@@ -81,16 +81,22 @@ export default function LicenseActivationScreen() {
 
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>CÓDIGO DE LICENCIA</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={code}
-                                onChangeText={handleChange}
-                                placeholder="XXXX-XXXX-XXXX"
-                                placeholderTextColor="#BDC3C7"
-                                maxLength={14}
-                                autoCapitalize="characters"
-                                autoCorrect={false}
-                            />
+                            <View style={styles.textInputWrapper}>
+                                <TextInput
+                                    style={[styles.input, { letterSpacing: code ? 2 : 0 }]}
+                                    value={code}
+                                    onChangeText={handleChange}
+                                    maxLength={14}
+                                    autoCapitalize="characters"
+                                    autoCorrect={false}
+                                    selectionColor={COLORS.primary}
+                                />
+                                {code.length === 0 && (
+                                    <View style={styles.placeholderContainer} pointerEvents="none">
+                                        <Text style={styles.placeholderText}>XXXX-XXXX-XXXX</Text>
+                                    </View>
+                                )}
+                            </View>
                         </View>
 
                         <TouchableOpacity
@@ -177,7 +183,26 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: COLORS.text,
         textAlign: 'center',
-        letterSpacing: 2,
+        textAlignVertical: 'center', // Fix for Android centering
+        width: '100%',
+    },
+    textInputWrapper: {
+        justifyContent: 'center',
+    },
+    placeholderContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1,
+    },
+    placeholderText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#BDC3C7',
     },
     button: {
         backgroundColor: COLORS.primary,

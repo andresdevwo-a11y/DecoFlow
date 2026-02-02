@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, TouchableWithoutFeedba
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, SIZES } from '../constants/Theme';
 
-export default function InfoModal({ visible, title, message, onClose, type = 'info' }) {
+const InfoModal = React.memo(({ visible, title, message, onClose, type = 'info' }) => {
 
     // Determine style based on type
     let iconName = 'info';
@@ -59,7 +59,9 @@ export default function InfoModal({ visible, title, message, onClose, type = 'in
             </TouchableWithoutFeedback>
         </Modal>
     );
-}
+});
+
+export default InfoModal;
 
 const styles = StyleSheet.create({
     overlay: {
