@@ -4,8 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 import 'react-native-url-polyfill/auto';
 
 // ⚠️ REEMPLAZA ESTAS VARIABLES CON LAS DE TU PROYECTO SUPABASE
-const SUPABASE_URL = 'https://hmaubqenaantwvyswirw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtYXVicWVuYWFudHd2eXN3aXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5ODU0NzEsImV4cCI6MjA4NTU2MTQ3MX0.OsA69mXJRV7KSsacNcpVFXaNZZ-_8zwMZySPBgC2vi4';
+const SUPABASE_URL = 'https://vsxmovszgymmzdnpqskt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzeG1vdnN6Z3ltbXpkbnBxc2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTkyNDcsImV4cCI6MjA4NTYzNTI0N30.Qh1G9vZzsRsslB2SI9FuHY709RCwi8eiSwm7idF9QKk';
 
 const ExpoSecureStoreAdapter = {
     getItem: (key) => {
