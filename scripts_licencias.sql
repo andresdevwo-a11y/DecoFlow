@@ -1,91 +1,13 @@
-# Plan de Implementación: Sistema de Licenciamiento con Código Único
+-- ============================================================
+-- SISTEMA DE LICENCIAMIENTO: SCRIPTS SQL PARA SUPABASE
+-- ============================================================
+-- Ejecutar en: Supabase Dashboard → SQL Editor
+-- ============================================================
 
-## Descripción del Problema
+-- ============================================================
+-- 1. ESQUEMA DE BASE DE DATOS
+-- ============================================================
 
-Se requiere implementar un sistema de licenciamiento para la aplicación móvil "Woodland Studio" (React Native/Expo) basado en **códigos de licencia únicos** (sin cuentas de usuario) que permita:
-- Restringir el acceso cuando la licencia expire
-- Mantener los datos locales intactos durante el bloqueo
-- Controlar el uso por dispositivo único
-- Permitir reactivación tras confirmación de pago externo
-
----
-
-## Decisiones Confirmadas
-
-| Aspecto | Decisión |
-|---------|----------|
-| **Autenticación** | Código de licencia único (sin email/password) |
-| **Backend** | Supabase (PostgreSQL + RLS) |
-| **Modo Offline** | 7 días de período de gracia |
-| **Bloqueo** | Lógico (datos intactos) |
-
----
-
-## Arquitectura Propuesta
-
-```mermaid
-flowchart TB
-    subgraph App["Aplicación Móvil"]
-        A[App.js] --> B[LicenseContext]
-        B --> C{¿Licencia activada?}
-        C -->|No| D[LicenseActivationScreen]
-        D -->|Código válido| E[Registrar dispositivo]
-        C -->|Sí| F{¿Licencia válida?}
-        F -->|No| G[LicenseBlockedScreen]
-        F -->|Sí| H[MainApp]
-        B --> I[LicenseService]
-        I --> J[DeviceService]
-    end
-    
-    subgraph Supabase["Backend Supabase"]
-        K[(PostgreSQL)]
-        L[Funciones RPC]
-    end
-    
-    I <-->|HTTPS| K
-    I <-->|RPC| L
-```
-
----
-
-## Flujo de Activación
-
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant A as App
-    participant S as Supabase
-    
-    U->>A: Ingresa código de licencia
-    A->>A: Obtiene Device ID
-    A->>S: activate_license(code, device_id)
-    
-    alt Código válido y sin dispositivo
-        S->>S: Asocia dispositivo a licencia
-        S-->>A: {valid: true, license_info}
-        A->>A: Guarda en SecureStore
-        A-->>U: Acceso concedido
-    else Código ya usado en otro dispositivo
-        S-->>A: {valid: false, reason: DEVICE_MISMATCH}
-        A-->>U: Error: Licencia en otro dispositivo
-    else Código inválido/expirado
-        S-->>A: {valid: false, reason: ...}
-        A-->>U: Error: Código inválido
-    end
-```
-
----
-
-## Proposed Changes
-
-### Backend Supabase (Configuración Manual)
-
-> [!NOTE]
-> Estas instrucciones se ejecutan en el panel de Supabase → SQL Editor
-
-#### Esquema de Base de Datos
-
-```sql
 -- Tabla de licencias (sin referencia a auth.users)
 CREATE TABLE licenses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -108,7 +30,7 @@ CREATE INDEX idx_licenses_code ON licenses(license_code);
 CREATE INDEX idx_licenses_device ON licenses(device_id);
 CREATE INDEX idx_licenses_status ON licenses(status);
 
--- Trigger para actualizar updated_at
+-- Trigger para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -121,11 +43,13 @@ CREATE TRIGGER licenses_updated_at
     BEFORE UPDATE ON licenses
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at();
-```
 
-#### Función para Activar Licencia
 
-```sql
+-- ============================================================
+-- 2. FUNCIÓN: ACTIVAR LICENCIA
+-- ============================================================
+-- Uso: SELECT activate_license('XXXX-XXXX-XXXX', 'device_id_aqui');
+
 CREATE OR REPLACE FUNCTION activate_license(p_license_code TEXT, p_device_id TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
@@ -216,11 +140,13 @@ BEGIN
     );
 END;
 $$;
-```
 
-#### Función para Validar Licencia (revalidación periódica)
 
-```sql
+-- ============================================================
+-- 3. FUNCIÓN: VALIDAR LICENCIA (Revalidación periódica)
+-- ============================================================
+-- Uso: SELECT validate_license('XXXX-XXXX-XXXX', 'device_id_aqui');
+
 CREATE OR REPLACE FUNCTION validate_license(p_license_code TEXT, p_device_id TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
@@ -270,11 +196,14 @@ BEGIN
     );
 END;
 $$;
-```
 
-#### Función para Generar Códigos de Licencia (Administrador)
 
-```sql
+-- ============================================================
+-- 4. FUNCIÓN: GENERAR LICENCIA (Solo Administrador)
+-- ============================================================
+-- Uso: SELECT generate_license('Nombre Cliente', '3001234567', 365);
+-- Parámetros: p_client_name, p_client_phone, p_days_valid, p_notes
+
 CREATE OR REPLACE FUNCTION generate_license(
     p_client_name TEXT DEFAULT NULL,
     p_client_phone TEXT DEFAULT NULL,
@@ -318,124 +247,46 @@ BEGIN
     );
 END;
 $$;
-```
 
-#### Políticas de Seguridad (RLS)
 
-```sql
+-- ============================================================
+-- 5. POLÍTICAS DE SEGURIDAD (RLS)
+-- ============================================================
+
 -- Habilitar RLS
 ALTER TABLE licenses ENABLE ROW LEVEL SECURITY;
 
--- Política para llamadas RPC (anon puede validar licencias)
 -- Las funciones son SECURITY DEFINER, así que ejecutan con permisos del owner
 -- No se necesitan políticas SELECT para el usuario anon si solo usamos RPC
-```
 
-#### Configurar permisos para funciones RPC
 
-```sql
+-- ============================================================
+-- 6. PERMISOS PARA FUNCIONES RPC
+-- ============================================================
+
 -- Permitir que usuarios anónimos llamen las funciones de validación
 GRANT EXECUTE ON FUNCTION activate_license(TEXT, TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION validate_license(TEXT, TEXT) TO anon;
 
 -- La función generate_license solo debe ser accesible desde el dashboard
 -- o con service_role key (no dar acceso a anon)
-```
 
----
 
-### Dependencias Nuevas
+-- ============================================================
+-- 7. COMANDOS DE ADMINISTRACIÓN
+-- ============================================================
 
-#### [MODIFY] package.json
+-- Crear nueva licencia:
+-- SELECT generate_license('Nombre Cliente', '3001234567', 365);
 
-```json
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "expo-application": "~6.0.0",
-    "expo-secure-store": "~14.0.0",
-    ...
-  }
-```
+-- Ver todas las licencias:
+-- SELECT * FROM licenses;
 
----
+-- Bloquear licencia:
+-- UPDATE licenses SET status = 'blocked' WHERE license_code = 'XXXX-XXXX-XXXX';
 
-### Services
+-- Renovar licencia (extender 1 año):
+-- UPDATE licenses SET end_date = end_date + INTERVAL '1 year', status = 'active' WHERE license_code = 'XXXX-XXXX-XXXX';
 
-#### [NEW] services/supabaseClient.js
-
-Cliente de Supabase configurado para uso sin autenticación.
-
-#### [NEW] services/DeviceService.js
-
-Obtención de identificador único del dispositivo Android.
-
-#### [NEW] services/LicenseService.js
-
-Servicio para activar, validar y manejar cache offline.
-
----
-
-### Context
-
-#### [NEW] context/LicenseContext.js
-
-Contexto que maneja el estado global de la licencia.
-
----
-
-### Screens
-
-#### [NEW] screens/LicenseActivationScreen.js
-
-Pantalla para ingresar código de licencia.
-
-#### [NEW] screens/LicenseBlockedScreen.js
-
-Pantalla de bloqueo (licencia expirada o bloqueada).
-
----
-
-### Integración Principal
-
-#### [MODIFY] App.js
-
-Envolver la app con `LicenseProvider`.
-
-#### [MODIFY] app.json
-
-Agregar plugin `expo-secure-store`.
-
----
-
-## Verificación
-
-| # | Escenario | Resultado Esperado |
-|---|-----------|-------------------|
-| 1 | Código inválido | Error correspondiente |
-| 2 | Código válido | Activación exitosa |
-| 3 | Otro dispositivo | Error de coincidencia |
-| 4 | Offline | Funciona hasta 7 días |
-
----
-
-## Administración de Licencias
-
-Ejecutar en SQL Editor de Supabase:
-
-```sql
--- Crear licencia
-SELECT generate_license('Nombre Cliente', '3001234567', 365);
-
--- Ver todas
-SELECT * FROM licenses;
-```
-
----
-
-## Cronograma de Implementación
-
-1. **Fase 1:** Configuración Supabase (~20 min)
-2. **Fase 2:** Servicios (~45 min)
-3. **Fase 3:** Contexto (~30 min)
-4. **Fase 4:** Pantallas (~75 min)
-5. **Fase 5:** Integración y Pruebas (~50 min)
+-- Desasociar dispositivo (permite activar en otro):
+-- UPDATE licenses SET device_id = NULL, device_registered_at = NULL WHERE license_code = 'XXXX-XXXX-XXXX';
