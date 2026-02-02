@@ -21,11 +21,12 @@ CREATE TABLE IF NOT EXISTS licenses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     license_code TEXT UNIQUE NOT NULL,
     license_type TEXT DEFAULT 'CUSTOM' CHECK (license_type IN ('TRIAL', 'MENSUAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL', 'LIFETIME', 'CUSTOM')),
+    days_valid INTEGER,
     client_name TEXT,
     client_phone TEXT,
     start_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    end_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'blocked', 'expired')),
+    end_date TIMESTAMP WITH TIME ZONE,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'blocked', 'expired')),
     device_id TEXT,
     device_registered_at TIMESTAMP WITH TIME ZONE,
     last_validation TIMESTAMP WITH TIME ZONE,
@@ -132,13 +133,19 @@ BEGIN
         END IF;
     END IF;
     
-    -- Registrar dispositivo por primera vez
+    -- Registrar dispositivo por primera vez y calcular end_date
     UPDATE licenses 
     SET 
         device_id = p_device_id,
         device_registered_at = NOW(),
-        last_validation = NOW()
+        last_validation = NOW(),
+        start_date = NOW(),
+        end_date = NOW() + (license_record.days_valid || ' days')::INTERVAL,
+        status = 'active'
     WHERE id = license_record.id;
+    
+    -- Recargar el registro con los nuevos valores
+    SELECT * INTO license_record FROM licenses WHERE id = license_record.id;
     
     RETURN json_build_object(
         'valid', true,
@@ -255,14 +262,16 @@ BEGIN
         final_notes := final_notes || ' | ' || p_extra_notes;
     END IF;
     
-    INSERT INTO licenses (license_code, license_type, client_name, client_phone, end_date, notes)
+    -- Insertar licencia SIN end_date (se calcula al activar)
+    INSERT INTO licenses (license_code, license_type, days_valid, client_name, client_phone, notes, status)
     VALUES (
         new_code, 
         p_license_type, 
+        p_days_valid,
         p_client_name, 
         p_client_phone, 
-        NOW() + (p_days_valid || ' days')::INTERVAL, 
-        final_notes
+        final_notes,
+        'pending'
     )
     RETURNING * INTO new_license;
     
@@ -272,9 +281,9 @@ BEGIN
         'license_type', new_license.license_type,
         'client_name', new_license.client_name,
         'client_phone', new_license.client_phone,
-        'start_date', new_license.start_date,
-        'end_date', new_license.end_date,
-        'days_valid', p_days_valid
+        'days_valid', new_license.days_valid,
+        'status', new_license.status,
+        'message', 'Licencia creada. Se activará cuando el usuario ingrese el código.'
     );
 END;
 $$;
