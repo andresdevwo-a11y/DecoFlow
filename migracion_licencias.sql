@@ -164,6 +164,7 @@ BEGIN
     RETURN json_build_object(
         'valid', true,
         'reason', 'LICENSE_VALID',
+        'license_code', license_record.license_code,
         'license_type', license_record.license_type,
         'end_date', license_record.end_date,
         'days_remaining', CEIL(EXTRACT(EPOCH FROM license_record.end_date - NOW()) / 86400)
