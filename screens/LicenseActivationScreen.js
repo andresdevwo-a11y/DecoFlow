@@ -61,61 +61,50 @@ export default function LicenseActivationScreen() {
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.container}
-        >
+        <View style={styles.container}>
             <StatusBar style="dark" />
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.logoContainer}>
-                    <View style={styles.iconCircle}>
-                        <Text style={styles.iconText}>WS</Text>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.keyboardView}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.card}>
+                        <Text style={styles.title}>Activar Licencia</Text>
+                        <Text style={styles.description}>
+                            Ingresa tu código de licencia único para empezar a usar la aplicación en este dispositivo.
+                        </Text>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>CÓDIGO DE LICENCIA</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={code}
+                                onChangeText={handleChange}
+                                placeholder="XXXX-XXXX-XXXX"
+                                placeholderTextColor="#BDC3C7"
+                                maxLength={14}
+                                autoCapitalize="characters"
+                                autoCorrect={false}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={[styles.button, (submitting || code.length < 14) && styles.buttonDisabled]}
+                            onPress={handleActivate}
+                            disabled={submitting || code.length < 14}
+                        >
+                            {submitting ? (
+                                <ActivityIndicator color="#FFF" />
+                            ) : (
+                                <Text style={styles.buttonText}>ACTIVAR APLICACIÓN</Text>
+                            )}
+                        </TouchableOpacity>
                     </View>
-                    <Text style={styles.appName}>Woodland Studio</Text>
-                    <Text style={styles.version}>Gestión Administrativa</Text>
-                </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.title}>Activar Licencia</Text>
-                    <Text style={styles.description}>
-                        Ingresa tu código de licencia único para empezar a usar la aplicación en este dispositivo.
-                    </Text>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>CÓDIGO DE LICENCIA</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={code}
-                            onChangeText={handleChange}
-                            placeholder="XXXX-XXXX-XXXX"
-                            placeholderTextColor="#BDC3C7"
-                            maxLength={14}
-                            autoCapitalize="characters"
-                            autoCorrect={false}
-                        />
-                    </View>
-
-                    <TouchableOpacity
-                        style={[styles.button, (submitting || code.length < 14) && styles.buttonDisabled]}
-                        onPress={handleActivate}
-                        disabled={submitting || code.length < 14}
-                    >
-                        {submitting ? (
-                            <ActivityIndicator color="#FFF" />
-                        ) : (
-                            <Text style={styles.buttonText}>ACTIVAR APLICACIÓN</Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>¿No tienes un código?</Text>
-                    <TouchableOpacity onPress={() => Alert.alert('Contacto', 'Contacta al administrador para adquirir una licencia.')}>
-                        <Text style={styles.linkText}>Adquirir Licencia</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 }
 
@@ -124,44 +113,15 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: COLORS.background,
     },
+    keyboardView: {
+        flex: 1,
+    },
     scrollContent: {
         flexGrow: 1,
         justifyContent: 'center',
         padding: 20,
     },
-    logoContainer: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: COLORS.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-        elevation: 5,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-    },
-    iconText: {
-        color: 'white',
-        fontSize: 32,
-        fontWeight: 'bold',
-    },
-    appName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: COLORS.text,
-        marginBottom: 4,
-    },
-    version: {
-        fontSize: 14,
-        color: COLORS.textSecondary,
-    },
+
     card: {
         backgroundColor: COLORS.card,
         borderRadius: 16,
@@ -222,17 +182,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    footer: {
-        marginTop: 32,
-        alignItems: 'center',
-    },
-    footerText: {
-        color: COLORS.textSecondary,
-        marginBottom: 8,
-    },
-    linkText: {
-        color: COLORS.primary,
-        fontWeight: '600',
-        fontSize: 16,
-    },
+
 });
