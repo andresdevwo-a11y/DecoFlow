@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { validateLicense, activateLicense, getStoredLicenseCode, clearLicenseCache } from '../services/LicenseService';
+import { getDeviceId } from '../services/DeviceService';
 
 const LicenseContext = createContext();
 
@@ -11,12 +12,23 @@ export const LicenseProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isActivated, setIsActivated] = useState(false);
     const [lastCheck, setLastCheck] = useState(null);
+    const [deviceId, setDeviceId] = useState(null);
 
-    // Cargar licencia guardada al iniciar
+    // Cargar licencia guardada y deviceId al iniciar
     useEffect(() => {
         console.log('[LicenseContext] Mounting Provider...');
+        loadDeviceId();
         checkStoredLicense();
     }, []);
+
+    const loadDeviceId = async () => {
+        try {
+            const id = await getDeviceId();
+            setDeviceId(id);
+        } catch (error) {
+            console.error('[LicenseContext] Error loading deviceId:', error);
+        }
+    };
 
     // Revalidar cuando la app vuelve primer plano
     useEffect(() => {
@@ -141,6 +153,7 @@ export const LicenseProvider = ({ children }) => {
         isValid,
         isLoading,
         isActivated,
+        deviceId,
         activate,
         refreshLicense,
         removeLicense

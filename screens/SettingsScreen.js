@@ -13,6 +13,7 @@ import {
     Platform,
     Keyboard
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../constants/Theme';
 
@@ -238,7 +239,7 @@ export default function SettingsScreen() {
 
     // But useWorkspace IS a hook.
     const { resetWorkspace } = useWorkspace();
-    const { licenseInfo, refreshLicense, removeLicense, isLoading: licenseLoading } = useLicense();
+    const { licenseInfo, refreshLicense, removeLicense, deviceId, isLoading: licenseLoading } = useLicense();
 
     const handleResetData = useCallback(async () => {
         setIsLoading(true);
@@ -289,6 +290,37 @@ export default function SettingsScreen() {
             return `****-****-${parts[2]}`;
         }
         return '****-****-****';
+    };
+
+    const maskDeviceId = (id) => {
+        if (!id) return 'No disponible';
+        // Mostrar solo los últimos 8 caracteres
+        if (id.length > 8) {
+            return `****${id.slice(-8)}`;
+        }
+        return id;
+    };
+
+    const getPlanColor = (type) => {
+        const colors = {
+            'TRIAL': '#FF9500',      // Naranja
+            'MENSUAL': '#007AFF',    // Azul
+            'TRIMESTRAL': '#5856D6', // Morado
+            'SEMESTRAL': '#34C759',  // Verde
+            'ANUAL': '#AF52DE',      // Púrpura
+            'LIFETIME': '#FFD700',   // Dorado
+            'CUSTOM': '#8E8E93'      // Gris
+        };
+        return colors[type] || colors['CUSTOM'];
+    };
+
+    const handleCopyDeviceId = async () => {
+        if (deviceId) {
+            await Clipboard.setStringAsync(deviceId);
+            showToast('ID del dispositivo copiado');
+        } else {
+            showToast('No hay ID de dispositivo disponible');
+        }
     };
 
     const handleRefreshLicense = async () => {
@@ -498,6 +530,48 @@ export default function SettingsScreen() {
 
                 {/* License Section */}
                 <SettingSection title="🔑 Licencia">
+                    {/* Plan Type Badge */}
+                    {licenseInfo?.license_type && (
+                        <View style={styles.licenseBadgeContainer}>
+                            <View style={[
+                                styles.licenseBadge,
+                                { backgroundColor: getPlanColor(licenseInfo.license_type) }
+                            ]}>
+                                <Text style={styles.licenseBadgeText}>
+                                    {licenseInfo.license_type}
+                                </Text>
+                            </View>
+                            <Text style={styles.licenseBadgeLabel}>Plan Actual</Text>
+                        </View>
+                    )}
+
+                    {/* Days Remaining */}
+                    {licenseInfo?.license_type !== 'LIFETIME' && licenseInfo?.days_remaining !== undefined && (
+                        <SettingNavItem
+                            icon="clock"
+                            label="Días restantes"
+                            value={`${Math.ceil(licenseInfo.days_remaining)} días de acceso`}
+                            onPress={() => { }}
+                        />
+                    )}
+
+                    {/* Expiration Date */}
+                    {licenseInfo?.end_date && (
+                        <SettingNavItem
+                            icon="calendar"
+                            label="Fecha de Vencimiento"
+                            value={licenseInfo.license_type === 'LIFETIME'
+                                ? 'Acceso Permanente'
+                                : new Date(licenseInfo.end_date).toLocaleDateString('es-CO', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })
+                            }
+                            onPress={() => { }}
+                        />
+                    )}
+
                     <SettingNavItem
                         icon="key"
                         label="Código de Licencia"
@@ -505,14 +579,14 @@ export default function SettingsScreen() {
                         onPress={() => showToast('Código de licencia activo')}
                     />
 
-                    {licenseInfo?.end_date && (
-                        <SettingNavItem
-                            icon="calendar"
-                            label="Fecha de Vencimiento"
-                            value={new Date(licenseInfo.end_date).toLocaleDateString()}
-                            onPress={() => { }}
-                        />
-                    )}
+                    {/* Device Status */}
+                    <SettingNavItem
+                        icon="smartphone"
+                        label="Dispositivo Vinculado"
+                        value={deviceId ? `✓ ${maskDeviceId(deviceId)}` : 'No disponible'}
+                        description="Toca para copiar ID del dispositivo"
+                        onPress={() => handleCopyDeviceId()}
+                    />
 
                     {licenseInfo?.offline_mode && (
                         <SettingNavItem
@@ -524,12 +598,15 @@ export default function SettingsScreen() {
                         />
                     )}
 
-                    <SettingNavItem
-                        icon="refresh-cw"
-                        label="Verificar licencia"
-                        description="Actualizar estado y permisos"
-                        onPress={handleRefreshLicense}
-                    />
+                    {/* Only show verify button for non-lifetime licenses */}
+                    {licenseInfo?.license_type !== 'LIFETIME' && (
+                        <SettingNavItem
+                            icon="refresh-cw"
+                            label="Verificar licencia"
+                            description="Actualizar estado y permisos"
+                            onPress={handleRefreshLicense}
+                        />
+                    )}
 
                     <SettingNavItem
                         icon="log-out"
@@ -790,5 +867,30 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontWeight: 'bold',
         fontSize: TYPOGRAPHY.size.md,
+    },
+    // License Badge Styles
+    licenseBadgeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.lg,
+        marginBottom: SPACING.sm,
+    },
+    licenseBadge: {
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.xs,
+        borderRadius: RADIUS.sm,
+        marginRight: SPACING.sm,
+    },
+    licenseBadgeText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: TYPOGRAPHY.size.sm,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    licenseBadgeLabel: {
+        color: COLORS.textMuted,
+        fontSize: TYPOGRAPHY.size.sm,
     },
 });
