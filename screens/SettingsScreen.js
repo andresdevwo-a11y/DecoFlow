@@ -30,6 +30,7 @@ import ToastNotification from '../components/ui/ToastNotification';
 import { useData } from '../context/DataContext';
 import { useFinance } from '../context/FinanceContext';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useLicense } from '../context/LicenseContext';
 
 import { exportData } from '../services/ExportService';
 import { importData } from '../services/ImportService';
@@ -237,6 +238,7 @@ export default function SettingsScreen() {
 
     // But useWorkspace IS a hook.
     const { resetWorkspace } = useWorkspace();
+    const { licenseInfo, refreshLicense, removeLicense, isLoading: licenseLoading } = useLicense();
 
     const handleResetData = useCallback(async () => {
         setIsLoading(true);
@@ -277,6 +279,77 @@ export default function SettingsScreen() {
             setIsLoading(false);
         }
     }, [clearDataState, clearFinanceState, resetSettings, resetWorkspace, performReset]);
+
+    // License Helpers
+    const maskLicenseCode = (code) => {
+        if (!code) return 'No disponible';
+        // XXXX-XXXX-1234 → ****-****-1234
+        const parts = code.split('-');
+        if (parts.length === 3) {
+            return `****-****-${parts[2]}`;
+        }
+        return '****-****-****';
+    };
+
+    const handleRefreshLicense = async () => {
+        setInfoModal({
+            visible: true,
+            title: 'Verificando',
+            message: 'Comprobando estado de la licencia...',
+            type: 'info'
+        });
+
+        try {
+            const result = await refreshLicense();
+
+            if (result && result.valid) {
+                setTimeout(() => {
+                    setInfoModal({
+                        visible: true,
+                        title: 'Licencia Activa',
+                        message: 'Tu licencia ha sido verificada correctamente.',
+                        type: 'success'
+                    });
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    setInfoModal({
+                        visible: true,
+                        title: 'Problema de Licencia',
+                        message: result?.message || 'No se pudo verificar la licencia. Revisa tu conexión.',
+                        type: 'error'
+                    });
+                }, 500);
+            }
+        } catch (error) {
+            setTimeout(() => {
+                setInfoModal({
+                    visible: true,
+                    title: 'Error',
+                    message: 'Hubo un error al conectar con el servidor.',
+                    type: 'error'
+                });
+            }, 500);
+        }
+    };
+
+    const handleChangeLicense = () => {
+        Alert.alert(
+            "Cambiar Licencia",
+            "¿Estás seguro? Esto cerrará tu sesión actual y necesitarás ingresar un nuevo código de licencia válido para continuar.",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Sí, Cambiar",
+                    style: "destructive",
+                    onPress: async () => {
+                        await removeLicense();
+                        // App.js manejará el cambio de estado y mostrará LicenseActivationScreen
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -417,6 +490,52 @@ export default function SettingsScreen() {
                         label="Borrar todos los datos"
                         description="Elimina todas las secciones y ajustes"
                         onPress={() => setResetModalVisible(true)}
+                        isDestructive={true}
+                    />
+                </SettingSection>
+
+
+
+                {/* License Section */}
+                <SettingSection title="🔑 Licencia">
+                    <SettingNavItem
+                        icon="key"
+                        label="Código de Licencia"
+                        value={maskLicenseCode(licenseInfo?.license_code)}
+                        onPress={() => showToast('Código de licencia activo')}
+                    />
+
+                    {licenseInfo?.end_date && (
+                        <SettingNavItem
+                            icon="calendar"
+                            label="Fecha de Vencimiento"
+                            value={new Date(licenseInfo.end_date).toLocaleDateString()}
+                            onPress={() => { }}
+                        />
+                    )}
+
+                    {licenseInfo?.offline_mode && (
+                        <SettingNavItem
+                            icon="wifi-off"
+                            label="Modo Offline"
+                            value={`${licenseInfo.offline_days_remaining} días restantes`}
+                            description="Conéctate a internet para renovar el período offline"
+                            onPress={() => showToast('Necesitas conexión para actualizar la licencia')}
+                        />
+                    )}
+
+                    <SettingNavItem
+                        icon="refresh-cw"
+                        label="Verificar licencia"
+                        description="Actualizar estado y permisos"
+                        onPress={handleRefreshLicense}
+                    />
+
+                    <SettingNavItem
+                        icon="log-out"
+                        label="Cambiar licencia"
+                        description="Usar un código diferente"
+                        onPress={handleChangeLicense}
                         isDestructive={true}
                     />
                 </SettingSection>
