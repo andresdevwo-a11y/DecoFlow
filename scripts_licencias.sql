@@ -120,7 +120,7 @@ BEGIN
                 'license_type', license_record.license_type,
                 'client_name', license_record.client_name,
                 'end_date', license_record.end_date,
-                'days_remaining', EXTRACT(DAY FROM license_record.end_date - NOW())
+                'days_remaining', CEIL(EXTRACT(EPOCH FROM license_record.end_date - NOW()) / 86400)
             );
         ELSE
             -- Dispositivo diferente
@@ -149,7 +149,7 @@ BEGIN
         'license_type', license_record.license_type,
         'client_name', license_record.client_name,
         'end_date', license_record.end_date,
-        'days_remaining', EXTRACT(DAY FROM license_record.end_date - NOW())
+        'days_remaining', CEIL(EXTRACT(EPOCH FROM license_record.end_date - NOW()) / 86400)
     );
 END;
 $$;
@@ -206,7 +206,7 @@ BEGIN
         'reason', 'LICENSE_VALID',
         'license_type', license_record.license_type,
         'end_date', license_record.end_date,
-        'days_remaining', EXTRACT(DAY FROM license_record.end_date - NOW())
+        'days_remaining', CEIL(EXTRACT(EPOCH FROM license_record.end_date - NOW()) / 86400)
     );
 END;
 $$;
