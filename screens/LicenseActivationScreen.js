@@ -17,9 +17,10 @@ const COLORS = {
 
 export default function LicenseActivationScreen() {
     const [code, setCode] = useState('');
-    const { activate } = useLicense();
+    const { activate, confirmActivation } = useLicense();
     const [submitting, setSubmitting] = useState(false);
     const [alertModal, setAlertModal] = useState({ visible: false, title: '', message: '', type: 'error' });
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     const showAlert = (title, message, type = 'error') => {
         setAlertModal({ visible: true, title, message, type });
@@ -56,13 +57,22 @@ export default function LicenseActivationScreen() {
             const result = await activate(code);
             if (!result.success) {
                 showAlert('Error de Activación', result.message);
+            } else {
+                setSuccessModalVisible(true);
             }
-            // Si es exitoso, el contexto actualizará el estado y App.js desmontará esta pantalla
         } catch (error) {
             showAlert('Error', 'Ocurrió un error inesperado. Intenta nuevamente.');
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const handleSuccessClose = () => {
+        setSuccessModalVisible(false);
+        // Pequeño delay para permitir que el modal cierre suavemente
+        setTimeout(() => {
+            confirmActivation();
+        }, 200);
     };
 
     return (
@@ -120,6 +130,14 @@ export default function LicenseActivationScreen() {
                 message={alertModal.message}
                 type={alertModal.type}
                 onClose={closeAlert}
+            />
+
+            <InfoModal
+                visible={successModalVisible}
+                title="¡Activación Exitosa!"
+                message="Tu licencia ha sido verificada correctamente. Bienvenido."
+                type="success"
+                onClose={handleSuccessClose}
             />
         </View>
     );

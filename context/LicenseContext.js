@@ -114,7 +114,7 @@ export const LicenseProvider = ({ children }) => {
             const result = await activateLicense(code);
 
             if (result.valid) {
-                setIsActivated(true);
+                // Pre-set license info but verify entry manually with confirmActivation
                 setLicenseInfo(result);
                 setIsValid(true);
                 return { success: true };
@@ -127,6 +127,10 @@ export const LicenseProvider = ({ children }) => {
                 message: error.message || 'Error de conexión.'
             };
         }
+    };
+
+    const confirmActivation = () => {
+        setIsActivated(true);
     };
 
     const refreshLicense = async () => {
@@ -152,6 +156,7 @@ export const LicenseProvider = ({ children }) => {
         isActivated,
         deviceId,
         activate,
+        confirmActivation,
         refreshLicense,
         removeLicense
     };
