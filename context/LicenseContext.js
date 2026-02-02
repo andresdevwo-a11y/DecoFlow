@@ -110,7 +110,6 @@ export const LicenseProvider = ({ children }) => {
     };
 
     const activate = async (code) => {
-        setIsLoading(true);
         try {
             const result = await activateLicense(code);
 
@@ -127,8 +126,6 @@ export const LicenseProvider = ({ children }) => {
                 success: false,
                 message: error.message || 'Error de conexión.'
             };
-        } finally {
-            setIsLoading(false);
         }
     };
 

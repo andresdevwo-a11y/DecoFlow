@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useLicense } from '../context/LicenseContext';
 import { StatusBar } from 'expo-status-bar';
+import InfoModal from '../components/InfoModal';
 
 const COLORS = {
     primary: '#4CAF50',
@@ -18,6 +19,15 @@ export default function LicenseActivationScreen() {
     const [code, setCode] = useState('');
     const { activate } = useLicense();
     const [submitting, setSubmitting] = useState(false);
+    const [alertModal, setAlertModal] = useState({ visible: false, title: '', message: '', type: 'error' });
+
+    const showAlert = (title, message, type = 'error') => {
+        setAlertModal({ visible: true, title, message, type });
+    };
+
+    const closeAlert = () => {
+        setAlertModal(prev => ({ ...prev, visible: false }));
+    };
 
     const formatCode = (text) => {
         // Eliminar todo lo que no sea alfanumérico
@@ -41,20 +51,15 @@ export default function LicenseActivationScreen() {
     };
 
     const handleActivate = async () => {
-        if (code.length < 14) {
-            Alert.alert('Código Incompleto', 'Por favor ingresa el código completo de 12 caracteres.');
-            return;
-        }
-
         setSubmitting(true);
         try {
             const result = await activate(code);
             if (!result.success) {
-                Alert.alert('Error de Activación', result.message);
+                showAlert('Error de Activación', result.message);
             }
             // Si es exitoso, el contexto actualizará el estado y App.js desmontará esta pantalla
         } catch (error) {
-            Alert.alert('Error', 'Ocurrió un error inesperado. Intenta nuevamente.');
+            showAlert('Error', 'Ocurrió un error inesperado. Intenta nuevamente.');
         } finally {
             setSubmitting(false);
         }
@@ -100,10 +105,16 @@ export default function LicenseActivationScreen() {
                             )}
                         </TouchableOpacity>
                     </View>
-
-
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <InfoModal
+                visible={alertModal.visible}
+                title={alertModal.title}
+                message={alertModal.message}
+                type={alertModal.type}
+                onClose={closeAlert}
+            />
         </View>
     );
 }
