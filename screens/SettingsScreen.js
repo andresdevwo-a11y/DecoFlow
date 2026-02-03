@@ -241,6 +241,40 @@ export default function SettingsScreen() {
     const { resetWorkspace } = useWorkspace();
     const { licenseInfo, refreshLicense, removeLicense, deviceId, isLoading: licenseLoading } = useLicense();
 
+    // Countdown timer state for license expiration
+    const [countdown, setCountdown] = useState('');
+
+    // Update countdown every second
+    useEffect(() => {
+        if (!licenseInfo?.end_date || licenseInfo?.license_type === 'LIFETIME') {
+            setCountdown('');
+            return;
+        }
+
+        const calculateCountdown = () => {
+            const now = new Date();
+            const endDate = new Date(licenseInfo.end_date);
+            const diff = endDate.getTime() - now.getTime();
+
+            if (diff <= 0) {
+                setCountdown('Expirada');
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            setCountdown(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        };
+
+        calculateCountdown();
+        const interval = setInterval(calculateCountdown, 1000);
+
+        return () => clearInterval(interval);
+    }, [licenseInfo?.end_date, licenseInfo?.license_type]);
+
     const handleResetData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -546,11 +580,11 @@ export default function SettingsScreen() {
                     )}
 
                     {/* Days Remaining */}
-                    {licenseInfo?.license_type !== 'LIFETIME' && licenseInfo?.days_remaining !== undefined && (
+                    {licenseInfo?.license_type !== 'LIFETIME' && countdown && (
                         <SettingNavItem
                             icon="clock"
-                            label="Días restantes"
-                            value={`${Math.ceil(licenseInfo.days_remaining)} días de acceso`}
+                            label="Tiempo restante"
+                            value={countdown}
                             onPress={() => { }}
                         />
                     )}
