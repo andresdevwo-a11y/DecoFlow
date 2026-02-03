@@ -24,7 +24,20 @@ export const LicenseProvider = ({ children }) => {
     // Constantes de configuración
     const WARNING_DAYS_THRESHOLD = 3;
     const GRACE_PERIOD_MINUTES = 15;
-    const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
+
+    // Intervalos dinámicos según estado
+    const INTERVALS = {
+        NORMAL: 5 * 60 * 1000,      // 5 minutos
+        URGENT: 60 * 1000,          // 1 minuto
+        GRACE: 20 * 1000            // 20 segundos (un poco más rápido para asegurar precisión)
+    };
+
+    // Función para obtener intervalo actual
+    const getCurrentInterval = useCallback(() => {
+        if (isInGracePeriod) return INTERVALS.GRACE;
+        if (warningLevel === 'HOURS') return INTERVALS.URGENT;
+        return INTERVALS.NORMAL;
+    }, [isInGracePeriod, warningLevel]);
 
     // Cargar licencia guardada y deviceId al iniciar
     useEffect(() => {
@@ -33,21 +46,34 @@ export const LicenseProvider = ({ children }) => {
         checkStoredLicense();
     }, []);
 
-    // Verificación periódica local
+    // Verificación periódica local con intervalo dinámico
     useEffect(() => {
-        // Ejecutar inmediatamente si tenemos datos
-        if (licenseInfo?.end_date && isValid) {
+        let timeoutId = null;
+
+        const scheduleNextCheck = () => {
+            const interval = getCurrentInterval();
+            console.log(`[LicenseContext] Next expiration check in ${interval / 1000}s`);
+
+            timeoutId = setTimeout(() => {
+                if (licenseInfo?.end_date) {
+                    checkExpirationState();
+                }
+                scheduleNextCheck(); // Programar siguiente verificación
+            }, interval);
+        };
+
+        // Verificación inicial inmediata si hay datos
+        if (licenseInfo?.end_date) {
             checkExpirationState();
         }
 
-        const interval = setInterval(() => {
-            if (licenseInfo?.end_date && isValid) {
-                checkExpirationState();
-            }
-        }, CHECK_INTERVAL_MS);
+        // Iniciar ciclo
+        scheduleNextCheck();
 
-        return () => clearInterval(interval);
-    }, [licenseInfo, isValid, isInGracePeriod]);
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [licenseInfo, isValid, isInGracePeriod, warningLevel, getCurrentInterval]);
 
     const loadDeviceId = async () => {
         try {
