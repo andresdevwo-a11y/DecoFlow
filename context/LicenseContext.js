@@ -184,47 +184,56 @@ export const LicenseProvider = ({ children }) => {
         console.log('[LicenseContext] Checking stored license...');
         setIsLoading(true);
 
-        const timeoutPromise = new Promise((resolve) => {
-            setTimeout(() => {
-                resolve('TIMEOUT');
-            }, 5000);
-        });
-
-        const checkPromise = async () => {
-            try {
-                console.log('[LicenseContext] Calling getStoredLicenseCode...');
-                const storedCode = await getStoredLicenseCode();
-                console.log('[LicenseContext] Stored code result:', storedCode);
-
-                if (storedCode) {
-                    console.log('[LicenseContext] Code found, validating...');
-                    setIsActivated(true);
-                    // Validar la licencia guardada
-                    const result = await validateLicense(storedCode);
-                    console.log('[LicenseContext] Validation result:', result);
-                    handleValidationResult(result);
-                } else {
-                    console.log('[LicenseContext] No code found.');
-                    setIsActivated(false);
-                    setIsValid(false);
-                }
-            } catch (error) {
-                console.error('[LicenseContext] Initial license check failed:', error);
-                setIsValid(false);
-            }
-            return 'DONE';
-        };
-
         try {
-            const result = await Promise.race([checkPromise(), timeoutPromise]);
+            // PASO 1: Detectar si hay código (independiente de validación)
+            console.log('[LicenseContext] Calling getStoredLicenseCode...');
+            const storedCode = await getStoredLicenseCode();
+            console.log('[LicenseContext] Stored code result:', storedCode);
 
-            if (result === 'TIMEOUT') {
-                console.warn('[LicenseContext] Initialization timed out! Force stopping loading.');
+            if (!storedCode) {
+                console.log('[LicenseContext] No code found.');
                 setIsActivated(false);
                 setIsValid(false);
+                setIsLoading(false);
+                return;
             }
-        } catch (e) {
-            console.error('[LicenseContext] Race error:', e);
+
+            // PASO 2: Hay código, SIEMPRE es activado (aunque no sepamos si es válido aún)
+            console.log('[LicenseContext] Code found, marking as activated.');
+            setIsActivated(true);
+
+            // PASO 3: Intentar validar con servidor con timeout
+            try {
+                const validationPromise = validateLicense(storedCode);
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('TIMEOUT')), 5000)
+                );
+
+                const result = await Promise.race([validationPromise, timeoutPromise]);
+                console.log('[LicenseContext] Validation result:', result);
+                handleValidationResult(result);
+            } catch (validationError) {
+                console.error('[LicenseContext] Validation error/timeout:', validationError);
+
+                // Error de validación NO afecta isActivated (ya está en true)
+                setIsValid(false);
+
+                // Determinar razón del error para el UI
+                const isTimeout = validationError.message === 'TIMEOUT' || validationError.message?.includes('Network');
+
+                setLicenseInfo({
+                    valid: false,
+                    reason: isTimeout ? 'CACHE_EXPIRED' : 'VALIDATION_ERROR',
+                    message: isTimeout
+                        ? 'No se pudo verificar. Conecta a internet.'
+                        : 'Error al verificar la licencia.'
+                });
+            }
+        } catch (error) {
+            console.error('[LicenseContext] Critical error reading storage:', error);
+            // Solo si falla la lectura del storage (muy raro) desactivamos
+            setIsActivated(false);
+            setIsValid(false);
         } finally {
             console.log('[LicenseContext] Finished check, loading false.');
             setIsLoading(false);

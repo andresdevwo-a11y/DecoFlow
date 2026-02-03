@@ -22,7 +22,10 @@ export const activateLicense = async (licenseCode) => {
         if (error) throw error;
 
         if (data.valid) {
-            await cacheLicenseResult(data);
+            await cacheLicenseResult({
+                ...data,
+                license_code: licenseCode
+            });
         }
 
         return data;
