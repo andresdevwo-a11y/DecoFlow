@@ -63,8 +63,12 @@ export const validateLicense = async (licenseCode) => {
             });
             return data;
         } else {
-            // Si el servidor dice que no es válida, borramos cache
-            await clearLicenseCache();
+            // Actulizamos el cache con la info de invalidez para recordarlo
+            // pero mantenemos el código guardado
+            await cacheLicenseResult({
+                ...data,
+                license_code: licenseCode
+            });
             return data;
         }
 
