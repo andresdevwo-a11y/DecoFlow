@@ -32,6 +32,9 @@ import NoteEditorScreen from './screens/NoteEditorScreen';
 import { LicenseProvider, useLicense } from './context/LicenseContext';
 import LicenseActivationScreen from './screens/LicenseActivationScreen';
 import LicenseBlockedScreen from './screens/LicenseBlockedScreen';
+import LicenseWarningBanner from './components/LicenseWarningBanner';
+import LicenseGraceModal from './components/LicenseGraceModal';
+import GraceCountdownBadge from './components/GraceCountdownBadge';
 
 // Finance Screens
 import FinancesScreen from './screens/FinancesScreen';
@@ -66,6 +69,13 @@ const FULLSCREEN_TABS = [
 ];
 
 function AppContent() {
+  const {
+    warningLevel,
+    isInGracePeriod,
+    gracePeriodEndsAt,
+    isWarningDismissed,
+    isGraceModalDismissed
+  } = useLicense();
   const [activeTab, setActiveTab] = useState('home');
   const [isCreateModalVisible, setCreateModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -448,6 +458,22 @@ function AppContent() {
         onClose={() => setCreateModalVisible(false)}
         onCreate={handleCreateSection}
       />
+
+      {/* COMPONENTES DE SISTEMA DE LICENCIAS */}
+      {!isWarningDismissed && warningLevel && warningLevel !== 'EXPIRED' && (
+        <View style={{ position: 'absolute', top: SIZES.navBarHeight + insets.top, width: '100%', zIndex: 999 }}>
+          <LicenseWarningBanner level={warningLevel} />
+        </View>
+      )}
+
+      <LicenseGraceModal
+        visible={isInGracePeriod}
+        endsAt={gracePeriodEndsAt}
+      />
+
+      {isInGracePeriod && isGraceModalDismissed && (
+        <GraceCountdownBadge endsAt={gracePeriodEndsAt} />
+      )}
 
     </View>
   );
