@@ -35,6 +35,7 @@ import LicenseBlockedScreen from './screens/LicenseBlockedScreen';
 import LicenseWarningBanner from './components/LicenseWarningBanner';
 import LicenseGraceModal from './components/LicenseGraceModal';
 import GraceCountdownBadge from './components/GraceCountdownBadge';
+import AnimatedScreenTransition from './components/AnimatedScreenTransition';
 
 // Finance Screens
 import FinancesScreen from './screens/FinancesScreen';
@@ -494,34 +495,52 @@ export default function App() {
 function LicenseGate() {
   const { isActivated, isValid, isLoading, licenseInfo, isEnteringNewCode } = useLicense();
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  // Calcular screenKey para animaciones
+  const getScreenKey = () => {
+    if (isLoading) return 'loading';
+    if (isEnteringNewCode || !isActivated) return 'activation';
+    if (!isValid) return 'blocked';
+    return 'app';
+  };
 
-  if (isEnteringNewCode || !isActivated) {
-    return <LicenseActivationScreen />;
-  }
+  const screenKey = getScreenKey();
 
-  if (!isValid) {
-    return <LicenseBlockedScreen info={licenseInfo} />;
-  }
+  const renderScreen = () => {
+    if (isLoading) {
+      return <LoadingScreen />;
+    }
+
+    if (isEnteringNewCode || !isActivated) {
+      return <LicenseActivationScreen />;
+    }
+
+    if (!isValid) {
+      return <LicenseBlockedScreen info={licenseInfo} />;
+    }
+
+    return (
+      <SettingsProvider>
+        <DataProvider>
+          <FinanceProvider>
+            <WorkspaceProvider>
+              <LoadingProvider>
+                <AlertProvider>
+                  <NotesProvider>
+                    <AppContent />
+                  </NotesProvider>
+                </AlertProvider>
+              </LoadingProvider>
+            </WorkspaceProvider>
+          </FinanceProvider>
+        </DataProvider>
+      </SettingsProvider>
+    );
+  };
 
   return (
-    <SettingsProvider>
-      <DataProvider>
-        <FinanceProvider>
-          <WorkspaceProvider>
-            <LoadingProvider>
-              <AlertProvider>
-                <NotesProvider>
-                  <AppContent />
-                </NotesProvider>
-              </AlertProvider>
-            </LoadingProvider>
-          </WorkspaceProvider>
-        </FinanceProvider>
-      </DataProvider>
-    </SettingsProvider>
+    <AnimatedScreenTransition screenKey={screenKey}>
+      {renderScreen()}
+    </AnimatedScreenTransition>
   );
 }
 
