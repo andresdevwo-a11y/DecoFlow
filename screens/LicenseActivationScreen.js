@@ -17,7 +17,7 @@ const COLORS = {
 
 export default function LicenseActivationScreen() {
     const [code, setCode] = useState('');
-    const { activate, confirmActivation } = useLicense();
+    const { activate, confirmActivation, isEnteringNewCode, cancelNewLicenseEntry } = useLicense();
     const [submitting, setSubmitting] = useState(false);
     const [alertModal, setAlertModal] = useState({ visible: false, title: '', message: '', type: 'error' });
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -120,6 +120,16 @@ export default function LicenseActivationScreen() {
                                 <Text style={styles.buttonText}>ACTIVAR APLICACIÓN</Text>
                             )}
                         </TouchableOpacity>
+
+                        {isEnteringNewCode && (
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={cancelNewLicenseEntry}
+                                disabled={submitting}
+                            >
+                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -236,5 +246,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-
+    cancelButton: {
+        marginTop: 16,
+        padding: 12,
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        color: COLORS.textSecondary,
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });

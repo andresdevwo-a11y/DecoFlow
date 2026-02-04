@@ -14,6 +14,7 @@ export const LicenseProvider = ({ children }) => {
     const [lastCheck, setLastCheck] = useState(null);
     const [deviceId, setDeviceId] = useState(null);
 
+    const [isEnteringNewCode, setIsEnteringNewCode] = useState(false);
     // Nuevos estados para el sistema de expiración amigable
     const [warningLevel, setWarningLevel] = useState(null); // null, 'DAYS', 'HOURS', 'EXPIRED'
     const [gracePeriodEndsAt, setGracePeriodEndsAt] = useState(null);
@@ -204,7 +205,7 @@ export const LicenseProvider = ({ children }) => {
 
             // PASO 3: Intentar validar con servidor con timeout
             try {
-                const validationPromise = validateLicense(storedCode);
+                const validationPromise = new Promise(resolve => setTimeout(() => resolve(validateLicense(storedCode)), 0)); // Ensure it's async
                 const timeoutPromise = new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('TIMEOUT')), 5000)
                 );
@@ -266,6 +267,9 @@ export const LicenseProvider = ({ children }) => {
                 setLicenseInfo(result);
                 setIsValid(true);
 
+                // Salir del modo "ingresando código"
+                setIsEnteringNewCode(false);
+
                 // Reiniciar estados de advertencia
                 setWarningLevel(null);
                 setIsInGracePeriod(false);
@@ -308,6 +312,14 @@ export const LicenseProvider = ({ children }) => {
         setGracePeriodEndsAt(null);
     };
 
+    const startNewLicenseEntry = () => {
+        setIsEnteringNewCode(true);
+    };
+
+    const cancelNewLicenseEntry = () => {
+        setIsEnteringNewCode(false);
+    };
+
     const value = {
         licenseInfo,
         isValid,
@@ -318,6 +330,10 @@ export const LicenseProvider = ({ children }) => {
         confirmActivation,
         refreshLicense,
         removeLicense,
+        // Nuevos exports para el flujo de cambio
+        isEnteringNewCode,
+        startNewLicenseEntry,
+        cancelNewLicenseEntry,
         // Nuevos exports
         warningLevel,
         isInGracePeriod,

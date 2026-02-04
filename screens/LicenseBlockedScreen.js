@@ -13,7 +13,7 @@ const COLORS = {
 };
 
 export default function LicenseBlockedScreen({ info }) {
-    const { refreshLicense, removeLicense, isLoading } = useLicense();
+    const { refreshLicense, removeLicense, startNewLicenseEntry, isLoading } = useLicense();
 
     // Determinar mensaje y color basado en la razón
     const getReasonDetails = () => {
@@ -93,7 +93,7 @@ export default function LicenseBlockedScreen({ info }) {
 
                     <TouchableOpacity
                         style={styles.outlineButton}
-                        onPress={removeLicense}
+                        onPress={startNewLicenseEntry}
                     >
                         <Text style={styles.outlineButtonText}>Ingresar Nueva Licencia</Text>
                     </TouchableOpacity>

@@ -492,13 +492,13 @@ export default function App() {
 }
 
 function LicenseGate() {
-  const { isActivated, isValid, isLoading, licenseInfo } = useLicense();
+  const { isActivated, isValid, isLoading, licenseInfo, isEnteringNewCode } = useLicense();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  if (!isActivated) {
+  if (isEnteringNewCode || !isActivated) {
     return <LicenseActivationScreen />;
   }
 
