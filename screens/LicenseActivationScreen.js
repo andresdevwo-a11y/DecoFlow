@@ -7,7 +7,7 @@ import InfoModal from '../components/InfoModal';
 
 const COLORS = {
     primary: '#4CAF50',
-    background: '#F5F7FA',
+    background: '#F3F4F6',
     card: '#FFFFFF',
     text: '#2C3E50',
     textSecondary: '#7F8C8D',
@@ -171,11 +171,6 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.card,
         borderRadius: 16,
         padding: 24,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 4,
     },
     title: {
         fontSize: 20,
@@ -203,8 +198,7 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: '#F8F9FA',
-        borderWidth: 1,
-        borderColor: COLORS.border,
+        borderWidth: 0,
         borderRadius: 12,
         padding: 16,
         fontSize: 18,

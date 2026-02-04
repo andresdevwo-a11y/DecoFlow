@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 const COLORS = {
     error: '#E74C3C',
     warning: '#F39C12',
-    background: '#FFFFFF',
+    background: '#F3F4F6',
     text: '#2C3E50',
     textSecondary: '#7F8C8D',
 };

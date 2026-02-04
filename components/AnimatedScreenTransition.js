@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Dimensions, View } from 'react-native';
+import { COLORS } from '../constants/Theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -87,7 +88,9 @@ export default function AnimatedScreenTransition({ screenKey, direction = 'auto'
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.background,
         overflow: 'hidden',
+        // Prevenir artefactos visuales durante animaciones de opacidad
+        backfaceVisibility: 'hidden',
     },
 });
