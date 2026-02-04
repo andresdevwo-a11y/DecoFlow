@@ -25,6 +25,7 @@ import { Feather } from '@expo/vector-icons'; // Added for modal icons
 import { useSettings } from '../context/SettingsContext';
 
 import ConfirmResetModal from '../components/ConfirmResetModal';
+import ChangeLicenseModal from '../components/ChangeLicenseModal';
 import InfoModal from '../components/InfoModal';
 import SelectionModal from '../components/SelectionModal';
 import ToastNotification from '../components/ui/ToastNotification';
@@ -60,6 +61,7 @@ export default function SettingsScreen() {
 
     // Modals
     const [resetModalVisible, setResetModalVisible] = useState(false);
+    const [changeLicenseModalVisible, setChangeLicenseModalVisible] = useState(false);
 
     // Business Edit State
     const [editBusinessVisible, setEditBusinessVisible] = useState(false);
@@ -400,21 +402,12 @@ export default function SettingsScreen() {
     };
 
     const handleChangeLicense = () => {
-        Alert.alert(
-            "Cambiar Licencia",
-            "¿Estás seguro? Esto cerrará tu sesión actual y necesitarás ingresar un nuevo código de licencia válido para continuar.",
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Sí, Cambiar",
-                    style: "destructive",
-                    onPress: async () => {
-                        await removeLicense();
-                        // App.js manejará el cambio de estado y mostrará LicenseActivationScreen
-                    }
-                }
-            ]
-        );
+        setChangeLicenseModalVisible(true);
+    };
+
+    const handleConfirmChangeLicense = async () => {
+        await removeLicense();
+        setChangeLicenseModalVisible(false);
     };
 
     return (
@@ -669,6 +662,13 @@ export default function SettingsScreen() {
             />
 
             {/* Modals */}
+            <ChangeLicenseModal
+                visible={changeLicenseModalVisible}
+                onCancel={() => setChangeLicenseModalVisible(false)}
+                onConfirm={handleConfirmChangeLicense}
+                loading={licenseLoading}
+            />
+
             <ConfirmResetModal
                 visible={resetModalVisible}
                 onCancel={() => !isLoading && setResetModalVisible(false)}
