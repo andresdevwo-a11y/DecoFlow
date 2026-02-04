@@ -10,6 +10,16 @@ import { useNotes } from '../context/NotesContext';
 import { useAlert } from '../context/AlertContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    return d.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+};
+
 const NoteCard = React.memo(({ note, onPress, onLongPress, isSelected, selectionMode }) => {
     return (
         <TouchableOpacity
@@ -35,7 +45,7 @@ const NoteCard = React.memo(({ note, onPress, onLongPress, isSelected, selection
                         {isSelected && <Feather name="check" size={14} color="#FFF" />}
                     </View>
                 ) : (
-                    <Text style={styles.cardDate}>{note.date}</Text>
+                    <Text style={styles.cardDate}>{formatDate(note.date)}</Text>
                 )}
             </View>
             <Text style={styles.cardPreview} numberOfLines={2}>
