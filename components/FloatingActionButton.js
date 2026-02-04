@@ -7,7 +7,7 @@ const FloatingActionButton = ({ label, onPress, style }) => {
         <View style={[
             styles.container,
             style,
-            { bottom: SPACING.xs } // Close to bottom (around 4-5px relative to whatever parent)
+            { bottom: SPACING.xl } // Elevated for better spacing above nav bar
         ]} pointerEvents="box-none">
             <TouchableOpacity
                 style={styles.button}
