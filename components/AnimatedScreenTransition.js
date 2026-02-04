@@ -70,29 +70,24 @@ export default function AnimatedScreenTransition({ screenKey, direction = 'auto'
     }, [screenKey, children]);
 
     return (
-        <View style={styles.wrapper}>
-            <Animated.View
-                style={[
-                    styles.container,
-                    {
-                        opacity: fadeAnim,
-                        transform: [{ translateX: slideAnim }],
-                    },
-                ]}
-            >
-                {currentChildren}
-            </Animated.View>
-        </View>
+        <Animated.View
+            style={[
+                styles.container,
+                {
+                    opacity: fadeAnim,
+                    transform: [{ translateX: slideAnim }],
+                },
+            ]}
+        >
+            {currentChildren}
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
-    wrapper: {
+    container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
         overflow: 'hidden',
-    },
-    container: {
-        flex: 1,
     },
 });

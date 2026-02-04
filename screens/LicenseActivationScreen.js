@@ -171,8 +171,11 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.card,
         borderRadius: 16,
         padding: 24,
-        borderWidth: 1,      // Agregar borde sutil para mantener definición sin sombra
-        borderColor: '#EEEEEE',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 4,
     },
     title: {
         fontSize: 20,
