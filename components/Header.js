@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'r
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, SIZES } from '../constants/Theme';
 
-const Header = ({ title = "Woodland Studio", onBack }) => {
+const Header = ({ title = "DecoFlow Studio", onBack }) => {
     return (
         <View style={styles.container}>
             <View style={styles.contentContainer}>

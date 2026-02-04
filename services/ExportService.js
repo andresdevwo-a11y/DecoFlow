@@ -175,7 +175,7 @@ export const exportData = async () => {
 
         // Meta
         const meta = {
-            appName: 'Woodland',
+            appName: 'DecoFlow',
             version: require('../constants/Config').APP_VERSION, // Should match app version
             exportDate: new Date().toISOString(),
             counts: {
@@ -196,7 +196,7 @@ export const exportData = async () => {
 
         // 5. Zip
         const dateStr = getLocalDateString();
-        const zipFileName = `woodland_backup_${dateStr}.zip`;
+        const zipFileName = `decoflow_backup_${dateStr}.zip`;
         const zipFilePath = FileSystem.cacheDirectory + zipFileName;
 
         await ZipService.createZip(EXPORT_TEMP_DIR, zipFilePath);

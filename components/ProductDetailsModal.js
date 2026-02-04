@@ -54,7 +54,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
         // Save temporarily without updating the actual product
         const saleNumeric = parseFloat(tempPrices.salePrice.replace(/[^0-9.]/g, ''));
         const rentNumeric = parseFloat(tempPrices.rentPrice.replace(/[^0-9.]/g, ''));
-        
+
         setTempPrices({
             salePrice: isNaN(saleNumeric) ? '0' : String(saleNumeric),
             rentPrice: isNaN(rentNumeric) ? '0' : String(rentNumeric)
@@ -333,7 +333,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
                         
                         <!-- SECTION 1: PRODUCT NAME -->
                         <div class="name-section">
-                            <div class="brand">WOODLAND</div>
+                            <div class="brand">DECOFLOW</div>
                             <h1 class="product-name">${product.name}</h1>
                         </div>
 
@@ -376,7 +376,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
 
                         <!-- FOOTER -->
                         <div class="footer">
-                            <p class="footer-text">Generado el ${currentDate} • <span class="footer-brand">WOODLAND</span></p>
+                            <p class="footer-text">Generado el ${currentDate} • <span class="footer-brand">DECOFLOW</span></p>
                         </div>
                     </div>
                 </body>
@@ -412,7 +412,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
     const getDisplayPrices = () => {
         const salePrice = tempPrices.salePrice ? parseFloat(tempPrices.salePrice.replace(/[^0-9.]/g, '')) : (product.salePrice || product.price);
         const rentPrice = tempPrices.rentPrice ? parseFloat(tempPrices.rentPrice.replace(/[^0-9.]/g, '')) : (product.rentalPrice || product.rentPrice);
-        
+
         return {
             salePrice,
             rentPrice,

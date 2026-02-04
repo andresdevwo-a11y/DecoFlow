@@ -46,7 +46,7 @@ const LoadingScreen = () => {
             <View style={styles.content}>
                 {/* App Name with Pulse Animation */}
                 <Animated.View style={{ opacity: opacity, transform: [{ scale: scale }] }}>
-                    <Text style={styles.title}>Woodland</Text>
+                    <Text style={styles.title}>DecoFlow</Text>
                 </Animated.View>
 
                 {/* Loading Indicator */}

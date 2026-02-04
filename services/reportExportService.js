@@ -373,7 +373,7 @@ const generateHTML = (reportData) => {
 
         <!-- 6. FOOTER -->
         <div class="footer">
-            Generado el: ${now} • Woodland App Reportes
+            Generado el: ${now} • DecoFlow App Reportes
         </div>
     </body>
     </html>

@@ -519,8 +519,8 @@ function LicenseGate() {
     }
 
     return (
-      <SettingsProvider>
-        <DataProvider>
+      <DataProvider>
+        <SettingsProvider>
           <FinanceProvider>
             <WorkspaceProvider>
               <LoadingProvider>
@@ -532,8 +532,8 @@ function LicenseGate() {
               </LoadingProvider>
             </WorkspaceProvider>
           </FinanceProvider>
-        </DataProvider>
-      </SettingsProvider>
+        </SettingsProvider>
+      </DataProvider>
     );
   };
 

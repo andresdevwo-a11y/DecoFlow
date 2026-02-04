@@ -646,10 +646,10 @@ export default function SettingsScreen() {
 
                 {/* Footer */}
                 <View style={styles.footer}>
-                    <Text style={styles.footerText}>Woodland</Text>
+                    <Text style={styles.footerText}>DecoFlow</Text>
                     <Text style={styles.footerVersion}>Versión {APP_VERSION}</Text>
                     <Text style={styles.footerCopyright}>
-                        © 2026 Woodland App. Todos los derechos reservados.
+                        © 2026 DecoFlow App. Todos los derechos reservados.
                     </Text>
                 </View>
             </ScrollView>
@@ -720,7 +720,7 @@ export default function SettingsScreen() {
                                                 style={styles.input}
                                                 value={businessForm.name}
                                                 onChangeText={(t) => setBusinessForm(prev => ({ ...prev, name: t }))}
-                                                placeholder="Ej: Woodland Eventos"
+                                                placeholder="Ej: DecoFlow Eventos"
                                             />
                                         </View>
                                         <View style={styles.inputGroup}>

@@ -346,7 +346,7 @@ const getCommonStyles = () => `
  * Generate business header section
  */
 const getBusinessHeader = (invoiceType, transactionId, date, businessData = null) => {
-    const name = businessData?.name || 'Woodland Eventos';
+    const name = businessData?.name || 'DecoFlow Eventos';
     const rut = businessData?.rut || '1113695670';
     const address = businessData?.address || 'Calle 28 #21-07, Ciudad';
     const phone = businessData?.phone || '(312) 729-9520';

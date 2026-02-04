@@ -22,7 +22,7 @@ export const SettingsProvider = ({ children }) => {
 
     // Business Info Settings
     const [businessInfo, setBusinessInfoState] = useState({
-        name: 'Woodland Eventos',
+        name: 'DecoFlow Eventos',
         rut: '1113695670',
         address: 'Calle 28 #21-07, Ciudad',
         phone: '(312) 729-9520'

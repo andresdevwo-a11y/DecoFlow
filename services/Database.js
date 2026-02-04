@@ -6,7 +6,7 @@ let initError = null;
 try {
     // Attempt to open the database synchronously.
     // Ensure we are using the correct API for the installed SDK version.
-    db = SQLite.openDatabaseSync('woodland.db');
+    db = SQLite.openDatabaseSync('decoflow.db');
 } catch (error) {
     console.error("CRITICAL: Failed to open database synchronously:", error);
     initError = error;

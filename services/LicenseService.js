@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import { getDeviceId } from './DeviceService';
 import * as SecureStore from 'expo-secure-store';
 
-const LICENSE_CACHE_KEY = 'woodland_license_cache';
+const LICENSE_CACHE_KEY = 'decoflow_license_cache';
 const OFFLINE_GRACE_DAYS = 7;
 
 /**

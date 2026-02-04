@@ -6,7 +6,7 @@ const withCustomApkName = (config) => {
             config.modResults.contents += `
         android.applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = "woodland-studio.apk"
+                outputFileName = "decoflow-studio.apk"
             }
         }
       `;
