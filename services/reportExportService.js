@@ -136,7 +136,7 @@ const generateHTML = (reportData) => {
 
         let color = '#10B981'; // Green (Sale)
         if (isExpense) color = '#EF4444'; // Red (Expense)
-        else if (isDecoration) color = '#F97316'; // Orange (Decoration)
+        else if (isDecoration) color = '#3B82F6'; // Blue (Decoration - Primary)
         else if (items[0]?.type === 'rental') color = '#3B82F6'; // Blue (Rental)
 
         return items.map(t => {
@@ -194,7 +194,7 @@ const generateHTML = (reportData) => {
             .text-green { color: #10B981; }
             .text-red { color: #EF4444; }
             .text-blue { color: #3B82F6; }
-            .text-orange { color: #F97316; }
+            .text-orange { color: #3B82F6; } /* Now uses primary blue */
             .bg-green-light { background-color: #ecfdf5; color: #047857; padding: 4px 8px; border-radius: 4px; }
             .bg-red-light { background-color: #fef2f2; color: #b91c1c; padding: 4px 8px; border-radius: 4px; }
 
@@ -243,7 +243,7 @@ const generateHTML = (reportData) => {
             </div>
             <div class="summary-card">
                 <div class="summary-label">Decoraciones</div>
-                <div class="summary-value text-orange">${formatCurrency(summary.decorations?.total || 0)}</div>
+                <div class="summary-value text-blue">${formatCurrency(summary.decorations?.total || 0)}</div>
             </div>
             <div class="summary-card">
                 <div class="summary-label">Total Ingresos</div>
@@ -319,7 +319,7 @@ const generateHTML = (reportData) => {
                 ${decorations.length > 0 ? `
                 <tr class="subtotal-row">
                     <td colspan="2" style="text-align: right;">Total Decoraciones</td>
-                    <td style="text-align: right; color: #F97316;">${formatCurrency(summary.decorations?.total || 0)}</td>
+                    <td style="text-align: right; color: #3B82F6;">${formatCurrency(summary.decorations?.total || 0)}</td>
                 </tr>` : ''}
             </tbody>
         </table>

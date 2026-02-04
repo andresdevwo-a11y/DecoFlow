@@ -80,7 +80,7 @@ const TransactionDetailScreen = ({ transaction, onBack, onDelete }) => {
     const getColors = () => {
         if (isSale) return { main: '#22C55E', bg: '#22C55E15' }; // Green
         if (isRental) return { main: '#3B82F6', bg: '#3B82F615' }; // Blue
-        if (isDecoration) return { main: '#F97316', bg: '#F9731615' }; // Orange
+        if (isDecoration) return { main: COLORS.primary, bg: COLORS.primary + '15' }; // Primary (Blue)
         return { main: '#EF4444', bg: '#EF444415' }; // Red
     };
 
@@ -122,7 +122,7 @@ const TransactionDetailScreen = ({ transaction, onBack, onDelete }) => {
         }).format(amount || 0);
     };
 
-const formatDateComplete = (dateString) => {
+    const formatDateComplete = (dateString) => {
         if (!dateString) return '';
         const dateObj = parseLocalDate(dateString);
         return dateObj.toLocaleDateString('es-CO', {
@@ -332,7 +332,7 @@ const formatDateComplete = (dateString) => {
                             </Text>
                         </View>
 
-{/* 2. Sección de Cliente (Mejorada) */}
+                        {/* 2. Sección de Cliente (Mejorada) */}
                         {(fullTransactionData.clientData || fullTransactionData.customerName) && (
                             <View style={styles.sectionContainer}>
                                 <View style={styles.sectionHeader}>
@@ -358,10 +358,10 @@ const formatDateComplete = (dateString) => {
                                             <InfoRow icon="map-pin" label="Dirección" value={fullTransactionData.clientData.address} isLast />
                                         )}
                                         {/* Si no hay más campos, marcar el último como isLast */}
-                                        {!fullTransactionData.clientData.phone && !fullTransactionData.clientData.email && 
-                                         !fullTransactionData.clientData.documentId && !fullTransactionData.clientData.address && (
-                                            <InfoRow icon="user" label="Nombre" value={fullTransactionData.clientData.name} isLast />
-                                        )}
+                                        {!fullTransactionData.clientData.phone && !fullTransactionData.clientData.email &&
+                                            !fullTransactionData.clientData.documentId && !fullTransactionData.clientData.address && (
+                                                <InfoRow icon="user" label="Nombre" value={fullTransactionData.clientData.name} isLast />
+                                            )}
                                     </>
                                 ) : (
                                     <InfoRow icon="user" label="Cliente" value={fullTransactionData.customerName} isLast />
@@ -369,9 +369,9 @@ const formatDateComplete = (dateString) => {
                             </View>
                         )}
 
-{/* 3. Sección de Vigencia (Alquiler, Decoración, y Venta con entrega) */}
-                        {((isRental || isDecoration) && (fullTransactionData.startDate || fullTransactionData.endDate)) || 
-                         (isSale && fullTransactionData.deliveryDate) ? (
+                        {/* 3. Sección de Vigencia (Alquiler, Decoración, y Venta con entrega) */}
+                        {((isRental || isDecoration) && (fullTransactionData.startDate || fullTransactionData.endDate)) ||
+                            (isSale && fullTransactionData.deliveryDate) ? (
                             <View style={styles.sectionContainer}>
                                 <View style={styles.sectionHeader}>
                                     <View style={[styles.sectionIcon, { backgroundColor: '#3B82F615' }]}>
@@ -424,7 +424,7 @@ const formatDateComplete = (dateString) => {
                             </View>
                         ) : null}
 
-{/* 4. Sección de Items / Productos */}
+                        {/* 4. Sección de Items / Productos */}
                         {hasItems ? (
                             <View style={styles.sectionContainer}>
                                 <View style={styles.sectionHeader}>
@@ -579,7 +579,7 @@ const formatDateComplete = (dateString) => {
                             {/* Separator */}
                             <View style={styles.divider} />
 
-{/* Subtotal Calculation - Different logic for each transaction type */}
+                            {/* Subtotal Calculation - Different logic for each transaction type */}
                             {items.length > 0 && !isDecoration && (
                                 <View style={[styles.financialRow, { marginTop: 4 }]}>
                                     <Text style={styles.financialLabel}>Subtotal Productos</Text>
@@ -588,7 +588,7 @@ const formatDateComplete = (dateString) => {
                                     </Text>
                                 </View>
                             )}
-                            
+
                             {/* For decorations, show the base price instead of items subtotal */}
                             {isDecoration && fullTransactionData.unitPrice > 0 && (
                                 <View style={[styles.financialRow, { marginTop: 4 }]}>

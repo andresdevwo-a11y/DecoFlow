@@ -21,7 +21,7 @@ const TransactionCard = ({ transaction, onPress, onLongPress, onAddPayment }) =>
     const getColors = () => {
         if (isSale) return { main: '#22C55E', bg: '#22C55E15' }; // Green
         if (isRental) return { main: '#3B82F6', bg: '#3B82F615' }; // Blue
-        if (isDecoration) return { main: '#F97316', bg: '#F9731615' }; // Orange
+        if (isDecoration) return { main: COLORS.primary, bg: COLORS.primary + '15' }; // Primary (Blue)
         return { main: COLORS.error, bg: COLORS.error + '15' }; // Red
     };
 
@@ -51,7 +51,7 @@ const TransactionCard = ({ transaction, onPress, onLongPress, onAddPayment }) =>
         }).format(amount);
     };
 
-const formatRelativeDate = (dateString) => {
+    const formatRelativeDate = (dateString) => {
         const date = parseLocalDate(dateString);
         const today = new Date();
         const yesterday = new Date(today);

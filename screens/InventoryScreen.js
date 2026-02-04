@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: SPACING.xl,
         borderWidth: 1,
-        borderColor: '#FFEDD5',
+        borderColor: COLORS.primaryBorder,
     },
     emptyTitle: {
         fontSize: TYPOGRAPHY.size['3xl'],

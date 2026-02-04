@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../constants/Theme';
 
 const COLORS_LIST = [
-    '#F97316', // Orange (Signature)
+    '#3B82F6', // Blue (Signature)
     '#EF4444', // Red
     '#F59E0B', // Amber
     '#10B981', // Emerald

@@ -1,6 +1,6 @@
 /**
  * Theme.js - Sistema de Diseño Centralizado
- * Basado en estilos.txt - Paleta de colores versión móvil minimalista (naranja)
+ * Paleta de colores versión móvil minimalista (azul profesional)
  */
 
 // =============================================================================
@@ -8,9 +8,9 @@
 // =============================================================================
 export const COLORS = {
     // Color de Acento
-    primary: '#F97316',          // Naranja suave (Acento principal)
-    primaryDisabled: '#FDBA74',  // Botón principal disabled
-    primaryBorder: '#FDBA74',    // Bordes / divisores naranjas
+    primary: '#3B82F6',          // Azul (Acento principal)
+    primaryDisabled: '#93C5FD',  // Botón principal disabled
+    primaryBorder: '#93C5FD',    // Bordes / divisores azules
 
     // Secondary Colors
     secondary: '#3B82F6',        // Azul (Alquileres / Info)
@@ -155,7 +155,7 @@ export const SHADOWS = {
 
     // Sombra para FAB
     fab: {
-        shadowColor: '#F97316',
+        shadowColor: '#3B82F6',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 4,

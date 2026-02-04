@@ -31,7 +31,7 @@ const ProductSelectorModal = ({ visible, onClose, onConfirm, context = 'sale' })
     const CONTEXT_COLORS = {
         sale: '#22C55E',       // Green
         rental: '#3B82F6',     // Blue
-        decoration: '#F97316', // Orange
+        decoration: COLORS.primary, // Primary (Blue)
         default: COLORS.primary
     };
     const accentColor = CONTEXT_COLORS[context] || CONTEXT_COLORS.default;
