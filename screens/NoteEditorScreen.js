@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES } from '../constants/Theme';
-
-
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../constants/Theme';
 import { useAlert } from '../context/AlertContext';
 
 export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
@@ -14,28 +12,39 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     // State
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [date, setDate] = useState(new Date().toISOString()); // Guardamos ISO completo
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Formatear fecha para mostrar
-    const formatDate = (dateString) => {
-        const d = new Date(dateString + 'T00:00:00');
-        return d.toLocaleDateString('es-ES', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    };
 
     // Init state if editing
     useEffect(() => {
         if (note) {
             setTitle(note.title);
             setContent(note.content || '');
-            setDate(note.date);
+            setDate(note.date || note.createdAt || new Date().toISOString());
         }
     }, [note]);
+
+    // Format date and time for metadata
+    const getMetadataString = () => {
+        const d = new Date(date);
+        
+        // Date part: "4 de febrero"
+        const dateStr = d.toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'long'
+        });
+
+        // Time part: "2:28 PM"
+        const timeStr = d.toLocaleTimeString('es-ES', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        const charCount = content ? content.length : 0;
+        
+        return `${dateStr}  ${timeStr}  |  ${charCount} caracteres`;
+    };
 
     const handleSave = async () => {
         if (!title.trim()) {
@@ -48,8 +57,8 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             await onSave({
                 id: note?.id,
                 title: title.trim(),
-                content: content.trim(),
-                date
+                content: content,
+                date: date // Preservamos fecha original o de creación
             });
         } catch (error) {
             console.error(error);
@@ -76,75 +85,76 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + SPACING.xs }]}>
+            {/* Minimalist Header */}
+            <View style={[styles.header, { paddingTop: insets.top + SPACING.sm }]}>
                 <TouchableOpacity onPress={onBack} style={styles.iconButton}>
                     <Feather name="arrow-left" size={24} color={COLORS.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>
-                    {note ? 'Editar Nota' : 'Nueva Nota'}
-                </Text>
-                {note && onDelete ? (
-                    <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
-                        <Feather name="trash-2" size={24} color={COLORS.error || '#EF4444'} />
-                    </TouchableOpacity>
-                ) : (
-                    <View style={styles.iconButton} />
-                )}
+                
+                <View style={styles.headerActions}>
+                    {/* Botones de acción adicionales placeholder (share, etc) */}
+                    
+                    {note && onDelete && (
+                        <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
+                            <Feather name="trash-2" size={20} color={COLORS.error} />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ScrollView contentContainerStyle={styles.content}>
-
+                <ScrollView 
+                    contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* Title Input */}
-                    <Text style={styles.label}>Título</Text>
                     <TextInput
-                        style={styles.titleInput}
-                        placeholder="Título de la nota"
-                        placeholderTextColor={COLORS.textMuted}
+                        style={styles.titleInputClean}
+                        placeholder="Título"
+                        placeholderTextColor={COLORS.placeholder}
                         value={title}
                         onChangeText={setTitle}
                         maxLength={100}
+                        selectionColor={COLORS.primary}
                     />
 
-                    {/* Fecha (solo lectura) */}
-                    <View style={{ marginTop: SPACING.lg }}>
-                        <Text style={styles.label}>Fecha</Text>
-                        <View style={styles.dateDisplay}>
-                            <Feather name="calendar" size={18} color={COLORS.textSecondary} style={{ marginRight: SPACING.sm }} />
-                            <Text style={styles.dateText}>{formatDate(date)}</Text>
-                        </View>
-                    </View>
+                    {/* Metadata Line */}
+                    <Text style={styles.metadataText}>
+                        {getMetadataString()}
+                    </Text>
 
                     {/* Content Input */}
-                    <Text style={[styles.label, { marginTop: SPACING.lg }]}>Contenido</Text>
                     <TextInput
-                        style={styles.contentInput}
-                        placeholder="Escribe tu nota aquí..."
-                        placeholderTextColor={COLORS.textMuted}
+                        style={styles.contentInputClean}
+                        placeholder="Empiece a escribir"
+                        placeholderTextColor={COLORS.placeholder}
                         value={content}
                         onChangeText={setContent}
                         multiline
                         textAlignVertical="top"
+                        selectionColor={COLORS.primary}
+                        scrollEnabled={false} // Dejamos que el ScrollView maneje el scroll
                     />
-
-                    <View style={{ height: 100 }} />
+                    
+                    {/* Espaciado extra al final para scroll cómodo */}
+                    <View style={{ height: 150 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Save Button */}
+            {/* Floating/Fixed Save Button */}
             <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
                 <TouchableOpacity
                     style={[styles.saveButton, isSubmitting && styles.disabledButton]}
                     onPress={handleSave}
                     disabled={isSubmitting}
+                    activeOpacity={0.9}
                 >
-                    <Feather name="check" size={20} color="#FFF" style={{ marginRight: SPACING.sm }} />
+                    <Feather name="save" size={20} color="#FFF" style={{ marginRight: SPACING.sm }} />
                     <Text style={styles.saveButtonText}>
-                        {isSubmitting ? 'Guardando...' : 'Guardar Nota'}
+                        {isSubmitting ? 'Guardando...' : (note ? 'Guardar cambios' : 'Guardar')}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -155,72 +165,72 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        backgroundColor: COLORS.background, // Idealmente sería un color sólido oscuro o claro según tema
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.md,
-        paddingBottom: SPACING.md,
-        backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        paddingBottom: SPACING.sm,
+        // Sin borde ni fondo marcado para look limpio
     },
-    headerTitle: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     iconButton: {
         width: 40,
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: RADIUS.full,
     },
     content: {
-        padding: SPACING.lg,
+        paddingHorizontal: SPACING.lg,
+        paddingTop: SPACING.sm,
     },
-    label: {
-        fontSize: TYPOGRAPHY.size.sm,
-        fontWeight: TYPOGRAPHY.weight.medium,
-        color: COLORS.textSecondary,
-        marginBottom: SPACING.sm,
-    },
-    titleInput: {
-        backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.sm,
-        padding: SPACING.md,
-        fontSize: TYPOGRAPHY.size.xl,
-        fontWeight: '600',
+    titleInputClean: {
+        fontSize: 28, // Tamaño grande para título
+        fontWeight: 'bold',
         color: COLORS.text,
-        borderWidth: 1,
-        borderColor: COLORS.border,
+        paddingVertical: SPACING.sm,
+        marginBottom: SPACING.xs,
     },
-    contentInput: {
-        backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.sm,
-        padding: SPACING.md,
+    metadataText: {
+        fontSize: TYPOGRAPHY.size.sm,
+        color: COLORS.textSecondary,
+        marginBottom: SPACING.xl,
+        opacity: 0.8,
+    },
+    contentInputClean: {
         fontSize: TYPOGRAPHY.size.md,
         color: COLORS.text,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        minHeight: 300,
+        lineHeight: 24, // Mejor legibilidad
+        minHeight: 200,
     },
     footer: {
-        paddingHorizontal: SPACING.lg,
+        paddingHorizontal: SPACING.xl,
         paddingTop: SPACING.md,
-        backgroundColor: COLORS.surface,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.border,
+        // Fondo transparente o gradiente si se quiere flotante, aquí simple
+        backgroundColor: 'transparent',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
     },
     saveButton: {
         backgroundColor: COLORS.primary,
-        borderRadius: RADIUS.md, // Matching global radius ideally
-        paddingVertical: 16,
+        borderRadius: RADIUS.full, // Botón pastilla
+        paddingVertical: 14,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
     },
     disabledButton: {
         opacity: 0.7,
@@ -230,17 +240,4 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.size.md,
         fontWeight: TYPOGRAPHY.weight.bold,
     },
-    dateDisplay: {
-        backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.sm,
-        padding: SPACING.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.border,
-    },
-    dateText: {
-        fontSize: TYPOGRAPHY.size.md,
-        color: COLORS.text,
-    }
 });
