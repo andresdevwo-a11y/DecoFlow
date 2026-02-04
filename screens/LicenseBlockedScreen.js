@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { useLicense } from '../context/LicenseContext';
 import { StatusBar } from 'expo-status-bar';
+import ToastNotification from '../components/ui/ToastNotification';
 
 const COLORS = {
     error: '#E74C3C',
@@ -14,6 +15,51 @@ const COLORS = {
 
 export default function LicenseBlockedScreen({ info }) {
     const { refreshLicense, removeLicense, startNewLicenseEntry, isLoading } = useLicense();
+    const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+
+    // Helper para obtener mensaje según el motivo
+    const getVerificationMessage = (reason) => {
+        switch (reason) {
+            case 'LICENSE_EXPIRED':
+                return 'La licencia sigue expirada';
+            case 'LICENSE_BLOCKED':
+                return 'La licencia sigue bloqueada';
+            case 'DEVICE_MISMATCH':
+                return 'Dispositivo no autorizado';
+            default:
+                return 'La licencia no pudo ser validada';
+        }
+    };
+
+    // Handler para verificar licencia con feedback
+    const handleVerifyLicense = async () => {
+        try {
+            const result = await refreshLicense();
+
+            if (result?.valid) {
+                // La navegación se manejará automáticamente por el contexto
+                setToast({
+                    visible: true,
+                    message: '¡Licencia verificada exitosamente!',
+                    type: 'success'
+                });
+            } else {
+                // La licencia sigue siendo inválida
+                const message = getVerificationMessage(result?.reason);
+                setToast({
+                    visible: true,
+                    message,
+                    type: 'error'
+                });
+            }
+        } catch (error) {
+            setToast({
+                visible: true,
+                message: 'Error de conexión. Verifica tu internet.',
+                type: 'error'
+            });
+        }
+    };
 
     // Determinar mensaje y color basado en la razón
     const getReasonDetails = () => {
@@ -83,7 +129,7 @@ export default function LicenseBlockedScreen({ info }) {
                 <View style={styles.actions}>
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: details.color }]}
-                        onPress={refreshLicense}
+                        onPress={handleVerifyLicense}
                         disabled={isLoading}
                     >
                         <Text style={styles.buttonText}>
@@ -106,6 +152,13 @@ export default function LicenseBlockedScreen({ info }) {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            <ToastNotification
+                visible={toast.visible}
+                message={toast.message}
+                type={toast.type}
+                onHide={() => setToast(prev => ({ ...prev, visible: false }))}
+            />
         </View>
     );
 }
