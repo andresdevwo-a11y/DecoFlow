@@ -27,23 +27,20 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     // Format date and time for metadata
     const getMetadataString = () => {
         const d = new Date(date);
-        
-        // Date part: "4 de febrero"
+
+        // Date part: "4 de febrero de 2026, 3:04 p. m." matches NotesScreen format
         const dateStr = d.toLocaleDateString('es-ES', {
             day: 'numeric',
-            month: 'long'
-        });
-
-        // Time part: "2:28 PM"
-        const timeStr = d.toLocaleTimeString('es-ES', {
+            month: 'long',
+            year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
 
         const charCount = content ? content.length : 0;
-        
-        return `${dateStr}  ${timeStr}  |  ${charCount} caracteres`;
+
+        return `${dateStr}  |  ${charCount} caracteres`;
     };
 
     const handleSave = async () => {
@@ -53,12 +50,16 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         }
 
         setIsSubmitting(true);
+        const now = new Date().toISOString();
+        // Update local state to reflect change immediately if we stay on screen
+        setDate(now);
+
         try {
             await onSave({
                 id: note?.id,
                 title: title.trim(),
                 content: content,
-                date: date // Preservamos fecha original o de creación
+                date: now // Update date to now
             });
         } catch (error) {
             console.error(error);
@@ -90,10 +91,10 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 <TouchableOpacity onPress={onBack} style={styles.iconButton}>
                     <Feather name="arrow-left" size={24} color={COLORS.text} />
                 </TouchableOpacity>
-                
+
                 <View style={styles.headerActions}>
                     {/* Botones de acción adicionales placeholder (share, etc) */}
-                    
+
                     {note && onDelete && (
                         <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
                             <Feather name="trash-2" size={20} color={COLORS.error} />
@@ -106,7 +107,7 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ScrollView 
+                <ScrollView
                     contentContainerStyle={styles.content}
                     showsVerticalScrollIndicator={false}
                 >
@@ -138,7 +139,7 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                         selectionColor={COLORS.primary}
                         scrollEnabled={false} // Dejamos que el ScrollView maneje el scroll
                     />
-                    
+
                     {/* Espaciado extra al final para scroll cómodo */}
                     <View style={{ height: 150 }} />
                 </ScrollView>

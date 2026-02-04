@@ -16,7 +16,10 @@ const formatDate = (dateString) => {
     return d.toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
     });
 };
 
