@@ -87,7 +87,7 @@ export default function LicenseBlockedScreen({ info }) {
                         disabled={isLoading}
                     >
                         <Text style={styles.buttonText}>
-                            {isLoading ? 'Verificando...' : 'Reintentar Verificación'}
+                            {isLoading ? 'Verificando...' : 'Verificar Estado'}
                         </Text>
                     </TouchableOpacity>
 
@@ -95,7 +95,7 @@ export default function LicenseBlockedScreen({ info }) {
                         style={styles.outlineButton}
                         onPress={removeLicense}
                     >
-                        <Text style={styles.outlineButtonText}>Usar otro código</Text>
+                        <Text style={styles.outlineButtonText}>Ingresar Nueva Licencia</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
