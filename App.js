@@ -429,7 +429,7 @@ function AppContent() {
     <View style={styles.container} onLayout={() => setIsLayoutReady(true)}>
       {!FULLSCREEN_TABS.includes(activeTab) && activeTab !== 'finances' && activeTab !== 'workspace' && activeTab !== 'notes' && !(activeTab === 'home' && activeSection) && <Header />}
 
-      <View style={[styles.body, { paddingBottom: FULLSCREEN_TABS.includes(activeTab) ? 0 : SIZES.navBarHeight + insets.bottom + 10 }]}>
+      <View style={[styles.body, { paddingBottom: FULLSCREEN_TABS.includes(activeTab) ? 0 : SIZES.navBarHeight + insets.bottom }]}>
 
         {/* Persistent Workspace Layer */}
         <View style={[styles.layer, { display: activeTab === 'workspace' ? 'flex' : 'none' }]}>
