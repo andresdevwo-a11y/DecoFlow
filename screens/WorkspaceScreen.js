@@ -22,7 +22,7 @@ import CanvasSettingsModal from '../components/workspace/modals/CanvasSettingsMo
 import ProductPickerModal from '../components/workspace/modals/ProductPickerModal';
 import ConfirmationModal from '../components/workspace/modals/ConfirmationModal';
 import CreateCanvasModal from '../components/CreateCanvasModal'; // Used for First Save Naming
-import InfoModal from '../components/InfoModal';
+
 
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useSettings } from '../context/SettingsContext';
@@ -76,7 +76,6 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     const [isNameModalVisible, setNameModalVisible] = useState(false);
 
     // Feedback State
-    const [infoModal, setInfoModal] = useState({ visible: false, title: '', message: '', type: 'info' });
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
     const showToast = (message, type = 'success') => setToast({ visible: true, message, type });
 
@@ -338,7 +337,7 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
         try {
             const { status } = await ImagePicker.requestCameraPermissionsAsync();
             if (status !== 'granted') {
-                setInfoModal({ visible: true, title: 'Permiso Denegado', message: 'Se necesita permiso de cámara', type: 'error' });
+                showToast('Se necesita permiso de cámara', 'error');
                 return;
             }
             const result = await ImagePicker.launchCameraAsync({
@@ -562,13 +561,7 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
                 onCreate={handleFirstSaveConfirm}
             />
 
-            <InfoModal
-                visible={infoModal.visible}
-                title={infoModal.title}
-                message={infoModal.message}
-                type={infoModal.type}
-                onClose={() => setInfoModal(prev => ({ ...prev, visible: false }))}
-            />
+
 
             <LayersPanel
                 visible={isLayersPanelVisible}

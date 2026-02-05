@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useLicense } from '../context/LicenseContext';
 import { StatusBar } from 'expo-status-bar';
-import InfoModal from '../components/InfoModal';
+import ToastNotification from '../components/ui/ToastNotification';
 
 const COLORS = {
     primary: '#4CAF50',
@@ -17,17 +17,18 @@ const COLORS = {
 
 export default function LicenseActivationScreen() {
     const [code, setCode] = useState('');
-    const { activate, confirmActivation, isEnteringNewCode, cancelNewLicenseEntry } = useLicense();
     const [submitting, setSubmitting] = useState(false);
-    const [alertModal, setAlertModal] = useState({ visible: false, title: '', message: '', type: 'error' });
-    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
-    const showAlert = (title, message, type = 'error') => {
-        setAlertModal({ visible: true, title, message, type });
-    };
+    // Toast state replacement for InfoModal
+    const [toast, setToast] = useState({
+        visible: false,
+        message: '',
+        type: 'error',
+        onHide: null
+    });
 
-    const closeAlert = () => {
-        setAlertModal(prev => ({ ...prev, visible: false }));
+    const showToast = (message, type = 'error', onHide = null) => {
+        setToast({ visible: true, message, type, onHide });
     };
 
     const formatCode = (text) => {
@@ -56,24 +57,20 @@ export default function LicenseActivationScreen() {
         try {
             const result = await activate(code);
             if (!result.success) {
-                showAlert('Error de Activación', result.message);
+                showToast(result.message, 'error');
             } else {
-                setSuccessModalVisible(true);
+                showToast('Tu licencia ha sido verificada correctamente. Bienvenido.', 'success', () => {
+                    confirmActivation();
+                });
             }
         } catch (error) {
-            showAlert('Error', 'Ocurrió un error inesperado. Intenta nuevamente.');
+            showToast('Ocurrió un error inesperado. Intenta nuevamente.', 'error');
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleSuccessClose = () => {
-        setSuccessModalVisible(false);
-        // Pequeño delay para permitir que el modal cierre suavemente
-        setTimeout(() => {
-            confirmActivation();
-        }, 200);
-    };
+
 
     return (
         <View style={styles.container}>
@@ -134,20 +131,15 @@ export default function LicenseActivationScreen() {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            <InfoModal
-                visible={alertModal.visible}
-                title={alertModal.title}
-                message={alertModal.message}
-                type={alertModal.type}
-                onClose={closeAlert}
-            />
-
-            <InfoModal
-                visible={successModalVisible}
-                title="¡Activación Exitosa!"
-                message="Tu licencia ha sido verificada correctamente. Bienvenido."
-                type="success"
-                onClose={handleSuccessClose}
+            <ToastNotification
+                visible={toast.visible}
+                message={toast.message}
+                type={toast.type}
+                duration={3000}
+                onHide={() => {
+                    setToast(prev => ({ ...prev, visible: false }));
+                    if (toast.onHide) toast.onHide();
+                }}
             />
         </View>
     );

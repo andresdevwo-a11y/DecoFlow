@@ -174,19 +174,9 @@ export default function SettingsScreen() {
                         setIsLoading(true);
                         try {
                             await exportData();
-                            setInfoModal({
-                                visible: true,
-                                title: 'Éxito',
-                                message: 'Datos exportados correctamente.',
-                                type: 'success'
-                            });
+                            showToast('Datos exportados correctamente', 'success');
                         } catch (error) {
-                            setInfoModal({
-                                visible: true,
-                                title: 'Error',
-                                message: 'No se pudo exportar los datos. Intenta nuevamente.',
-                                type: 'error'
-                            });
+                            showToast('No se pudo exportar los datos', 'error');
                             console.error(error);
                         } finally {
                             setIsLoading(false);
@@ -211,20 +201,10 @@ export default function SettingsScreen() {
                             try {
                                 const success = await importData();
                                 if (success) {
-                                    setInfoModal({
-                                        visible: true,
-                                        title: 'Éxito',
-                                        message: 'Datos importados. Reinicia la app.',
-                                        type: 'success'
-                                    });
+                                    showToast('Datos importados. Reinicia la app.', 'success');
                                 }
                             } catch (error) {
-                                setInfoModal({
-                                    visible: true,
-                                    title: 'Error',
-                                    message: 'No se pudo importar.',
-                                    type: 'error'
-                                });
+                                showToast('No se pudo importar.', 'error');
                                 console.error(error);
                             } finally {
                                 setIsLoading(false);
@@ -294,23 +274,13 @@ export default function SettingsScreen() {
             setResetModalVisible(false); // Close AFTER success
 
             setTimeout(() => {
-                setInfoModal({
-                    visible: true,
-                    title: 'Completado',
-                    message: 'Todos los datos han sido eliminados correctamente.',
-                    type: 'success'
-                });
+                showToast('Todos los datos han sido eliminados correctamente.', 'success');
             }, 300);
         } catch (error) {
             setResetModalVisible(false);
             console.error("Reset Data Error:", error); // Log the real error
             setTimeout(() => {
-                setInfoModal({
-                    visible: true,
-                    title: 'Error',
-                    message: 'Hubo un problema al eliminar los datos. Intenta nuevamente.',
-                    type: 'error'
-                });
+                showToast('Hubo un problema al eliminar los datos.', 'error');
             }, 300);
         } finally {
             setIsLoading(false);
@@ -370,33 +340,23 @@ export default function SettingsScreen() {
         try {
             const result = await refreshLicense();
 
+            // Close info modal
+            setInfoModal(prev => ({ ...prev, visible: false }));
+
             if (result && result.valid) {
                 setTimeout(() => {
-                    setInfoModal({
-                        visible: true,
-                        title: 'Licencia Activa',
-                        message: 'Tu licencia ha sido verificada correctamente.',
-                        type: 'success'
-                    });
+                    showToast('Tu licencia ha sido verificada correctamente.', 'success');
                 }, 500);
             } else {
                 setTimeout(() => {
-                    setInfoModal({
-                        visible: true,
-                        title: 'Problema de Licencia',
-                        message: result?.message || 'No se pudo verificar la licencia. Revisa tu conexión.',
-                        type: 'error'
-                    });
+                    showToast(result?.message || 'No se pudo verificar la licencia.', 'error');
                 }, 500);
             }
         } catch (error) {
+            // Close info modal
+            setInfoModal(prev => ({ ...prev, visible: false }));
             setTimeout(() => {
-                setInfoModal({
-                    visible: true,
-                    title: 'Error',
-                    message: 'Hubo un error al conectar con el servidor.',
-                    type: 'error'
-                });
+                showToast('Hubo un error al conectar con el servidor.', 'error');
             }, 500);
         }
     };

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import InfoModal from '../components/InfoModal';
+import ToastNotification from '../components/ui/ToastNotification';
 import ConfirmationModal from '../components/ConfirmationModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import ActionSheetModal from '../components/ActionSheetModal';
@@ -14,6 +15,14 @@ export const AlertProvider = ({ children }) => {
         message: '',
         type: 'info', // 'info', 'success', 'error'
         onClose: null
+    });
+
+    // State for Toast Notification
+    const [toast, setToast] = useState({
+        visible: false,
+        message: '',
+        type: 'success', // 'success', 'error', 'info'
+        onHide: null
     });
 
     // State for Confirmation Modal
@@ -60,12 +69,38 @@ export const AlertProvider = ({ children }) => {
      * @param {function} onClose - Optional callback when closed
      */
     const showAlert = useCallback((type, title, message, onClose = null) => {
-        setInfoModal({
+        // Use Toast for success and error types
+        if (type === 'success' || type === 'error') {
+            setToast({
+                visible: true,
+                message: message && message.length > 0 ? message : title, // Prioritize message if available
+                type,
+                onHide: onClose
+            });
+        } else {
+            // Use InfoModal for 'info' or other types that require interaction
+            setInfoModal({
+                visible: true,
+                type,
+                title,
+                message,
+                onClose
+            });
+        }
+    }, []);
+
+    /**
+     * Show a toast notification explicitly
+     * @param {string} type - 'success', 'error', 'info'
+     * @param {string} message 
+     * @param {function} onHide - Optional callback when hidden
+     */
+    const showToast = useCallback((type, message, onHide = null) => {
+        setToast({
             visible: true,
             type,
-            title,
             message,
-            onClose
+            onHide
         });
     }, []);
 
@@ -159,6 +194,7 @@ export const AlertProvider = ({ children }) => {
     return (
         <AlertContext.Provider value={{
             showAlert,
+            showToast,
             showConfirm,
             showDelete,
             showActionSheet,
@@ -167,6 +203,17 @@ export const AlertProvider = ({ children }) => {
             {children}
 
             {/* RENDER MODALS */}
+
+            <ToastNotification
+                visible={toast.visible}
+                message={toast.message}
+                type={toast.type}
+                duration={3000}
+                onHide={() => {
+                    setToast(prev => ({ ...prev, visible: false }));
+                    if (toast.onHide) toast.onHide();
+                }}
+            />
 
             <InfoModal
                 visible={infoModal.visible}
