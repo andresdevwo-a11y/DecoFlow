@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../constants/Theme';
 import { useAlert } from '../context/AlertContext';
+import ToastNotification from '../components/ui/ToastNotification';
 
 export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     const insets = useSafeAreaInsets();
@@ -14,6 +15,9 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     const [content, setContent] = useState('');
     const [date, setDate] = useState(new Date().toISOString()); // Guardamos ISO completo
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // Toast State
+    const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
     // Init state if editing
     useEffect(() => {
@@ -43,9 +47,17 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         return `${dateStr}  |  ${charCount} caracteres`;
     };
 
+    const showToast = (message, type = 'success') => {
+        setToast({ visible: true, message, type });
+    };
+
+    const hideToast = () => {
+        setToast(prev => ({ ...prev, visible: false }));
+    };
+
     const handleSave = async () => {
         if (!title.trim()) {
-            showAlert("error", "Requerido", "Por favor ingresa un título para la nota.");
+            showToast("Por favor ingresa un título para la nota.", "error");
             return;
         }
 
@@ -61,9 +73,10 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 content: content,
                 date: now // Update date to now
             });
+            showToast("Nota guardada correctamente");
         } catch (error) {
             console.error(error);
-            showAlert("error", "Error", "No se pudo guardar la nota.");
+            showToast("No se pudo guardar la nota.", "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -159,6 +172,13 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                     </Text>
                 </TouchableOpacity>
             </View>
+
+            <ToastNotification
+                visible={toast.visible}
+                message={toast.message}
+                type={toast.type}
+                onHide={hideToast}
+            />
         </View>
     );
 }

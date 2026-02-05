@@ -249,8 +249,9 @@ function AppContent() {
           onBack={() => setActiveTab('notes')}
           onSave={async (noteData) => {
             try {
-              await addNote(noteData);
-              setActiveTab('notes');
+              const newNote = await addNote(noteData);
+              setSelectedNote(newNote);
+              setActiveTab('edit_note');
             } catch (error) {
               console.error(error);
               showAlert("error", "Error", "No se pudo crear la nota");
@@ -279,8 +280,9 @@ function AppContent() {
           onSave={async (noteData) => {
             try {
               await updateNote(noteData);
-              setSelectedNote(null);
-              setActiveTab('notes');
+              // No navegamos "back", nos quedamos aquí
+              // Pero actualizamos la nota seleccionada con los nuevos datos para que la UI no parpadee datos viejos
+              setSelectedNote({ ...selectedNote, ...noteData, updatedAt: new Date().toISOString() });
             } catch (error) {
               console.error(error);
               showAlert("error", "Error", "No se pudo actualizar la nota");
