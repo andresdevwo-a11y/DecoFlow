@@ -13,15 +13,18 @@ export default function MultiSelectToolbar({ onAction, selectedCount = 0 }) {
     // Group enabled only if 2+ items
     const canGroup = selectedCount >= 2;
 
-    const bottomSheetOffset = useSharedValue(100);
+    const bottomSheetOffset = useSharedValue(20);
+    const opacity = useSharedValue(0);
 
     useEffect(() => {
-        bottomSheetOffset.value = withSpring(0, { damping: 12 });
+        bottomSheetOffset.value = withTiming(0, { duration: 200 });
+        opacity.value = withTiming(1, { duration: 200 });
     }, []);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
-            transform: [{ translateY: bottomSheetOffset.value }]
+            transform: [{ translateY: bottomSheetOffset.value }],
+            opacity: opacity.value
         };
     });
 
