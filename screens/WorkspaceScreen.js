@@ -61,6 +61,13 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     const [isLayersPanelVisible, setLayersPanelVisible] = useState(false);
     const [isMultiSelectMode, setIsMultiSelectMode] = useState(false); // NEW
 
+    // Sync Multi-Select Mode (e.g. triggered by Ungroup action)
+    useEffect(() => {
+        if (selectedImageIds.length > 1 && !isMultiSelectMode) {
+            setIsMultiSelectMode(true);
+        }
+    }, [selectedImageIds, isMultiSelectMode]);
+
     // Modal states
     const [isSourceModalVisible, setSourceModalVisible] = useState(false);
     const [isProductPickerVisible, setProductPickerVisible] = useState(false);
