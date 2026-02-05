@@ -183,7 +183,8 @@ const FinanceFAB = ({
     };
 
     // Calculate FAB position ensuring it's above BottomNavBar
-    const bottomPosition = SIZES.navBarHeight + insets.bottom + 20;
+    // Calculate FAB position ensuring it's above BottomNavBar
+    const bottomPosition = SPACING.xl;
 
     return (
         <>
@@ -204,9 +205,13 @@ const FinanceFAB = ({
             <View style={[styles.container, { bottom: bottomPosition }]} pointerEvents="box-none">
 
                 {/* Sub Menu Items (Ingresos children) */}
-                {renderSubMenuItem("shopping-cart", "Venta", "#22C55E", 0, onCreateSale)}
-                {renderSubMenuItem("package", "Alquiler", "#3B82F6", 1, onCreateRental)}
-                {renderSubMenuItem("gift", "Decoración", "#F97316", 2, onCreateDecoration)}
+                {activeSubMenu === 'income' && (
+                    <>
+                        {renderSubMenuItem("shopping-cart", "Venta", "#22C55E", 0, onCreateSale)}
+                        {renderSubMenuItem("package", "Alquiler", "#3B82F6", 1, onCreateRental)}
+                        {renderSubMenuItem("gift", "Decoración", "#F97316", 2, onCreateDecoration)}
+                    </>
+                )}
 
                 {/* Main Menu Items */}
                 {renderMenuItem("file-text", "Cotización", "#8B5CF6", 2, () => {
