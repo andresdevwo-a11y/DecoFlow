@@ -131,7 +131,7 @@ export default function ProductStatsModal({ visible, onClose, product }) {
                                 <CustomDatePicker
                                     label="Desde"
                                     date={startDate}
-                                    onDateChange={(d) => handleCustomDateChange('start', d.toISOString().split('T')[0])}
+                                    onDateChange={(d) => handleCustomDateChange('start', d)}
                                     placeholder="Inicio"
                                     maxDate={endDate ? new Date(endDate) : new Date()}
                                 />
@@ -140,7 +140,7 @@ export default function ProductStatsModal({ visible, onClose, product }) {
                                 <CustomDatePicker
                                     label="Hasta"
                                     date={endDate}
-                                    onDateChange={(d) => handleCustomDateChange('end', d.toISOString().split('T')[0])}
+                                    onDateChange={(d) => handleCustomDateChange('end', d)}
                                     placeholder="Fin"
                                     minDate={startDate ? new Date(startDate) : null}
                                 />
@@ -148,13 +148,14 @@ export default function ProductStatsModal({ visible, onClose, product }) {
                         </View>
                     </View>
 
-                    {loading ? (
+                    {/* Loading State Logic: Show spinner only on initial load (no stats yet) */}
+                    {loading && !stats ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color={COLORS.primary} />
                             <Text style={{ marginTop: SPACING.sm, color: COLORS.textMuted }}>Cargando datos...</Text>
                         </View>
                     ) : stats ? (
-                        <View style={styles.content}>
+                        <View style={[styles.content, loading && { opacity: 0.6 }]}>
                             {/* Sales Section */}
                             <View style={styles.sectionContainer}>
                                 <View style={styles.sectionHeader}>
@@ -206,6 +207,21 @@ export default function ProductStatsModal({ visible, onClose, product }) {
                                     {formatCurrency(stats.totalRevenue)}
                                 </Text>
                             </View>
+
+                            {/* Loading Overlay for updates */}
+                            {loading && (
+                                <View style={StyleSheet.absoluteFillObject}>
+                                    <ActivityIndicator
+                                        size="small"
+                                        color={COLORS.primary}
+                                        style={{
+                                            position: 'absolute',
+                                            top: SPACING.md,
+                                            right: SPACING.md
+                                        }}
+                                    />
+                                </View>
+                            )}
                         </View>
                     ) : (
                         <Text style={styles.errorText}>No se pudieron cargar las estadísticas</Text>
