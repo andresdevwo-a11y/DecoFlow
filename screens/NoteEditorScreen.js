@@ -15,7 +15,11 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     const [content, setContent] = useState('');
     const [date, setDate] = useState(new Date().toISOString()); // Guardamos ISO completo
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
+    // Track initial state for dirty checking
+    const [initialTitle, setInitialTitle] = useState('');
+    const [initialContent, setInitialContent] = useState('');
+
     // Toast State
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
@@ -25,6 +29,10 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             setTitle(note.title);
             setContent(note.content || '');
             setDate(note.date || note.createdAt || new Date().toISOString());
+
+            // Set initial values
+            setInitialTitle(note.title);
+            setInitialContent(note.content || '');
         }
     }, [note]);
 
@@ -61,6 +69,15 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             return;
         }
 
+        // Check for changes if it's an existing note
+        if (note) {
+            const hasChanges = title.trim() !== initialTitle || content !== initialContent;
+            if (!hasChanges) {
+                showToast("No has realizado cambios", "info");
+                return;
+            }
+        }
+
         setIsSubmitting(true);
         const now = new Date().toISOString();
         // Update local state to reflect change immediately if we stay on screen
@@ -73,7 +90,13 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 content: content,
                 date: now // Update date to now
             });
-            showToast("Nota guardada correctamente");
+
+            // Update initial state to current state after successful save
+            setInitialTitle(title.trim());
+            setInitialContent(content);
+
+            const successMessage = note ? "Cambios guardados correctamente" : "Nota creada correctamente";
+            showToast(successMessage);
         } catch (error) {
             console.error(error);
             showToast("No se pudo guardar la nota.", "error");
