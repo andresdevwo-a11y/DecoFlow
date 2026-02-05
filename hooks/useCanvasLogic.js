@@ -5,6 +5,7 @@ export default function useCanvasLogic(initialData) {
     // Canvas state
     const [images, setImages] = useState([]);
     const [selectedImageId, setSelectedImageId] = useState(null);
+    const [selectedImageIds, setSelectedImageIds] = useState([]); // Array of IDs for multi-selection
     const [zoomLevel, setZoomLevel] = useState(100);
 
     // History state for undo/redo
@@ -50,7 +51,9 @@ export default function useCanvasLogic(initialData) {
     const addImage = useCallback((newImage) => {
         pushToHistory(images);
         setImages(prev => [...prev, newImage]);
+        // Set single selection for the new image
         setSelectedImageId(newImage.id);
+        setSelectedImageIds([newImage.id]);
     }, [images, pushToHistory]);
 
     const updateImage = useCallback((update) => {
@@ -70,6 +73,8 @@ export default function useCanvasLogic(initialData) {
         if (selectedImageId === id) {
             setSelectedImageId(null);
         }
+        // Also remove from multi-selection
+        setSelectedImageIds(prev => prev.filter(selId => selId !== id));
     }, [images, selectedImageId, pushToHistory]);
 
     const duplicateImage = useCallback(() => {
@@ -138,36 +143,178 @@ export default function useCanvasLogic(initialData) {
         pushToHistory(images);
         setImages([]);
         setSelectedImageId(null);
+        setSelectedImageIds([]);
     }, [images, pushToHistory]);
 
-    const reorderImages = useCallback((newImages) => {
-        pushToHistory(images);
-        setImages(newImages);
-    }, [images, pushToHistory]);
+}, [images, pushToHistory]);
 
-    return {
-        images,
-        setImages, // exposed for full reset or init
-        selectedImageId,
-        setSelectedImageId,
-        zoomLevel,
-        setZoomLevel,
-        hasUnsavedChanges,
-        setHasUnsavedChanges,
-        // Actions
-        addImage,
-        updateImage,
-        removeImage,
-        duplicateImage,
-        moveLayer,
-        flipImage,
-        centerImage,
-        clearCanvas,
-        reorderImages,
-        // History
-        handleUndo,
-        handleRedo,
-        canUndo: historyStack.length > 0,
-        canRedo: redoStack.length > 0
+// Selection Logic
+const toggleSelection = useCallback((id) => {
+    if (!id) {
+        // Deselect all
+        setSelectedImageId(null);
+        setSelectedImageIds([]);
+        return;
+    }
+
+    setSelectedImageIds(prev => {
+        const isSelected = prev.includes(id);
+        let newSelection;
+        if (isSelected) {
+            newSelection = prev.filter(item => item !== id);
+        } else {
+            newSelection = [...prev, id];
+        }
+
+        // Sync primary selectedImageId (usually the last selected or the single one)
+        if (newSelection.length === 1) {
+            setSelectedImageId(newSelection[0]);
+        } else if (newSelection.length === 0) {
+            setSelectedImageId(null);
+        } else {
+            // If multiple, maybe keep the last one as "primary" for properties? 
+            // Or null if we want to show group tools only?
+            // Let's keep the last added one as primary for now.
+            setSelectedImageId(newSelection[newSelection.length - 1]);
+        }
+
+        return newSelection;
+    });
+}, []);
+
+const handleLongPress = useCallback((id) => {
+    if (!id) return;
+    // Start multi-selection with this item if not already in it
+    setSelectedImageIds(prev => {
+        if (prev.includes(id)) return prev;
+        return [...prev, id];
+    });
+    setSelectedImageId(id);
+}, []);
+
+// Grouping Logic
+const groupSelectedImages = useCallback(() => {
+    if (selectedImageIds.length < 2) return;
+
+    const itemsToGroup = images.filter(img => selectedImageIds.includes(img.id));
+    if (itemsToGroup.length < 2) return;
+
+    pushToHistory(images);
+
+    // 1. Calculate BBox
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    itemsToGroup.forEach(img => {
+        minX = Math.min(minX, img.x);
+        minY = Math.min(minY, img.y);
+        maxX = Math.max(maxX, img.x + img.width);
+        maxY = Math.max(maxY, img.y + img.height);
+    });
+
+    // Add padding? No, exact fit usually better for manipulation
+    const groupX = minX;
+    const groupY = minY;
+    const groupW = maxX - minX;
+    const groupH = maxY - minY;
+
+    // 2. Create Group Item
+    const newGroupId = `group_${Date.now()}`;
+    const groupItem = {
+        id: newGroupId,
+        type: 'group',
+        x: groupX,
+        y: groupY,
+        width: groupW,
+        height: groupH,
+        rotation: 0,
+        scale: 1,
+        children: itemsToGroup.map(img => ({
+            ...img,
+            // Make relative
+            x: img.x - groupX,
+            y: img.y - groupY,
+            parentOriginalId: img.id
+        }))
     };
+
+    // 3. Update Images List
+    const remainingImages = images.filter(img => !selectedImageIds.includes(img.id));
+    setImages([...remainingImages, groupItem]);
+
+    // 4. Select the new group
+    setSelectedImageId(newGroupId);
+    setSelectedImageIds([newGroupId]);
+
+}, [images, selectedImageIds, pushToHistory]);
+
+const ungroupSelectedImage = useCallback(() => {
+    // Can only ungroup if 1 item is selected and it is a group
+    if (!selectedImageId) return;
+
+    const group = images.find(img => img.id === selectedImageId);
+    if (!group || group.type !== 'group') return;
+
+    pushToHistory(images);
+
+    // 1. Restore Children Positions
+    const gX = group.x;
+    const gY = group.y;
+    // NOTE: If group rotation/scale implemented, math needs update here.
+    // Currently assuming scale=1, rotation=0 for group or robust logic needed.
+    // For MVP, simple translation.
+
+    const restoredChildren = group.children.map(child => {
+        return {
+            ...child,
+            x: gX + child.x,
+            y: gY + child.y,
+            // Ensure unique IDs if needed, but keeping original usually fine unless duplicated
+            id: child.id
+        };
+    });
+
+    // 2. Update List
+    const otherImages = images.filter(img => img.id !== selectedImageId);
+    setImages([...otherImages, ...restoredChildren]);
+
+    // 3. Select the restored children? Or Deselect?
+    // Let's select them all so user can re-group if mistake
+    const restoredIds = restoredChildren.map(c => c.id);
+    setSelectedImageIds(restoredIds);
+    if (restoredIds.length > 0) setSelectedImageId(restoredIds[restoredIds.length - 1]);
+    else setSelectedImageId(null);
+
+}, [images, selectedImageId, pushToHistory]);
+
+return {
+    images,
+    setImages, // exposed for full reset or init
+    selectedImageId,
+    setSelectedImageId,
+    zoomLevel,
+    setZoomLevel,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    // Actions
+    addImage,
+    updateImage,
+    removeImage,
+    duplicateImage,
+    moveLayer,
+    flipImage,
+    centerImage,
+    clearCanvas,
+    reorderImages,
+    // Multi-Select & Grouping
+    selectedImageIds,
+    setSelectedImageIds,
+    toggleSelection,
+    handleLongPress,
+    groupSelectedImages,
+    ungroupSelectedImage,
+    // History
+    handleUndo,
+    handleRedo,
+    canUndo: historyStack.length > 0,
+    canRedo: redoStack.length > 0
+};
 }

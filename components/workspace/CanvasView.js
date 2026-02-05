@@ -24,7 +24,9 @@ const DEFAULT_CANVAS_SETTINGS = {
 const CanvasView = forwardRef(({
     images = [],
     selectedImageId,
+    selectedImageIds = [], // NEW
     onSelectImage,
+    onLongPress, // NEW
     onUpdateImage,
     onRemoveImage,
     canvasSettings = DEFAULT_CANVAS_SETTINGS,
@@ -327,12 +329,17 @@ const CanvasView = forwardRef(({
                                         source={img.source}
                                         flipH={img.flipH}
                                         flipV={img.flipV}
-                                        isSelected={selectedImageId === img.id}
+                                        isSelected={selectedImageIds && selectedImageIds.length > 0 ? selectedImageIds.includes(img.id) : selectedImageId === img.id}
                                         onSelect={handleSelectImage}
+                                        onLongPress={onLongPress}
                                         onUpdate={handleUpdateImage}
                                         onRemove={handleRemoveImage}
                                         width={img.width}
                                         height={img.height}
+                                        // Group Props
+                                        type={img.type || 'image'}
+                                        childrenItems={img.children}
+                                        // End Group Props
                                         initialX={img.x}
                                         initialY={img.y}
                                         initialRotation={img.rotation}

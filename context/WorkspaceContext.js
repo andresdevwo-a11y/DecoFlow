@@ -15,7 +15,9 @@ export const WorkspaceProvider = ({ children }) => {
 
     // Canvas Content
     const [images, setImages] = useState([]);
+
     const [selectedImageId, setSelectedImageId] = useState(null);
+    const [selectedImageIds, setSelectedImageIds] = useState([]); // NEW: Multi-selection
 
     // Canvas Configuration
     const [canvasSettings, setCanvasSettings] = useState({
@@ -68,6 +70,7 @@ export const WorkspaceProvider = ({ children }) => {
         pushToHistory(images);
         setImages(prev => [...prev, newImage]);
         setSelectedImageId(newImage.id);
+        setSelectedImageIds([newImage.id]); // NEW
     }, [images, pushToHistory]);
 
     const updateImage = useCallback((update) => {
@@ -92,6 +95,7 @@ export const WorkspaceProvider = ({ children }) => {
         if (selectedImageId === id) {
             setSelectedImageId(null);
         }
+        setSelectedImageIds(prev => prev.filter(selId => selId !== id)); // NEW
     }, [images, selectedImageId, pushToHistory]);
 
     const duplicateImage = useCallback(() => {
@@ -152,12 +156,116 @@ export const WorkspaceProvider = ({ children }) => {
         pushToHistory(images);
         setImages([]);
         setSelectedImageId(null);
+        setSelectedImageIds([]); // NEW
     }, [images, pushToHistory]);
 
     const reorderImages = useCallback((newImages) => {
         pushToHistory(images);
         setImages(newImages);
     }, [images, pushToHistory]);
+
+    // NEW: Selection & Grouping Logic
+    const toggleSelection = useCallback((id) => {
+        if (!id) {
+            setSelectedImageId(null);
+            setSelectedImageIds([]);
+            return;
+        }
+        setSelectedImageIds(prev => {
+            const isSelected = prev.includes(id);
+            let newSelection;
+            if (isSelected) {
+                newSelection = prev.filter(item => item !== id);
+            } else {
+                newSelection = [...prev, id];
+            }
+            // Sync primary
+            if (newSelection.length === 1) setSelectedImageId(newSelection[0]);
+            else if (newSelection.length === 0) setSelectedImageId(null);
+            else setSelectedImageId(newSelection[newSelection.length - 1]);
+
+            return newSelection;
+        });
+    }, []);
+
+    const handleLongPress = useCallback((id) => {
+        if (!id) return;
+        setSelectedImageIds(prev => {
+            if (prev.includes(id)) return prev;
+            return [...prev, id];
+        });
+        setSelectedImageId(id);
+    }, []);
+
+    const groupSelectedImages = useCallback(() => {
+        if (selectedImageIds.length < 2) return;
+        const itemsToGroup = images.filter(img => selectedImageIds.includes(img.id));
+        if (itemsToGroup.length < 2) return;
+
+        pushToHistory(images);
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        itemsToGroup.forEach(img => {
+            minX = Math.min(minX, img.x);
+            minY = Math.min(minY, img.y);
+            maxX = Math.max(maxX, img.x + img.width);
+            maxY = Math.max(maxY, img.y + img.height);
+        });
+
+        const groupX = minX;
+        const groupY = minY;
+        const groupW = maxX - minX;
+        const groupH = maxY - minY;
+
+        const newGroupId = `group_${Date.now()}`;
+        const groupItem = {
+            id: newGroupId,
+            type: 'group',
+            x: groupX,
+            y: groupY,
+            width: groupW,
+            height: groupH,
+            rotation: 0,
+            scale: 1,
+            children: itemsToGroup.map(img => ({
+                ...img,
+                x: img.x - groupX,
+                y: img.y - groupY,
+                parentOriginalId: img.id
+            }))
+        };
+
+        const remainingImages = images.filter(img => !selectedImageIds.includes(img.id));
+        setImages([...remainingImages, groupItem]);
+        setSelectedImageId(newGroupId);
+        setSelectedImageIds([newGroupId]);
+    }, [images, selectedImageIds, pushToHistory]);
+
+    const ungroupSelectedImage = useCallback(() => {
+        if (!selectedImageId) return;
+        const group = images.find(img => img.id === selectedImageId);
+        if (!group || group.type !== 'group') return;
+
+        pushToHistory(images);
+
+        const gX = group.x;
+        const gY = group.y;
+
+        const restoredChildren = group.children.map(child => ({
+            ...child,
+            x: gX + child.x,
+            y: gY + child.y,
+            id: child.id
+        }));
+
+        const otherImages = images.filter(img => img.id !== selectedImageId);
+        setImages([...otherImages, ...restoredChildren]);
+
+        const restoredIds = restoredChildren.map(c => c.id);
+        setSelectedImageIds(restoredIds);
+        if (restoredIds.length > 0) setSelectedImageId(restoredIds[restoredIds.length - 1]);
+        else setSelectedImageId(null);
+    }, [images, selectedImageId, pushToHistory]);
 
     const handleUndo = useCallback(() => {
         if (historyStack.length === 0) return;
@@ -223,6 +331,7 @@ export const WorkspaceProvider = ({ children }) => {
         setCanvasName('');
         setImages([]);
         setSelectedImageId(null);
+        setSelectedImageIds([]); // NEW
         setCanvasSettings({
             width: 1080,
             height: 1080,
@@ -325,6 +434,7 @@ export const WorkspaceProvider = ({ children }) => {
         currentCanvasId,
         canvasName, setCanvasName,
         images, selectedImageId, setSelectedImageId,
+        selectedImageIds, setSelectedImageIds, // NEW
         canvasSettings, setCanvasSettings,
         zoomLevel, setZoomLevel,
         viewport, setViewport,
@@ -337,6 +447,8 @@ export const WorkspaceProvider = ({ children }) => {
         addImage, updateImage, removeImage, duplicateImage,
         moveLayer, flipImage, centerImage, clearCanvas, reorderImages,
         handleUndo, handleRedo,
+        // Grouping
+        toggleSelection, handleLongPress, groupSelectedImages, ungroupSelectedImage, // NEW
 
         // Workspace Ops
         loadCanvas,

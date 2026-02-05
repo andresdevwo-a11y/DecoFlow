@@ -20,6 +20,13 @@ const CONTEXTUAL_ITEMS = [
         destructive: true
     },
     {
+        id: 'ungroup',
+        icon: 'layers', // or Grid?
+        label: 'Desagrupar',
+        color: COLORS.primary,
+        requiresGroup: true // Custom flag I will check
+    },
+    {
         id: 'duplicate',
         icon: 'copy',
         label: 'Duplicar',
@@ -95,6 +102,7 @@ export default function ContextualToolbar({
     visible = false,
     onAction,
     style,
+    isGroup = false // NEW
 }) {
     const insets = useSafeAreaInsets();
 
@@ -120,7 +128,7 @@ export default function ContextualToolbar({
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}
                 >
-                    {CONTEXTUAL_ITEMS.map((item, index) => (
+                    {CONTEXTUAL_ITEMS.filter(item => !item.requiresGroup || isGroup).map((item, index) => (
                         <React.Fragment key={item.id}>
                             <ToolbarButton
                                 item={item}

@@ -12,6 +12,7 @@ import WorkspaceHeader from '../components/workspace/WorkspaceHeader';
 import LeftSidePanel from '../components/workspace/panels/LeftSidePanel';
 import LayersPanel from '../components/workspace/panels/LayersPanel';
 import ContextualToolbar from '../components/workspace/toolbars/ContextualToolbar';
+import MultiSelectToolbar from '../components/workspace/toolbars/MultiSelectToolbar'; // NEW
 import FloatingControls from '../components/workspace/toolbars/FloatingControls';
 import ToastNotification from '../components/ui/ToastNotification';
 
@@ -35,6 +36,7 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
         canvasName,
         images,
         selectedImageId, setSelectedImageId,
+        selectedImageIds, setSelectedImageIds, toggleSelection, handleLongPress, groupSelectedImages, ungroupSelectedImage, // NEW
         canvasSettings, setCanvasSettings,
         zoomLevel, setZoomLevel,
         viewport, setViewport,
@@ -57,6 +59,7 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     // Local UI State (Panel visibility etc.)
     const [isPanelExpanded, setIsPanelExpanded] = useState(false);
     const [isLayersPanelVisible, setLayersPanelVisible] = useState(false);
+    const [isMultiSelectMode, setIsMultiSelectMode] = useState(false); // NEW
 
     // Modal states
     const [isSourceModalVisible, setSourceModalVisible] = useState(false);
@@ -241,6 +244,42 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
             case 'flipH': flipImage('H'); break;
             case 'flipV': flipImage('V'); break;
             case 'center': centerImage(); break;
+            case 'ungroup': ungroupSelectedImage(); break; // NEW
+        }
+    };
+
+    // NEW: Multi-Select Handlers
+    const handleImageSelect = (id) => {
+        if (!id) {
+            // Tap background
+            setIsMultiSelectMode(false);
+            setSelectedImageId(null);
+            setSelectedImageIds([]);
+            return;
+        }
+
+        if (isMultiSelectMode) {
+            toggleSelection(id);
+        } else {
+            // Single Select
+            setSelectedImageId(id);
+            setSelectedImageIds([id]);
+        }
+    };
+
+    const handleLongPressAction = (id) => {
+        if (!id) return;
+        setIsMultiSelectMode(true);
+        handleLongPress(id); // Context helper ensures it's added
+    };
+
+    const handleMultiSelectAction = (actionId) => {
+        if (actionId === 'delete') {
+            selectedImageIds.forEach(id => removeImage(id));
+            setIsMultiSelectMode(false);
+        } else if (actionId === 'group') {
+            groupSelectedImages();
+            setIsMultiSelectMode(false);
         }
     };
 
@@ -441,12 +480,15 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
                 ref={canvasRef}
                 images={images}
                 selectedImageId={selectedImageId}
-                onSelectImage={setSelectedImageId}
+                selectedImageIds={selectedImageIds} // NEW
+                onSelectImage={handleImageSelect} // CHANGED
+                onLongPress={handleLongPressAction} // NEW
                 onUpdateImage={updateImage}
                 onRemoveImage={removeImage}
                 canvasSettings={canvasSettings}
                 onZoomChange={handleZoomUpdate}
             />
+
 
             <LeftSidePanel
                 onAction={handlePanelAction}
@@ -466,10 +508,22 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
                 canRedo={canRedo}
             />
 
-            <ContextualToolbar
-                visible={selectedImageId !== null}
-                onAction={handleContextualAction}
-            />
+            {/* Toolbar Switcher */}
+            {isMultiSelectMode ? (
+                <MultiSelectToolbar
+                    onAction={handleMultiSelectAction}
+                    selectedCount={selectedImageIds.length}
+                />
+            ) : selectedImageId ? (
+                <ContextualToolbar
+                    visible={true}
+                    onAction={handleContextualAction}
+                    isGroup={images.find(i => i.id === selectedImageId)?.type === 'group'}
+                />
+            ) : (
+                null
+            )}
+
 
             {/* Modals */}
             <ImageSourceModal visible={isSourceModalVisible} onClose={() => setSourceModalVisible(false)} onSelect={handleSourceSelect} />

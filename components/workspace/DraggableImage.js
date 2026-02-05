@@ -40,6 +40,10 @@ export default function DraggableImage({
     flipV = false,
     zIndex = 0, // Layer index for stacking order
     isLocked = false, // New prop
+    // Group Props
+    type = 'image',
+    childrenItems = [],
+    onLongPress,
 }) {
     // Shared Values for transformations
     const translateX = useSharedValue(initialX);
@@ -444,12 +448,21 @@ export default function DraggableImage({
             triggerUpdate();
         });
 
+    // LONG PRESS Gesture: Triggers selection mode
+    const longPressGesture = Gesture.LongPress()
+        .onStart(() => {
+            if (onLongPress) {
+                runOnJS(onLongPress)(id);
+            }
+        });
+
     // Combine gestures
     const composedGesture = Gesture.Simultaneous(
         tapGesture,
         panGesture,
         pinchGesture,
-        rotationGesture
+        rotationGesture,
+        longPressGesture
     );
 
     // Animated Style
@@ -757,11 +770,35 @@ export default function DraggableImage({
                     ]}
                     pointerEvents="none"
                 >
-                    <Image
-                        source={source}
-                        style={styles.image}
-                        resizeMode="cover"
-                    />
+                    {type === 'group' ? (
+                        <View style={{ flex: 1 }}>
+                            {childrenItems && childrenItems.map((child, idx) => (
+                                <Image
+                                    key={child.id || idx}
+                                    source={child.source}
+                                    style={{
+                                        position: 'absolute',
+                                        left: child.x,
+                                        top: child.y,
+                                        width: child.width,
+                                        height: child.height,
+                                        transform: [
+                                            { rotate: `${child.rotation || 0}rad` },
+                                            { scaleX: child.flipH ? -1 : 1 },
+                                            { scaleY: child.flipV ? -1 : 1 }
+                                        ]
+                                    }}
+                                    resizeMode="cover"
+                                />
+                            ))}
+                        </View>
+                    ) : (
+                        <Image
+                            source={source}
+                            style={styles.image}
+                            resizeMode="cover"
+                        />
+                    )}
                 </Animated.View>
             </Portal>
 
