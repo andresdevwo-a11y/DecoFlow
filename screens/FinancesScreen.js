@@ -1,23 +1,25 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TextInput, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, SIZES, SHADOWS } from '../constants/Theme';
 import { useFinance } from '../context/FinanceContext';
 import Header from '../components/Header';
 import BalanceCard from '../components/finance/BalanceCard';
-import QuickActionButton from '../components/finance/QuickActionButton';
 import TransactionCard from '../components/finance/TransactionCard';
 import AddPaymentModal from '../components/finance/AddPaymentModal';
 import FinanceActionsModal from '../components/finance/FinanceActionsModal';
 import { useAlert } from '../context/AlertContext';
+
+// New Components
+import FinanceFAB from '../components/finance/FinanceFAB';
+import QuickNavigationGrid from '../components/finance/QuickNavigationGrid';
 
 const FinancesScreen = ({
     onCreateSale,
     onCreateRental,
     onCreateDecoration,
     onCreateExpense,
-
     onCreateQuotation,
     onViewReports,
     onViewQuotations,
@@ -147,223 +149,155 @@ const FinancesScreen = ({
     return (
         <View style={styles.container}>
             <Header title="Finanzas" />
-            <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={[
-                    styles.content,
-                    { paddingTop: SPACING.md }
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        colors={[COLORS.primary]}
-                        tintColor={COLORS.primary}
+
+            <View style={{ flex: 1 }}>
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={[
+                        styles.content,
+                        { paddingTop: SPACING.md }
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={[COLORS.primary]}
+                            tintColor={COLORS.primary}
+                        />
+                    }
+                >
+
+                    {/* Balance Card */}
+                    <BalanceCard summary={summary} />
+
+                    {/* New Compact Navigation Grid */}
+                    <QuickNavigationGrid
+                        onViewReports={onViewReports}
+                        onViewQuotations={onViewQuotations}
+                        onViewDataManagement={() => setActionsModalVisible(true)}
                     />
-                }
-            >
 
-                {/* Balance Card */}
-                <BalanceCard summary={summary} />
-
-                {/* Quick Actions */}
-                <View style={[styles.section, { paddingHorizontal: 0 }]}>
-                    <Text style={[styles.sectionTitle, { paddingHorizontal: SPACING.md }]}>Acciones Rápidas</Text>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingHorizontal: SPACING.md, paddingBottom: 4 }}
-                    >
-                        <View style={{ width: 110 }}>
-                            <QuickActionButton
-                                icon="plus-circle"
-                                label="Venta"
-                                color="#22C55E"
-                                onPress={onCreateSale}
-                            />
-                        </View>
-                        <View style={{ width: 110 }}>
-                            <QuickActionButton
-                                icon="package"
-                                label="Alquiler"
-                                color="#3B82F6"
-                                onPress={onCreateRental}
-                            />
-                        </View>
-                        <View style={{ width: 110 }}>
-                            <QuickActionButton
-                                icon="gift"
-                                label="Decoración"
-                                color="#F97316"
-                                onPress={onCreateDecoration}
-                            />
-                        </View>
-                        <View style={{ width: 110 }}>
-                            <QuickActionButton
-                                icon="minus-circle"
-                                label="Gasto"
-                                color="#EF4444"
-                                onPress={onCreateExpense}
-                            />
-                        </View>
-                        <View style={{ width: 110 }}>
-                            <QuickActionButton
-                                icon="file-text"
-                                label="Cotización"
-                                color="#8B5CF6"
-                                onPress={onCreateQuotation}
-                            />
-                        </View>
-                    </ScrollView>
-                </View>
-
-                {/* Reports Button */}
-                <TouchableOpacity
-                    style={styles.reportsButton}
-                    onPress={onViewReports}
-                    activeOpacity={0.7}
-                >
-                    <View style={styles.reportsButtonContent}>
-                        <Feather name="bar-chart-2" size={24} color={COLORS.primary} />
-                        <Text style={styles.reportsButtonText}>Generar Reporte</Text>
-                    </View>
-                    <Feather name="chevron-right" size={24} color={COLORS.textMuted} />
-                </TouchableOpacity>
-
-                {/* Quotations List Button */}
-                <TouchableOpacity
-                    style={styles.reportsButton}
-                    onPress={onViewQuotations}
-                    activeOpacity={0.7}
-                >
-                    <View style={styles.reportsButtonContent}>
-                        <Feather name="file-text" size={24} color="#8B5CF6" />
-                        <Text style={styles.reportsButtonText}>Ver Cotizaciones</Text>
-                    </View>
-                    <Feather name="chevron-right" size={24} color={COLORS.textMuted} />
-                </TouchableOpacity>
-
-                {/* Data Management Button */}
-                <TouchableOpacity
-                    style={styles.reportsButton}
-                    onPress={() => setActionsModalVisible(true)}
-                    activeOpacity={0.7}
-                >
-                    <View style={styles.reportsButtonContent}>
-                        <Feather name="settings" size={24} color={COLORS.text} />
-                        <Text style={styles.reportsButtonText}>Gestión de Datos</Text>
-                    </View>
-                    <Feather name="chevron-right" size={24} color={COLORS.textMuted} />
-                </TouchableOpacity>
-
-                <View style={styles.tabContainer}>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'ingresos' && styles.tabActive]}
-                        onPress={() => handleTabChange('ingresos')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'ingresos' && styles.tabTextActive]}>
-                            Ingresos
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'egresos' && styles.tabActive]}
-                        onPress={() => handleTabChange('egresos')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'egresos' && styles.tabTextActive]}>
-                            Egresos
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Search Bar */}
-                <View style={styles.searchContainer}>
-                    <Feather name="search" size={20} color={COLORS.textMuted} style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Buscar por nombre o cliente..."
-                        placeholderTextColor={COLORS.textMuted}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Feather name="x" size={18} color={COLORS.textMuted} />
+                    {/* Tabs */}
+                    <View style={styles.tabContainer}>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'ingresos' && styles.tabActive]}
+                            onPress={() => handleTabChange('ingresos')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'ingresos' && styles.tabTextActive]}>
+                                Ingresos
+                            </Text>
                         </TouchableOpacity>
-                    )}
-                </View>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === 'egresos' && styles.tabActive]}
+                            onPress={() => handleTabChange('egresos')}
+                        >
+                            <Text style={[styles.tabText, activeTab === 'egresos' && styles.tabTextActive]}>
+                                Egresos
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-                {/* Filter Chips (Only for Ingresos) */}
-                {activeTab === 'ingresos' && (
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.filterContainer}
-                    >
-                        {filterOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option.id}
-                                style={[
-                                    styles.filterChip,
-                                    filterType === option.id && styles.filterChipActive
-                                ]}
-                                onPress={() => setFilterType(option.id)}
-                            >
-                                <Text
-                                    style={[
-                                        styles.filterLabel,
-                                        filterType === option.id && styles.filterLabelActive
-                                    ]}
-                                >
-                                    {option.label}
-                                </Text>
+                    {/* Search Bar */}
+                    <View style={styles.searchContainer}>
+                        <Feather name="search" size={20} color={COLORS.textMuted} style={styles.searchIcon} />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Buscar por nombre o cliente..."
+                            placeholderTextColor={COLORS.textMuted}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                <Feather name="x" size={18} color={COLORS.textMuted} />
                             </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                )}
+                        )}
+                    </View>
 
-                {/* Tab Content */}
-                <View style={styles.tabContent}>
-                    {filteredData.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Feather name="inbox" size={48} color={COLORS.textMuted} />
-                            <Text style={styles.emptyStateText}>
-                                No hay {activeTab === 'ingresos' ? 'ingresos' : 'egresos'} registrados
-                            </Text>
-                            <Text style={styles.emptyStateSubtext}>
-                                {activeTab === 'ingresos'
-                                    ? 'Registra tu primera venta o alquiler'
-                                    : 'Registra tu primer gasto'}
-                            </Text>
-                        </View>
-                    ) : (
-                        <View style={styles.transactionsList}>
-                            {displayedData.map((item) => (
-                                <TransactionCard
-                                    key={item.id}
-                                    transaction={item}
-                                    onPress={() => onTransactionPress && onTransactionPress(item)}
-                                    onAddPayment={handleAddPayment}
-                                />
-                            ))}
-
-                            {/* View All Button */}
-                            {filteredData.length >= 5 && (
-                                <TouchableOpacity
-                                    style={styles.viewAllButton}
-                                    onPress={() => onViewAllTransactions && onViewAllTransactions(activeTab)}
-                                >
-                                    <Text style={styles.viewAllText}>Ver todas las transacciones</Text>
-                                    <Feather name="arrow-right" size={16} color={COLORS.primary} />
-                                </TouchableOpacity>
-                            )}
+                    {/* Filter Chips (Only for Ingresos) */}
+                    {activeTab === 'ingresos' && (
+                        <View style={styles.filterWrapper}>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.filterContainer}
+                            >
+                                {filterOptions.map((option) => (
+                                    <TouchableOpacity
+                                        key={option.id}
+                                        style={[
+                                            styles.filterChip,
+                                            filterType === option.id && styles.filterChipActive
+                                        ]}
+                                        onPress={() => setFilterType(option.id)}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.filterLabel,
+                                                filterType === option.id && styles.filterLabelActive
+                                            ]}
+                                        >
+                                            {option.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
                         </View>
                     )}
-                </View>
 
-                {/* Bottom Spacing */}
-                <View style={{ height: SIZES.navBarHeight + insets.bottom + 20 }} />
-            </ScrollView>
+                    {/* Tab Content */}
+                    <View style={styles.tabContent}>
+                        {filteredData.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <Feather name="inbox" size={48} color={COLORS.textMuted} />
+                                <Text style={styles.emptyStateText}>
+                                    No hay {activeTab === 'ingresos' ? 'ingresos' : 'egresos'} registrados
+                                </Text>
+                                <Text style={styles.emptyStateSubtext}>
+                                    {activeTab === 'ingresos'
+                                        ? 'Usa el botón + para registrar operaciones'
+                                        : 'Registra tus gastos operativos'}
+                                </Text>
+                            </View>
+                        ) : (
+                            <View style={styles.transactionsList}>
+                                {displayedData.map((item) => (
+                                    <TransactionCard
+                                        key={item.id}
+                                        transaction={item}
+                                        onPress={() => onTransactionPress && onTransactionPress(item)}
+                                        onAddPayment={handleAddPayment}
+                                    />
+                                ))}
+
+                                {/* View All Button */}
+                                {filteredData.length >= 5 && (
+                                    <TouchableOpacity
+                                        style={styles.viewAllButton}
+                                        onPress={() => onViewAllTransactions && onViewAllTransactions(activeTab)}
+                                    >
+                                        <Text style={styles.viewAllText}>Ver todas las transacciones</Text>
+                                        <Feather name="arrow-right" size={16} color={COLORS.primary} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Bottom Spacing for FAB and Scroll */}
+                    <View style={{ height: SIZES.navBarHeight + insets.bottom + 80 }} />
+                </ScrollView>
+
+                {/* New Expandable FAB */}
+                <FinanceFAB
+                    onCreateSale={onCreateSale}
+                    onCreateRental={onCreateRental}
+                    onCreateDecoration={onCreateDecoration}
+                    onCreateExpense={onCreateExpense}
+                    onCreateQuotation={onCreateQuotation}
+                />
+            </View>
 
             {/* Add Payment Modal for Installments */}
             <AddPaymentModal
@@ -395,41 +329,6 @@ const styles = StyleSheet.create({
     content: {
         paddingBottom: SPACING.xl,
     },
-    section: {
-        marginTop: SPACING.lg,
-        paddingHorizontal: SPACING.md,
-    },
-    sectionTitle: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.text,
-        marginBottom: SPACING.sm,
-    },
-    quickActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    reportsButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: COLORS.surface,
-        borderRadius: 12,
-        padding: SPACING.lg,
-        marginHorizontal: SPACING.md,
-        marginTop: SPACING.lg,
-        ...SHADOWS.small,
-    },
-    reportsButtonContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    reportsButtonText: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.text,
-        marginLeft: SPACING.md,
-    },
     // Tab Styles
     tabContainer: {
         flexDirection: 'row',
@@ -446,8 +345,8 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     tabActive: {
-        borderBottomColor: COLORS.primary || '#000', // Use primary color
-        marginBottom: -1.5, // Overlap the bottom border
+        borderBottomColor: COLORS.primary || '#000',
+        marginBottom: -1.5,
     },
     tabText: {
         fontSize: TYPOGRAPHY.size.md,
@@ -455,7 +354,7 @@ const styles = StyleSheet.create({
         fontWeight: TYPOGRAPHY.weight.medium,
     },
     tabTextActive: {
-        color: COLORS.text, // Active text color
+        color: COLORS.text,
         fontWeight: TYPOGRAPHY.weight.bold,
     },
     tabContent: {
@@ -505,21 +404,26 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: TYPOGRAPHY.size.md,
         color: COLORS.text,
-        padding: 0, // Remove default Android padding
+        padding: 0,
     },
     // Filter Styles
+    filterWrapper: {
+        marginTop: 12,
+        height: 44, // Fixed height to prevent layout jumps
+    },
     filterContainer: {
         paddingHorizontal: SPACING.md,
-        paddingVertical: 8,
+        paddingBottom: 4, // Visual adjust
         gap: 8,
     },
     filterChip: {
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingVertical: 6,
         borderRadius: 20,
         backgroundColor: COLORS.surface,
         borderWidth: 1,
         borderColor: COLORS.border,
+        justifyContent: 'center',
     },
     filterChipActive: {
         backgroundColor: COLORS.primary,
@@ -544,7 +448,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surface,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: COLORS.primary + '30', // Low opacity primary color
+        borderColor: COLORS.primary + '30',
         borderStyle: 'dashed',
     },
     viewAllText: {
