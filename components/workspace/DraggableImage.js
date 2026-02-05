@@ -784,6 +784,7 @@ export default function DraggableImage({
                                         height: child.height,
                                         transform: [
                                             { rotate: `${child.rotation || 0}rad` },
+                                            { scale: child.scale || 1 },
                                             { scaleX: child.flipH ? -1 : 1 },
                                             { scaleY: child.flipV ? -1 : 1 }
                                         ]

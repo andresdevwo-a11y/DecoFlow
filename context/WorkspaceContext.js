@@ -204,12 +204,42 @@ export const WorkspaceProvider = ({ children }) => {
 
         pushToHistory(images);
 
+        // Helper: Calculate rotated corners
+        const getTransformedCorners = (img) => {
+            const w = img.width * (img.scale || 1);
+            const h = img.height * (img.scale || 1);
+            const r = img.rotation || 0;
+
+            // Center of the image
+            const cx = img.x + img.width / 2;
+            const cy = img.y + img.height / 2;
+
+            // Unrotated corners relative to center
+            const corners = [
+                { x: -w / 2, y: -h / 2 }, // TL
+                { x: w / 2, y: -h / 2 },  // TR
+                { x: w / 2, y: h / 2 },   // BR
+                { x: -w / 2, y: h / 2 }   // BL
+            ];
+
+            // Rotate and translate back
+            return corners.map(p => ({
+                x: (p.x * Math.cos(r) - p.y * Math.sin(r)) + cx,
+                y: (p.x * Math.sin(r) + p.y * Math.cos(r)) + cy
+            }));
+        };
+
+        // 1. Calculate AABB of all selected items
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
         itemsToGroup.forEach(img => {
-            minX = Math.min(minX, img.x);
-            minY = Math.min(minY, img.y);
-            maxX = Math.max(maxX, img.x + img.width);
-            maxY = Math.max(maxY, img.y + img.height);
+            const corners = getTransformedCorners(img);
+            corners.forEach(p => {
+                minX = Math.min(minX, p.x);
+                minY = Math.min(minY, p.y);
+                maxX = Math.max(maxX, p.x);
+                maxY = Math.max(maxY, p.y);
+            });
         });
 
         const groupX = minX;
@@ -217,6 +247,7 @@ export const WorkspaceProvider = ({ children }) => {
         const groupW = maxX - minX;
         const groupH = maxY - minY;
 
+        // 2. Create Group Item
         const newGroupId = `group_${Date.now()}`;
         const groupItem = {
             id: newGroupId,
@@ -226,9 +257,16 @@ export const WorkspaceProvider = ({ children }) => {
             width: groupW,
             height: groupH,
             rotation: 0,
-            scale: 1,
+            scale: 1, // Group starts at scale 1
+            flipH: false,
+            flipV: false,
+            // 3. Transform children to be relative to the unrotated group (which is 0 rotation initially)
+            // Since group is 0 rot, relative pos is just childPos - groupPos (but child needs to keep its own rotation/scale)
             children: itemsToGroup.map(img => ({
                 ...img,
+                // The child's X/Y in DraggableImage are "top-left of unrotated box".
+                // We need to keep them such that the visual result is identical.
+                // Relative X = Absolute X - Group X
                 x: img.x - groupX,
                 y: img.y - groupY,
                 parentOriginalId: img.id
