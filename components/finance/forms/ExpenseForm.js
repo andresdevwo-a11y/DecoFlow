@@ -186,7 +186,7 @@ const ExpenseForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guardar
                         <CustomDatePicker
                             label="Fecha del Gasto"
                             date={date}
-                            onDateChange={(newDate) => setDate(newDate.toISOString().split('T')[0])}
+                            onDateChange={(newDate) => setDate(newDate)}
                         />
                     </View>
 
