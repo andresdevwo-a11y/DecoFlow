@@ -22,10 +22,10 @@ export const SettingsProvider = ({ children }) => {
 
     // Business Info Settings
     const [businessInfo, setBusinessInfoState] = useState({
-        name: 'DecoFlow Eventos',
-        rut: '1113695670',
-        address: 'Calle 28 #21-07, Ciudad',
-        phone: '(312) 729-9520'
+        name: 'Tu Empresa S.A.S',
+        rut: '900.123.456-7',
+        address: 'Calle Principal #123, Ciudad',
+        phone: '+57 300 123 4567'
     });
 
     const loadSettings = async () => {
