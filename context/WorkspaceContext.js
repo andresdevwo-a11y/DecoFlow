@@ -104,15 +104,26 @@ export const WorkspaceProvider = ({ children }) => {
         if (!imageToDuplicate) return;
 
         pushToHistory(images);
-        const newId = `img_${Date.now()}`;
-        const newImage = {
+        const newId = imageToDuplicate.type === 'group' ? `group_${Date.now()}` : `img_${Date.now()}`;
+
+        let newImage = {
             ...imageToDuplicate,
             id: newId,
             x: imageToDuplicate.x + 20,
             y: imageToDuplicate.y + 20,
         };
+
+        // If it's a group, we MUST regenerate IDs for all children to avoid collisions upon ungrouping
+        if (newImage.type === 'group' && Array.isArray(newImage.children)) {
+            newImage.children = newImage.children.map((child, index) => ({
+                ...child,
+                id: `img_${Date.now()}_${index}_copy` // Ensure unique ID for child
+            }));
+        }
+
         setImages(prev => [...prev, newImage]);
         setSelectedImageId(newId);
+        setSelectedImageIds([newId]);
     }, [images, selectedImageId, pushToHistory]);
 
     const moveLayer = useCallback((direction) => {
@@ -286,24 +297,73 @@ export const WorkspaceProvider = ({ children }) => {
 
         pushToHistory(images);
 
-        const gX = group.x;
-        const gY = group.y;
+        const gX = group.x; // Group Left
+        const gY = group.y; // Group Top
+        const gW = group.width;
+        const gH = group.height;
+        const gScale = group.scale || 1;
+        const gRot = group.rotation || 0;
 
-        const restoredChildren = group.children.map(child => ({
-            ...child,
-            x: gX + child.x,
-            y: gY + child.y,
-            id: child.id
-        }));
+        // Group Center (Pivot for rotation/scale)
+        // Note: The DraggableImage applies transforms around the center of the element.
+        // The element is positioned at gX, gY, then Scaled, then Rotated.
+        const gCx = gX + gW / 2;
+        const gCy = gY + gH / 2;
+
+        const restoredChildren = group.children.map(child => {
+            // Child properties in Local Group Space (Unscaled, Unrotated Group Top-Left is 0,0)
+            const cRelativeX = child.x;
+            const cRelativeY = child.y;
+            const cW = child.width;
+            const cH = child.height;
+            const cCx = cRelativeX + cW / 2;
+            const cCy = cRelativeY + cH / 2;
+
+            // 1. Shift to Center-Relative coordinates (relative to Group Center unrotated/unscaled)
+            const dx = cCx - gW / 2;
+            const dy = cCy - gH / 2;
+
+            // 2. Apply Group Scale
+            const dxScaled = dx * gScale;
+            const dyScaled = dy * gScale;
+
+            // 3. Apply Group Rotation
+            const rotatedX = dxScaled * Math.cos(gRot) - dyScaled * Math.sin(gRot);
+            const rotatedY = dxScaled * Math.sin(gRot) + dyScaled * Math.cos(gRot);
+
+            // 4. Transform back to World Coordinates (Add Group World Center)
+            const childWorldCx = gCx + rotatedX;
+            const childWorldCy = gCy + rotatedY;
+
+            // 5. Final Top-Left Position in World Space
+            const childWorldX = childWorldCx - cW / 2;
+            const childWorldY = childWorldCy - cH / 2;
+
+            // 6. Final Scale and Rotation
+            // Scale multiplies
+            const childWorldScale = (child.scale || 1) * gScale;
+            // Rotation adds
+            const childWorldRotation = (child.rotation || 0) + gRot;
+
+            return {
+                ...child,
+                x: childWorldX,
+                y: childWorldY,
+                scale: childWorldScale,
+                rotation: childWorldRotation,
+                id: child.id // Ensure ID persists
+            };
+        });
 
         const otherImages = images.filter(img => img.id !== selectedImageId);
         setImages([...otherImages, ...restoredChildren]);
 
-        const restoredIds = restoredChildren.map(c => c.id);
-        setSelectedImageIds(restoredIds);
-        if (restoredIds.length > 0) setSelectedImageId(restoredIds[restoredIds.length - 1]);
-        else setSelectedImageId(null);
+        // Select the ungrouped items
+        setSelectedImageId(null);
+        setSelectedImageIds(restoredChildren.map(c => c.id));
     }, [images, selectedImageId, pushToHistory]);
+
+
 
     const handleUndo = useCallback(() => {
         if (historyStack.length === 0) return;
