@@ -115,6 +115,9 @@ const FinanceFAB = ({
             outputRange: [1, activeSubMenu && hasSubMenu ? 1 : 0]
         });
 
+        // Determine visibility for pointer events
+        const isVisible = !activeSubMenu || (activeSubMenu && hasSubMenu);
+
         return (
             <Animated.View
                 style={[
@@ -125,17 +128,19 @@ const FinanceFAB = ({
                         zIndex: isOpen ? 1 : -1,
                     }
                 ]}
-                pointerEvents={isOpen ? 'auto' : 'none'}
+                pointerEvents={isOpen && isVisible ? 'box-none' : 'none'}
             >
-                <View style={styles.labelContainer}>
-                    <Text style={styles.label}>{label}</Text>
-                </View>
                 <TouchableOpacity
-                    style={[styles.menuItem, { backgroundColor: color }]}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
                     onPress={onPress}
                     activeOpacity={0.8}
                 >
-                    <Feather name={icon} size={20} color="#FFF" />
+                    <View style={styles.labelContainer}>
+                        <Text style={styles.label}>{label}</Text>
+                    </View>
+                    <View style={[styles.menuItem, { backgroundColor: color }]}>
+                        <Feather name={icon} size={20} color="#FFF" />
+                    </View>
                 </TouchableOpacity>
             </Animated.View>
         );
@@ -164,19 +169,22 @@ const FinanceFAB = ({
                         bottom: 70 + 20, // Base position above main FAB + Ingresos offset
                     }
                 ]}
+                pointerEvents="box-none"
             >
-                <View style={styles.labelContainer}>
-                    <Text style={styles.subLabel}>{label}</Text>
-                </View>
                 <TouchableOpacity
-                    style={[styles.subMenuItem, { backgroundColor: color }]}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
                     onPress={() => {
                         handleBackdropPress(); // Close everything
                         onPress();
                     }}
                     activeOpacity={0.8}
                 >
-                    <Feather name={icon} size={18} color="#FFF" />
+                    <View style={styles.labelContainer}>
+                        <Text style={styles.subLabel}>{label}</Text>
+                    </View>
+                    <View style={[styles.subMenuItem, { backgroundColor: color }]}>
+                        <Feather name={icon} size={18} color="#FFF" />
+                    </View>
                 </TouchableOpacity>
             </Animated.View>
         );
@@ -249,7 +257,11 @@ const styles = StyleSheet.create({
     container: {
         position: 'absolute',
         right: SPACING.lg,
-        alignItems: 'center',
+        // Increase dimensions to cover the expanded menu area for Android touch handling
+        height: 500,
+        width: 300,
+        alignItems: 'flex-end', // Align FAB to right
+        justifyContent: 'flex-end', // Align FAB to bottom
         zIndex: 100,
     },
     fab: {
@@ -265,6 +277,7 @@ const styles = StyleSheet.create({
     menuItemContainer: {
         position: 'absolute',
         right: 4, // Center with FAB (56 - 48)/2 = 4
+        bottom: 4, // Center vertically with FAB (56-48)/2 = 4 (Base position)
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
@@ -296,6 +309,10 @@ const styles = StyleSheet.create({
     subMenuItemContainer: {
         position: 'absolute',
         right: 6, // Center with FAB (56 - 44)/2 = 6
+        // Adjusted bottom to be relative to the container bottom (which ends at FAB)
+        bottom: 74, // FAB (56) + Gap (approx 18) = 74. Original was 90?? Let's stick roughly to original relative logic but cemented.
+        // Original used `bottom: 70 + 20` = 90.
+        // If we anchor from bottom of container (where FAB is).
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
