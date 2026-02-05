@@ -30,11 +30,12 @@ export const copyToInternal = async (uri) => {
             const info = await FileSystem.getInfoAsync(uri);
             if (info.exists) {
                 return uri;
+            } else {
+                console.warn(`[ImageService] Internal image missing: ${uri}. Preserving reference.`);
+                // Return the URI anyway to prevent crashing on re-copy attempt
+                // The image is broken, but we don't want to crash the save process.
+                return uri;
             }
-            // If it points to internal but doesn't exist, we can't copy it anyway (source missing)
-            // Proceeding leads to error, so catching it here is better?
-            // But if we return strict URI, the caller might fail later. 
-            // Let's let it try to copy to revive it? No, copy source must exist.
         }
 
         await ensureDirExists(IMAGES_DIR);
