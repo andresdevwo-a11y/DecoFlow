@@ -1,20 +1,27 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { COLORS, TYPOGRAPHY, SPACING, SHADOWS, SIZES, RADIUS } from '../constants/Theme';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { COLORS, TYPOGRAPHY, SPACING, SHADOWS, RADIUS } from '../constants/Theme';
+
+const FAB_SIZE = 56;
 
 const FloatingActionButton = ({ label, onPress, style }) => {
     return (
-        <View style={[
-            styles.container,
-            style,
-            { bottom: SPACING.xl } // Elevated for better spacing above nav bar
-        ]} pointerEvents="box-none">
+        <View style={[styles.container, style]} pointerEvents="box-none">
             <TouchableOpacity
-                style={styles.button}
+                style={styles.fabRow}
                 onPress={onPress}
                 activeOpacity={0.8}
             >
-                <Text style={styles.label}>{label}</Text>
+                {/* Label Container */}
+                <View style={styles.labelContainer}>
+                    <Text style={styles.label}>{label}</Text>
+                </View>
+
+                {/* FAB Button */}
+                <View style={styles.fab}>
+                    <Feather name="plus" size={28} color="#FFF" />
+                </View>
             </TouchableOpacity>
         </View>
     );
@@ -23,24 +30,36 @@ const FloatingActionButton = ({ label, onPress, style }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        // bottom: moved to inline style
-        left: SPACING.lg,
+        bottom: SPACING.xl,
         right: SPACING.lg,
         zIndex: 100,
     },
-    button: {
-        backgroundColor: COLORS.primary, // Orange #F97316
-        paddingVertical: SPACING.lg,
-        paddingHorizontal: SPACING.xl,
-        borderRadius: RADIUS.lg, // Pill-shaped rounded corners
+    fabRow: {
+        flexDirection: 'row',
         alignItems: 'center',
+    },
+    fab: {
+        width: FAB_SIZE,
+        height: FAB_SIZE,
+        borderRadius: FAB_SIZE / 2,
+        backgroundColor: COLORS.primary,
         justifyContent: 'center',
+        alignItems: 'center',
+        ...SHADOWS.fab,
+    },
+    labelContainer: {
+        marginRight: SPACING.md,
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 8,
+        borderRadius: RADIUS.md,
+        ...SHADOWS.small,
     },
     label: {
-        color: COLORS.surface,
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.medium,
-    }
+        fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: TYPOGRAPHY.weight.semibold,
+        color: COLORS.text,
+    },
 });
 
 export default FloatingActionButton;
