@@ -10,14 +10,14 @@ const SelectionActionBar = ({ selectedCount, onClear, onDelete, onMove }) => {
         <View style={styles.container}>
             <View style={styles.leftSection}>
                 <TouchableOpacity onPress={onClear} style={styles.closeButton}>
-                    <Feather name="x" size={24} color={COLORS.text} />
+                    <Feather name="x" size={24} color="#FFFFFF" />
                 </TouchableOpacity>
                 <Text style={styles.countText}>{selectedCount} seleccionados</Text>
             </View>
 
             <View style={styles.actions}>
                 <TouchableOpacity onPress={onDelete} style={styles.actionButton}>
-                    <Feather name="trash-2" size={24} color={COLORS.error} />
+                    <Feather name="trash-2" size={24} color="#FF6B6B" />
                 </TouchableOpacity>
             </View>
         </View>
@@ -27,28 +27,25 @@ const SelectionActionBar = ({ selectedCount, onClear, onDelete, onMove }) => {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: SIZES.navBarHeight - 65,
+        bottom: SPACING.xl, // Match FAB position
         left: SPACING.lg,
         right: SPACING.lg,
-        backgroundColor: COLORS.surface,
+        backgroundColor: COLORS.text, // Dark toast style
         borderRadius: RADIUS.full,
-        paddingVertical: SPACING.sm,
+        paddingVertical: 10,
         paddingHorizontal: SPACING.lg,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        // Shadow matches FAB/floating elements
-        shadowColor: COLORS.text, // Subtle dark shadow
+        shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 4,
         },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 5,
+        elevation: 8,
         zIndex: 100,
-        borderWidth: 1,
-        borderColor: COLORS.border,
     },
     leftSection: {
         flexDirection: 'row',
@@ -60,8 +57,8 @@ const styles = StyleSheet.create({
     },
     countText: {
         fontSize: TYPOGRAPHY.size.base,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.text,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: '#FFFFFF', // White text
     },
     actions: {
         flexDirection: 'row',
@@ -69,6 +66,8 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         padding: SPACING.xs,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: RADIUS.full,
     }
 });
 
