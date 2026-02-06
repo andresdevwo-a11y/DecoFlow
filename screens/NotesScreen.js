@@ -184,7 +184,7 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
 
     return (
         <View style={styles.container}>
-            <Header title="Notas" />
+            <Header />
             <FlatList
                 contentContainerStyle={[
                     styles.listContent,
@@ -197,12 +197,14 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 ListHeaderComponent={
-                    <SearchHeader
-                        // Title removed to avoid duplication
-                        placeholder="Buscar notas..."
-                        searchText={searchText}
-                        onSearchChange={setSearchText}
-                    />
+                    notes.length > 0 ? (
+                        <SearchHeader
+                            title="Mis Notas"
+                            placeholder="Buscar notas..."
+                            searchText={searchText}
+                            onSearchChange={setSearchText}
+                        />
+                    ) : null
                 }
                 ListEmptyComponent={!isLoading && renderEmpty}
                 showsVerticalScrollIndicator={false}
