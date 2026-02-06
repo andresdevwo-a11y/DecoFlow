@@ -29,7 +29,7 @@ const FinancesScreen = ({
     const insets = useSafeAreaInsets();
     const {
         summary,
-        recentTransactions,
+        transactions, // Changed from recentTransactions
         expenses,
         isLoading,
         refresh,
@@ -94,10 +94,10 @@ const FinancesScreen = ({
 
     // Filter transactions for Ingresos (Sales + Rentals + Decorations)
     const ingresosData = React.useMemo(() => {
-        return recentTransactions
+        return transactions // Changed from recentTransactions
             .filter(t => t.type === 'sale' || t.type === 'rental' || t.type === 'decoration')
             .sort((a, b) => new Date(b.date) - new Date(a.date));
-    }, [recentTransactions]);
+    }, [transactions]);
 
     // Filter expenses for Egresos
     const egresosData = React.useMemo(() => {
@@ -133,10 +133,13 @@ const FinancesScreen = ({
         return data;
     }, [ingresosData, egresosData, activeTab, searchQuery, filterType]);
 
-    // Limit to 5 transactions for Dashboard view
+    // Limit to 5 transactions for Dashboard view (or 10 if searching)
     const displayedData = React.useMemo(() => {
+        if (searchQuery.trim()) {
+            return filteredData.slice(0, 10);
+        }
         return filteredData.slice(0, 5);
-    }, [filteredData]);
+    }, [filteredData, searchQuery]);
 
     // Filter chips configuration
     const filterOptions = [
@@ -272,12 +275,17 @@ const FinancesScreen = ({
                                 ))}
 
                                 {/* View All Button */}
-                                {filteredData.length >= 5 && (
+                                {(filteredData.length > displayedData.length || (!searchQuery.trim() && filteredData.length >= 5)) && (
                                     <TouchableOpacity
                                         style={styles.viewAllButton}
-                                        onPress={() => onViewAllTransactions && onViewAllTransactions(activeTab)}
+                                        onPress={() => onViewAllTransactions && onViewAllTransactions(activeTab, searchQuery)}
                                     >
-                                        <Text style={styles.viewAllText}>Ver todas las transacciones</Text>
+                                        <Text style={styles.viewAllText}>
+                                            {searchQuery.trim()
+                                                ? `Ver los ${filteredData.length - displayedData.length} resultados restantes`
+                                                : 'Ver todas las transacciones'
+                                            }
+                                        </Text>
                                         <Feather name="arrow-right" size={16} color={COLORS.primary} />
                                     </TouchableOpacity>
                                 )}

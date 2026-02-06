@@ -7,12 +7,12 @@ import { useFinance } from '../context/FinanceContext';
 import TransactionCard from '../components/finance/TransactionCard';
 import AddPaymentModal from '../components/finance/AddPaymentModal';
 
-const AllTransactionsScreen = ({ initialTab = 'ingresos', onBack, onTransactionPress }) => {
+const AllTransactionsScreen = ({ initialTab = 'ingresos', initialSearchQuery = '', onBack, onTransactionPress }) => {
     const insets = useSafeAreaInsets();
     const { transactions, expenses, updateInstallmentPayment } = useFinance();
 
     const [activeTab, setActiveTab] = useState(initialTab);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
     const [filterType, setFilterType] = useState('all');
 
     // Payment Modal State
@@ -31,7 +31,8 @@ const AllTransactionsScreen = ({ initialTab = 'ingresos', onBack, onTransactionP
     // Sync with prop if it changes (or on mount/remount)
     React.useEffect(() => {
         setActiveTab(initialTab);
-    }, [initialTab]);
+        setSearchQuery(initialSearchQuery);
+    }, [initialTab, initialSearchQuery]);
 
     // Reset filters when tab changes
     const handleTabChange = (tab) => {
