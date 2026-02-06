@@ -15,7 +15,7 @@ const SectionCard = React.memo(({ section, onPress, onOptionsPress, viewMode = '
             ]}
             onPress={onPress}
             onLongPress={onLongPress}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
         >
             {/* Selection Checkbox/Indicator */}
             {selectionMode && (
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
         padding: SPACING.lg,
         marginBottom: SPACING.lg,
         width: '48%',
-        borderWidth: 0,
+        borderWidth: 1.5, // Consistent width
+        borderColor: 'transparent',
         ...SHADOWS.card,
         shadowOpacity: 0.05,
         shadowRadius: 10,
@@ -171,23 +172,26 @@ const styles = StyleSheet.create({
     cardSelected: {
         borderColor: COLORS.primary,
         borderWidth: 1.5,
-        backgroundColor: COLORS.primary + '05',
+        backgroundColor: COLORS.primary + '12',
+        shadowOpacity: 0,
+        elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
         top: SPACING.sm,
         right: SPACING.sm,
-        width: 22,
-        height: 22,
-        borderRadius: 11,
-        borderWidth: 1.5,
-        borderColor: COLORS.primary,
-        backgroundColor: COLORS.primary,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: COLORS.textMuted,
+        backgroundColor: 'transparent',
         zIndex: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     selectionIndicatorActive: {
-        // Active styles
+        backgroundColor: COLORS.primary,
+        borderColor: COLORS.primary,
     }
 });

@@ -139,7 +139,7 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
             ]}
             onPress={onPress}
             onLongPress={onLongPress}
-            activeOpacity={0.9}
+            activeOpacity={0.7}
         >
             {/* Selection Checkbox/Indicator */}
             {selectionMode && (
@@ -272,7 +272,8 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.xl, // 24px
         marginBottom: SPACING.lg,
         width: '48%',
-        borderWidth: 0,
+        borderWidth: 1.5, // Consistent width to prevent jump
+        borderColor: 'transparent', // Hidden by default
         ...SHADOWS.card,
         elevation: 2, // Softer native shadow
         shadowOpacity: 0.06, // Softer iOS shadow
@@ -285,28 +286,30 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
     },
     cardSelected: {
-        backgroundColor: COLORS.primary + '08',
+        backgroundColor: COLORS.primary + '12', // Slightly stronger background
         borderColor: COLORS.primary,
         borderWidth: 1.5,
+        shadowOpacity: 0, // Remove shadow when selected to avoid "dirty" edges
+        elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
         top: SPACING.md,
         right: SPACING.md,
-        width: 22,
-        height: 22,
-        borderRadius: 11,
-        borderWidth: 1.5,
-        borderColor: '#FFF',
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        backgroundColor: 'rgba(0,0,0,0.1)', // Very subtle dark tint for contrast
         zIndex: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 3,
     },
     selectionIndicatorActive: {
         backgroundColor: COLORS.primary,
         borderColor: COLORS.primary,
+        opacity: 1, // Ensure distinct visibility
     },
     imageContainer: {
         height: 145, // Slightly taller
@@ -364,13 +367,13 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         borderRadius: 15,
-        backgroundColor: 'rgba(255,255,255,0.9)',
+        backgroundColor: '#FFFFFF', // Solid white
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08, // Very subtle
+        shadowRadius: 2,
         elevation: 2,
     },
     content: {
