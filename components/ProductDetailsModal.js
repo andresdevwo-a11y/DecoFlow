@@ -201,9 +201,32 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
     };
 
     const getDisplayPrices = () => {
-        const salePrice = tempPrices.salePrice ? parseFloat(tempPrices.salePrice.replace(/[^0-9.]/g, '')) : (product.salePrice || product.price);
-        const rentPrice = tempPrices.rentPrice ? parseFloat(tempPrices.rentPrice.replace(/[^0-9.]/g, '')) : (product.rentalPrice || product.rentPrice);
-        return { salePrice, rentPrice, hasTempPrices: !!(tempPrices.salePrice || tempPrices.rentPrice) };
+        const originalSale = parseFloat(product.salePrice || product.price) || 0;
+        const originalRent = parseFloat(product.rentalPrice || product.rentPrice) || 0;
+
+        const parsePrice = (str) => {
+            const num = parseFloat(String(str).replace(/[^0-9.]/g, ''));
+            return isNaN(num) ? 0 : num;
+        };
+
+        const tempSaleVal = parsePrice(tempPrices.salePrice);
+        const tempRentVal = parsePrice(tempPrices.rentPrice);
+
+        const useTempSale = tempPrices.salePrice !== '';
+        const useTempRent = tempPrices.rentPrice !== '';
+
+        const salePrice = useTempSale ? tempSaleVal : originalSale;
+        const rentPrice = useTempRent ? tempRentVal : originalRent;
+
+        const isSaleEdited = useTempSale && (Math.abs(tempSaleVal - originalSale) > 0.1);
+        const isRentEdited = useTempRent && (Math.abs(tempRentVal - originalRent) > 0.1);
+
+        return {
+            salePrice,
+            rentPrice,
+            isSaleEdited,
+            isRentEdited
+        };
     };
 
     return (
@@ -255,7 +278,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
                             {/* Prices Card */}
                             <View style={styles.pricesCard}>
                                 {(() => {
-                                    const { salePrice, rentPrice, hasTempPrices } = getDisplayPrices();
+                                    const { salePrice, rentPrice, isSaleEdited, isRentEdited } = getDisplayPrices();
                                     const hasRentPrice = rentPrice && parseFloat(rentPrice) > 0;
                                     const hasSalePrice = salePrice !== undefined;
 
@@ -267,7 +290,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
                                                     <Text style={styles.priceValue}>
                                                         {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(salePrice || 0)}
                                                     </Text>
-                                                    {hasTempPrices && <Text style={styles.tempTag}>Editado</Text>}
+                                                    {isSaleEdited && <Text style={styles.tempTag}>Editado</Text>}
                                                 </View>
 
                                                 {hasRentPrice && (
@@ -278,6 +301,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
                                                             <Text style={[styles.priceValue, styles.rentValue]}>
                                                                 {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(rentPrice)}
                                                             </Text>
+                                                            {isRentEdited && <Text style={styles.tempTag}>Editado</Text>}
                                                         </View>
                                                     </>
                                                 )}
