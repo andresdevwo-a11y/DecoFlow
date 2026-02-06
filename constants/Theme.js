@@ -42,7 +42,7 @@ export const COLORS = {
     // Módulos Financieros
     sale: '#22C55E',             // Verde (Ventas)
     rental: '#3B82F6',           // Azul (Alquileres)
-    decoration: '#F59E0B',       // Naranja (Decoraciones)
+    decoration: '#F97316',       // Naranja (Decoraciones)
     expense: '#EF4444',          // Rojo (Gastos)
 };
 

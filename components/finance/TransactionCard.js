@@ -19,10 +19,10 @@ const TransactionCard = ({ transaction, onPress, onLongPress, onAddPayment }) =>
     const progressPercent = showInstallment ? ((amountPaid || 0) / totalPrice) * 100 : 100;
 
     const getColors = () => {
-        if (isSale) return { main: '#22C55E', bg: '#22C55E15' }; // Green
-        if (isRental) return { main: '#3B82F6', bg: '#3B82F615' }; // Blue
-        if (isDecoration) return { main: '#F97316', bg: '#F9731615' }; // Orange
-        return { main: COLORS.error, bg: COLORS.error + '15' }; // Red
+        if (isSale) return { main: COLORS.sale, bg: COLORS.sale + '15' }; // Green
+        if (isRental) return { main: COLORS.rental, bg: COLORS.rental + '15' }; // Blue
+        if (isDecoration) return { main: COLORS.decoration, bg: COLORS.decoration + '15' }; // Orange
+        return { main: COLORS.expense, bg: COLORS.expense + '15' }; // Red
     };
 
     const colors = getColors();
