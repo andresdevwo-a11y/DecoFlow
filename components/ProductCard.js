@@ -224,18 +224,20 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                 {/* List Actions */}
                 {isList && !selectionMode && (
                     <View style={styles.actionsList}>
-                        <TouchableOpacity
-                            style={styles.actionButtonList}
-                            onPress={() => setStatsModalVisible(true)}
-                        >
-                            <Feather name="bar-chart-2" size={18} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.actionButtonList}
-                            onPress={handleQuickAction}
-                        >
-                            <Feather name="shopping-bag" size={18} color={COLORS.primary} />
-                        </TouchableOpacity>
+                        <View style={styles.actionColumn}>
+                            <TouchableOpacity
+                                style={styles.actionButtonList}
+                                onPress={() => setStatsModalVisible(true)}
+                            >
+                                <Feather name="bar-chart-2" size={16} color={COLORS.textSecondary} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.actionButtonList}
+                                onPress={handleQuickAction}
+                            >
+                                <Feather name="shopping-bag" size={16} color={COLORS.primary} />
+                            </TouchableOpacity>
+                        </View>
                         <TouchableOpacity
                             style={styles.actionButtonList}
                             onPress={onOptionsPress}
@@ -342,7 +344,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: SPACING.sm,
         right: SPACING.sm,
-        flexDirection: 'row',
+        flexDirection: 'column',
         gap: 8,
     },
     floatingActionButton: {
@@ -441,7 +443,12 @@ const styles = StyleSheet.create({
     actionsList: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: SPACING.md,
+        gap: SPACING.sm, // Add explicit gap between column and options button
+    },
+    actionColumn: {
+        flexDirection: 'column',
+        gap: 8, // Increase vertical gap effectively
+        marginRight: 2, // Slight extra breathing room
     },
     actionButtonList: {
         padding: 6,
