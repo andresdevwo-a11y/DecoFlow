@@ -20,7 +20,7 @@ const SectionCard = React.memo(({ section, onPress, onOptionsPress, viewMode = '
             {/* Selection Checkbox/Indicator */}
             {selectionMode && (
                 <View style={[styles.selectionIndicator, isSelected && styles.selectionIndicatorActive]}>
-                    {isSelected && <Feather name="check" size={16} color="#FFFFFF" />}
+                    {isSelected && <Feather name="check" size={12} color="#FFFFFF" />}
                 </View>
             )}
 
@@ -145,35 +145,31 @@ const styles = StyleSheet.create({
     },
     cardSelected: {
         borderColor: COLORS.primary,
-        borderWidth: 2,
-        backgroundColor: COLORS.surface,
-        ...SHADOWS.md,
-        shadowColor: COLORS.primary,
-        shadowOpacity: 0.3, // Slightly stronger for selection
+        borderWidth: 1.5,
+        backgroundColor: COLORS.primary + '05', // Subtle background like Notes
+        shadowColor: 'transparent',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
         top: SPACING.sm,
         right: SPACING.sm,
-        width: SIZES.checkbox,
-        height: SIZES.checkbox,
-        borderRadius: RADIUS.md,
-        borderWidth: SIZES.borderWidthThick,
+        width: 20, // Smaller size like Notes (20px)
+        height: 20,
+        borderRadius: 4, // 4px radius
+        borderWidth: 1.5,
         borderColor: COLORS.border,
         backgroundColor: COLORS.surface,
         zIndex: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        ...SHADOWS.small,
     },
     selectionIndicatorActive: {
         backgroundColor: COLORS.primary,
         borderColor: COLORS.primary,
         borderWidth: 0,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 3,
     }
 });
