@@ -5,45 +5,37 @@ import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, SIZES } from '../constant
 import { useFinance } from '../context/FinanceContext';
 import { useAlert } from '../context/AlertContext';
 import QuickActionModal from './QuickActionModal';
-import ProductStatsModal from './ProductStatsModal'; // NEW: Import Stats Modal
+import ProductStatsModal from './ProductStatsModal';
 
 const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickAction, viewMode = 'Grid', isSelected, selectionMode, onLongPress }) => {
     const isList = viewMode === 'Lista';
     const effectiveRentalPrice = product.rentalPrice || product.rentPrice;
     const hasRentalPrice = Boolean(effectiveRentalPrice && parseFloat(effectiveRentalPrice) > 0);
 
-    // NEW: State for Quick Action Modal
     const [quickActionModalVisible, setQuickActionModalVisible] = React.useState(false);
-    const [statsModalVisible, setStatsModalVisible] = React.useState(false); // NEW: State for Stats Modal
+    const [statsModalVisible, setStatsModalVisible] = React.useState(false);
     const [selectedTransactionType, setSelectedTransactionType] = React.useState(null);
 
-    // Context hooks for transaction creation
-    // Note: We use a try-catch pattern or optional chaining in case the component is used outside the provider,
-    // though in this app structure it should always be within FinanceProvider.
     let addSale, addRental;
     try {
         const finance = useFinance();
         addSale = finance.addSale;
         addRental = finance.addRental;
     } catch (e) {
-        // Fallback or ignore if context is missing (development/testing)
-        console.warn("ProductCard: FinanceContext not available");
+        // Fallback
     }
 
-    // Alert context for styled modals
     let showActionSheet, showAlert;
     try {
         const alert = useAlert();
         showActionSheet = alert.showActionSheet;
         showAlert = alert.showAlert;
     } catch (e) {
-        console.warn("ProductCard: AlertContext not available");
+        // Fallback
     }
 
     const generateTransactionRef = (type, adjustedValues = null) => {
         const now = new Date();
-
-        // Use adjusted values if provided, otherwise default to product values
         const unitPrice = adjustedValues
             ? adjustedValues.price
             : (type === 'sale'
@@ -51,53 +43,40 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                 : (parseFloat(effectiveRentalPrice) || 0));
 
         const quantity = adjustedValues ? adjustedValues.quantity : 1;
-
-        // Total is calculated in modal usually, but verify here
         const total = adjustedValues ? adjustedValues.total : (unitPrice * quantity);
 
-        // Build the item object matching TransactionDetailScreen expectations
         const productItem = {
             productId: product.id,
             productName: product.name,
             quantity: quantity,
             unitPrice: unitPrice,
             total: total,
-            // Include image if available for richer display
             image: product.image || null
         };
 
         const isInstallment = adjustedValues && adjustedValues.isInstallment;
         const installmentAmount = adjustedValues && adjustedValues.installmentAmount;
 
-        const transactionData = {
-            type, // 'sale' or 'rental'
+        return {
+            type,
             productName: product.name,
             productId: product.id,
             quantity: quantity,
             unitPrice: unitPrice,
-            // Calculate correct amount based on type
-            totalAmount: isInstallment ? (installmentAmount || 0) : total, // This is expected income
+            totalAmount: isInstallment ? (installmentAmount || 0) : total,
             date: now.toISOString(),
-            // Items array with the product
             items: [productItem],
-            // Additional fields for FinanceContext
-            startDate: now.toISOString().split('T')[0], // For rentals
-            status: 'active', // For rentals
-
-            // Installment Support
+            startDate: now.toISOString().split('T')[0],
+            status: 'active',
             isInstallment: !!isInstallment,
-            totalPrice: total, // Full price
+            totalPrice: total,
             amountPaid: isInstallment ? (installmentAmount || 0) : total,
         };
-        return transactionData;
     };
 
     const handleQuickActionConfirm = async (values) => {
         if (!selectedTransactionType) return;
-
         const transactionData = generateTransactionRef(selectedTransactionType, values);
-
-        console.log(`Creando ${selectedTransactionType === 'sale' ? 'Venta' : 'Alquiler'} con valores ajustados:`, transactionData);
 
         if (selectedTransactionType === 'sale' && addSale) {
             try {
@@ -120,7 +99,6 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
         if (onQuickAction) {
             onQuickAction(product);
         } else if (showActionSheet && showAlert) {
-            // Use styled ActionSheetModal
             showActionSheet({
                 title: "Acción Rápida",
                 message: `¿Generar registro para ${product.name}?`,
@@ -130,7 +108,6 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                         icon: "shopping-cart",
                         onPress: () => {
                             setSelectedTransactionType('sale');
-                            // Delay slightly to let ActionSheet close smoothly
                             setTimeout(() => setQuickActionModalVisible(true), 300);
                         }
                     },
@@ -139,17 +116,18 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                         icon: "package",
                         onPress: () => {
                             setSelectedTransactionType('rental');
-                            // Delay slightly to let ActionSheet close smoothly
                             setTimeout(() => setQuickActionModalVisible(true), 300);
                         }
                     }
                 ],
                 cancelText: "Cancelar"
             });
-        } else {
-            // Fallback if AlertContext is not available (shouldn't happen in production)
-            console.warn("AlertContext not available, action skipped");
         }
+    };
+
+    const formatPrice = (price) => {
+        if (!price) return '$0';
+        return price.toString().startsWith('$') ? price : `$${price}`;
     };
 
     return (<>
@@ -161,7 +139,7 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
             ]}
             onPress={onPress}
             onLongPress={onLongPress}
-            activeOpacity={0.8}
+            activeOpacity={0.9}
         >
             {/* Selection Checkbox/Indicator */}
             {selectionMode && (
@@ -176,43 +154,31 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                     <Image source={{ uri: product.image }} style={styles.image} />
                 ) : (
                     <View style={styles.placeholderImage}>
-                        <Feather name="image" size={isList ? 24 : 32} color={COLORS.placeholder} />
+                        <Feather name="image" size={isList ? 24 : 36} color={COLORS.primary + '40'} />
                     </View>
                 )}
 
-
-
-                {/* Options Button (Grid only) */}
-                {!isList && !selectionMode && (
-                    <TouchableOpacity
-                        style={styles.optionsButton}
-                        onPress={onOptionsPress}
-                    >
-                        <View style={styles.optionsButtonBackground}>
-                            <Feather name="more-vertical" size={20} color={COLORS.text} />
-                        </View>
-                    </TouchableOpacity>
+                {/* Grid Mode Gradient Overlay for better text readability if we were putting text over image, 
+                    but here we use it for buttons contrast */}
+                {!isList && (
+                    <View style={styles.imageOverlay} />
                 )}
 
-                {/* Action Buttons Container (Grid only) - Bottom Right */}
+                {/* Floating Actions (Grid only) */}
                 {!isList && !selectionMode && (
-                    <View style={styles.actionButtonsContainerGrid}>
-                        {/* Stats Button */}
+                    <View style={styles.floatingActions}>
                         <TouchableOpacity
-                            style={styles.actionButtonGrid}
-                            onPress={() => setStatsModalVisible(true)}
-                        >
-                            <View style={styles.statsButtonBackground}>
-                                <Feather name="bar-chart-2" size={16} color={COLORS.text} />
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Quick Action Button */}
-                        <TouchableOpacity
-                            style={[styles.actionButtonGrid, styles.quickActionGridButton]}
+                            style={styles.floatingActionButton}
                             onPress={handleQuickAction}
                         >
-                            <Feather name="shopping-cart" size={16} color="#FFFFFF" />
+                            <Feather name="shopping-bag" size={16} color={COLORS.surface} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.floatingOptionsButton}
+                            onPress={onOptionsPress}
+                        >
+                            <Feather name="more-horizontal" size={18} color={COLORS.text} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -220,89 +186,59 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
 
             {/* Content Section */}
             <View style={[styles.content, isList && styles.contentList]}>
-                <View style={isList ? styles.textContainerList : null}>
+                <View style={isList ? styles.textContainerList : styles.textContainerGrid}>
                     <Text style={[styles.name, isList && styles.nameList]} numberOfLines={1}>
                         {product.name}
                     </Text>
 
-                    {product.description ? (
-                        <Text style={styles.description} numberOfLines={isList ? 1 : 2}>
-                            {product.description}
-                        </Text>
-                    ) : null}
-
-                    {/* Price Container */}
+                    {/* Price Config */}
                     <View style={[styles.pricesContainer, isList && styles.pricesContainerList]}>
-
-                        {/* Sale Price Block */}
-                        <View style={styles.priceBlock}>
-                            <Text style={styles.priceLabelTop}>VENTA</Text>
-                            <Text style={styles.salePriceValue}>
-                                ${(product.price !== undefined && product.price !== null && product.price !== '') ? product.price : '0'}
+                        <View style={styles.priceItem}>
+                            <Text style={styles.priceLabel}>VENTA</Text>
+                            <Text style={styles.salePrice}>
+                                {formatPrice(product.price)}
                             </Text>
                         </View>
 
-                        {/* Separator (List mode) */}
-                        {isList && hasRentalPrice && <View style={styles.priceSeparator} />}
-
-                        {/* Rental Price Block */}
                         {hasRentalPrice && (
-                            <View style={[styles.priceBlock, !isList && styles.priceItemStacked]}>
-                                <Text style={styles.rentalLabelTop}>ALQUILER</Text>
-                                <Text style={styles.rentalPriceValue}>
-                                    ${effectiveRentalPrice}
-                                </Text>
-                            </View>
+                            <>
+                                {isList && <View style={styles.priceDivider} />}
+                                <View style={[styles.priceItem, !isList && styles.priceItemMargin]}>
+                                    <Text style={styles.priceLabel}>ALQUILER</Text>
+                                    <Text style={styles.rentalPrice}>
+                                        {formatPrice(effectiveRentalPrice)}
+                                    </Text>
+                                </View>
+                            </>
                         )}
                     </View>
                 </View>
 
-                {/* Action Buttons Container (List only) */}
+                {/* List Actions */}
                 {isList && !selectionMode && (
-                    <View style={styles.actionButtonsContainerList}>
-                        {/* Stats Button */}
+                    <View style={styles.actionsList}>
                         <TouchableOpacity
-                            style={styles.statsButtonList}
-                            onPress={() => setStatsModalVisible(true)}
-                        >
-                            <Feather name="bar-chart-2" size={18} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
-
-                        {/* Quick Action Button */}
-                        <TouchableOpacity
-                            style={styles.quickActionList}
+                            style={styles.actionButtonList}
                             onPress={handleQuickAction}
                         >
-                            <Feather name="shopping-cart" size={18} color={COLORS.primary} />
+                            <Feather name="shopping-bag" size={18} color={COLORS.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.actionButtonList}
+                            onPress={onOptionsPress}
+                        >
+                            <Feather name="more-vertical" size={18} color={COLORS.placeholder} />
                         </TouchableOpacity>
                     </View>
-                )}
-
-                {/* Options Button (List only) */}
-                {isList && !selectionMode && (
-                    <TouchableOpacity
-                        style={styles.optionsButtonList}
-                        onPress={onOptionsPress}
-                    >
-                        <Feather name="more-vertical" size={24} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
                 )}
             </View>
         </TouchableOpacity>
 
-        {/* Quick Action Adjustment Modal */}
         <QuickActionModal
             visible={quickActionModalVisible}
             onClose={() => setQuickActionModalVisible(false)}
             onConfirm={handleQuickActionConfirm}
             transactionType={selectedTransactionType}
-            product={product}
-        />
-
-        {/* Stats Modal */}
-        <ProductStatsModal
-            visible={statsModalVisible}
-            onClose={() => setStatsModalVisible(false)}
             product={product}
         />
     </>
@@ -312,13 +248,14 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
 const styles = StyleSheet.create({
     card: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
-        overflow: 'hidden',
+        borderRadius: RADIUS.xl, // 24px
         marginBottom: SPACING.lg,
         width: '48%',
         borderWidth: 0,
-        borderColor: 'transparent',
         ...SHADOWS.card,
+        elevation: 2, // Softer native shadow
+        shadowOpacity: 0.06, // Softer iOS shadow
+        shadowRadius: 10,
     },
     cardList: {
         width: '100%',
@@ -327,39 +264,37 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
     },
     cardSelected: {
+        backgroundColor: COLORS.primary + '08',
         borderColor: COLORS.primary,
         borderWidth: 1.5,
-        backgroundColor: COLORS.primary + '05', // Subtle background
-        shadowColor: 'transparent',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
-        top: SPACING.sm,
-        right: SPACING.sm,
-        width: 20, // Smaller size
-        height: 20,
-        borderRadius: 4,
+        top: SPACING.md,
+        right: SPACING.md,
+        width: 22,
+        height: 22,
+        borderRadius: 11,
         borderWidth: 1.5,
-        borderColor: COLORS.border,
-        backgroundColor: COLORS.surface,
+        borderColor: '#FFF',
+        backgroundColor: 'rgba(0,0,0,0.2)',
         zIndex: 20,
         justifyContent: 'center',
         alignItems: 'center',
+        elevation: 3,
     },
     selectionIndicatorActive: {
         backgroundColor: COLORS.primary,
         borderColor: COLORS.primary,
-        borderWidth: 0,
     },
     imageContainer: {
-        height: SIZES.cardImageHeight,
+        height: 145, // Slightly taller
         width: '100%',
         backgroundColor: COLORS.background,
         position: 'relative',
+        borderTopLeftRadius: RADIUS.xl,
+        borderTopRightRadius: RADIUS.xl,
+        overflow: 'hidden',
     },
     imageContainerList: {
         width: 80,
@@ -367,21 +302,6 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.lg,
         marginRight: SPACING.md,
         aspectRatio: 1,
-    },
-
-    optionsButton: {
-        position: 'absolute',
-        top: SPACING.sm,
-        right: SPACING.sm,
-        zIndex: 10,
-    },
-    optionsButtonBackground: {
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-        borderRadius: RADIUS.full,
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     image: {
         width: '100%',
@@ -393,16 +313,58 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.background,
+        backgroundColor: '#F8FAFC',
+    },
+    imageOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'linear-gradient(180deg, rgba(0,0,0,0) 70%, rgba(0,0,0,0.05) 100%)', // Subtle finish
+    },
+    floatingActions: {
+        position: 'absolute',
+        top: SPACING.sm,
+        right: SPACING.sm,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    floatingActionButton: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: COLORS.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    floatingOptionsButton: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     content: {
         padding: SPACING.md,
+        paddingTop: SPACING.sm + 4,
     },
     contentList: {
         flex: 1,
+        padding: 0,
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 0,
+        paddingRight: SPACING.sm,
+    },
+    textContainerGrid: {
+        flexDirection: 'column',
     },
     textContainerList: {
         flex: 1,
@@ -410,124 +372,62 @@ const styles = StyleSheet.create({
     },
     name: {
         color: COLORS.text,
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: '700',
-        marginBottom: 2,
+        fontSize: TYPOGRAPHY.size.base,
+        fontWeight: 'bold', // Stronger name
+        marginBottom: SPACING.xs,
+        letterSpacing: -0.2, // Tighter modern implementation
     },
     nameList: {
-        marginBottom: 2,
-    },
-    description: {
-        color: COLORS.textSecondary,
-        fontSize: TYPOGRAPHY.size.xs,
-        marginBottom: SPACING.xs,
-        lineHeight: TYPOGRAPHY.lineHeight.tight,
+        fontSize: TYPOGRAPHY.size.lg,
+        marginBottom: 4,
     },
     pricesContainer: {
-        marginTop: SPACING.xs,
         flexDirection: 'column',
+        marginTop: 4,
     },
     pricesContainerList: {
-        marginTop: SPACING.xs,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start',
     },
-    priceBlock: {
+    priceItem: {
         flexDirection: 'column',
-        alignItems: 'flex-start',
     },
-    priceItemStacked: {
-        marginTop: SPACING.xs,
+    priceItemMargin: {
+        marginTop: 6,
     },
-    priceLabelTop: {
-        fontSize: 10,
-        color: COLORS.placeholder,
-        fontWeight: '600',
-        marginBottom: 0,
+    priceLabel: {
+        fontSize: 9, // Small concise label
+        color: COLORS.textMuted,
+        fontWeight: '700',
         textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 2,
     },
-    rentalLabelTop: {
-        fontSize: 10,
-        color: COLORS.placeholder,
-        fontWeight: '600',
-        marginBottom: 0,
-        textTransform: 'uppercase',
+    salePrice: {
+        color: COLORS.text, // Darker for high contrast
+        fontSize: 15,
+        fontWeight: '800',
     },
-    salePriceValue: {
-        color: COLORS.primary,
-        fontSize: TYPOGRAPHY.size.lg,
+    rentalPrice: {
+        color: COLORS.primary, // Color for rental
+        fontSize: 15,
         fontWeight: '700',
     },
-    rentalPriceValue: {
-        color: '#4A90E2',
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: '700',
-    },
-    priceSeparator: {
+    priceDivider: {
         width: 1,
         height: 24,
         backgroundColor: COLORS.border,
-        marginHorizontal: SPACING.md,
+        marginHorizontal: SPACING.lg,
     },
-    optionsButtonList: {
-        padding: SPACING.sm,
-        marginLeft: SPACING.xs,
-    },
-    actionButtonsContainerGrid: {
-        position: 'absolute',
-        bottom: SPACING.sm,
-        right: SPACING.sm,
-        zIndex: 10,
-        flexDirection: 'column',
+    actionsList: {
+        flexDirection: 'row',
         alignItems: 'center',
-        gap: 8, // Spacing between buttons
+        gap: SPACING.md,
     },
-    actionButtonGrid: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    quickActionGridButton: {
-        backgroundColor: COLORS.primary,
-        borderRadius: RADIUS.full,
-        ...SHADOWS.sm,
-    },
-    // Removidos estilos antiguos: quickActionGrid, statsButton
-    statsButtonBackground: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: RADIUS.full,
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...SHADOWS.sm,
-    },
-    actionButtonsContainerList: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: SPACING.sm,
-        gap: 6,
-    },
-    statsButtonList: {
-        padding: 4, // Reduced padding
+    actionButtonList: {
+        padding: 6,
         backgroundColor: COLORS.background,
         borderRadius: RADIUS.full,
-        width: 32, // Smaller size for list
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    quickActionList: {
-        padding: 4, // Reduced padding
-        backgroundColor: COLORS.primaryLight,
-        borderRadius: RADIUS.full,
-        width: 32, // Smaller size for list
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });
 

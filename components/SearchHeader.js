@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES } from '../constants/Theme';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES, SHADOWS } from '../constants/Theme';
 
 /**
  * Reusable search header component for list screens.
@@ -20,7 +20,7 @@ const SearchHeader = React.memo(({ title, placeholder, searchText, onSearchChang
                 ]}>
                     <Feather
                         name="search"
-                        size={SIZES.iconSm}
+                        size={20}
                         color={isFocused ? COLORS.primary : COLORS.placeholder}
                         style={styles.searchIcon}
                     />
@@ -45,32 +45,40 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.xl,
     },
     title: {
-        fontSize: TYPOGRAPHY.size['4xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size['4xl'], // 24px
+        fontWeight: '800',
         color: COLORS.text,
         marginBottom: SPACING.lg,
+        letterSpacing: -0.5,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.sm,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        paddingHorizontal: SPACING.md,
-        height: SIZES.inputHeight,
+        backgroundColor: COLORS.surface, // Use surface color
+        borderRadius: RADIUS.full, // Pill shape
+        borderWidth: 0, // Remove border
+        paddingHorizontal: SPACING.lg,
+        height: 52, // Slightly thicker for easier tap
+        ...SHADOWS.card, // Soft shadow
+        shadowOpacity: 0.05,
+        elevation: 2,
     },
     searchContainerFocused: {
-        borderColor: COLORS.primary,
+        backgroundColor: '#FFFFFF', // Clean white on focus
+        shadowOpacity: 0.1,
+        elevation: 4,
+        // borderColor: COLORS.primary,
+        // borderWidth: 1, // Optional: if we want border on focus
     },
     searchIcon: {
-        marginRight: SPACING.sm,
+        marginRight: SPACING.md,
     },
     searchInput: {
         flex: 1,
-        fontSize: TYPOGRAPHY.size.xl,
+        fontSize: TYPOGRAPHY.size.lg,
         color: COLORS.text,
         height: '100%',
+        fontWeight: '500',
     },
 });
 

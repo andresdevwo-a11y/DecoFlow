@@ -20,7 +20,7 @@ export default function RenameCanvasModal({ visible, onClose, onRename, currentN
 
     return (
         <Modal
-            animationType="slide"
+            animationType="fade"
             transparent={true}
             visible={visible}
             onRequestClose={onClose}
@@ -32,10 +32,12 @@ export default function RenameCanvasModal({ visible, onClose, onRename, currentN
                     style={styles.keyboardAvoidingView}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Renombrar Lienzo</Text>
+                        <View style={styles.header}>
+                            <Text style={styles.modalTitle}>Renombrar Lienzo</Text>
+                        </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Nombre</Text>
+                            <Text style={styles.label}>Nuevo nombre</Text>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Nombre del lienzo"
@@ -76,76 +78,88 @@ export default function RenameCanvasModal({ visible, onClose, onRename, currentN
 const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
-        backgroundColor: COLORS.overlay,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
         justifyContent: 'center',
-        padding: SPACING.xl,
+        alignItems: 'center',
+        padding: SPACING.lg,
+    },
+    keyboardAvoidingView: {
+        width: '100%',
+        alignItems: 'center',
     },
     modalContent: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
+        borderRadius: RADIUS.xl,
         padding: SPACING['2xl'],
+        width: '100%',
+        maxWidth: 400,
         ...SHADOWS.modal,
     },
+    header: {
+        marginBottom: SPACING.xl,
+        alignItems: 'center',
+    },
     modalTitle: {
-        fontSize: TYPOGRAPHY.size['3xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size['2xl'],
+        fontWeight: '700',
         color: COLORS.text,
-        marginBottom: SPACING['2xl'],
         textAlign: 'center',
     },
     inputContainer: {
         marginBottom: SPACING.xl,
     },
     label: {
-        fontSize: TYPOGRAPHY.size.base,
-        fontWeight: TYPOGRAPHY.weight.medium,
+        fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: '600',
         color: COLORS.textSecondary,
         marginBottom: SPACING.sm,
+        marginLeft: SPACING.xs,
     },
     input: {
-        backgroundColor: COLORS.surface,
+        backgroundColor: COLORS.background,
         borderWidth: 1,
-        borderColor: COLORS.inputBorder || COLORS.border, // Fallback if inputBorder not defined
-        borderRadius: RADIUS.sm,
-        padding: SPACING.md,
-        fontSize: TYPOGRAPHY.size.xl,
+        borderColor: COLORS.border,
+        borderRadius: RADIUS.lg,
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.md,
+        fontSize: TYPOGRAPHY.size.lg,
         color: COLORS.text,
     },
     buttonsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: SPACING.sm,
+        gap: SPACING.md,
     },
     button: {
         flex: 1,
         paddingVertical: SPACING.md,
-        borderRadius: RADIUS.sm,
+        borderRadius: RADIUS.lg,
         alignItems: 'center',
         justifyContent: 'center',
     },
     cancelButton: {
-        marginRight: SPACING.md,
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: COLORS.primary,
+        backgroundColor: COLORS.background,
     },
     cancelButtonText: {
-        color: COLORS.primary,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        fontSize: TYPOGRAPHY.size.xl,
+        color: COLORS.textSecondary,
+        fontWeight: '600',
+        fontSize: TYPOGRAPHY.size.base,
     },
     saveButton: {
         backgroundColor: COLORS.primary,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     },
     disabledButton: {
-        backgroundColor: COLORS.primaryDisabled || '#A0A0A0', // Fallback color
+        backgroundColor: COLORS.border,
+        shadowOpacity: 0,
+        elevation: 0,
     },
     saveButtonText: {
-        color: COLORS.surface,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        fontSize: TYPOGRAPHY.size.xl,
-    },
-    keyboardAvoidingView: {
-        width: '100%',
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: TYPOGRAPHY.size.base,
     },
 });

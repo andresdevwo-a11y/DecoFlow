@@ -15,7 +15,7 @@ const SectionCard = React.memo(({ section, onPress, onOptionsPress, viewMode = '
             ]}
             onPress={onPress}
             onLongPress={onLongPress}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
         >
             {/* Selection Checkbox/Indicator */}
             {selectionMode && (
@@ -24,51 +24,48 @@ const SectionCard = React.memo(({ section, onPress, onOptionsPress, viewMode = '
                 </View>
             )}
 
-            <View style={[styles.topRow, isList && styles.topRowList]}>
-                {section.image ? (
-                    <Image source={{ uri: section.image }} style={styles.sectionImage} />
-                ) : (
-                    <View style={[styles.iconContainer, { backgroundColor: section.color ? `${section.color}15` : COLORS.primaryLight }]}>
-                        <Feather
-                            name={section.icon || 'folder'} // Keep 'folder' icon for now or change to 'grid'? 'folder' is still a good icon.
-                            size={SIZES.iconLg}
-                            color={section.color || COLORS.primary}
-                        />
-                    </View>
-                )}
+            {/* Content Container */}
+            <View style={[styles.innerContainer, isList && styles.innerContainerList]}>
 
-                {isList && (
-                    <View style={styles.contentList}>
-                        <Text style={styles.sectionName} numberOfLines={1}>
+                {/* Icon/Image Section */}
+                <View style={[styles.iconContainer, isList && styles.iconContainerList]}>
+                    {section.image ? (
+                        <Image source={{ uri: section.image }} style={styles.sectionImage} />
+                    ) : (
+                        <View style={[styles.iconPlaceholder, { backgroundColor: COLORS.primary + '10' }]}>
+                            <Feather
+                                name={section.icon || 'folder'}
+                                size={isList ? 20 : 28}
+                                color={COLORS.primary}
+                            />
+                        </View>
+                    )}
+                </View>
+
+                {/* Text Content */}
+                <View style={[styles.textContainer, isList && styles.textContainerList]} >
+                    <View style={!isList && styles.centeredContent}>
+                        <Text style={[styles.sectionName, isList && styles.sectionNameList]} numberOfLines={1}>
                             {section.name}
                         </Text>
-                        <Text style={styles.itemCount}>
-                            {section.productCount || 0} items
-                        </Text>
+                        <View style={styles.badgeContainer}>
+                            <Text style={styles.itemCount}>
+                                {section.productCount || 0} items
+                            </Text>
+                        </View>
                     </View>
-                )}
+                </View>
 
-                {/* Hide More Button in Selection Mode */}
+                {/* Options Button */}
                 {!selectionMode && (
                     <TouchableOpacity
                         style={[styles.moreButton, isList && styles.moreButtonList]}
                         onPress={onOptionsPress}
                     >
-                        <Feather name="more-vertical" size={SIZES.iconSm} color={COLORS.placeholder} />
+                        <Feather name={isList ? "more-vertical" : "more-horizontal"} size={20} color={COLORS.placeholder} />
                     </TouchableOpacity>
                 )}
             </View>
-
-            {!isList && (
-                <View style={styles.content}>
-                    <Text style={styles.sectionName} numberOfLines={1}>
-                        {section.name}
-                    </Text>
-                    <Text style={styles.itemCount}>
-                        {section.productCount || 0} items
-                    </Text>
-                </View>
-            )}
         </TouchableOpacity>
     );
 });
@@ -78,98 +75,119 @@ export default SectionCard;
 const styles = StyleSheet.create({
     card: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
+        borderRadius: RADIUS.xl, // 24px
         padding: SPACING.lg,
         marginBottom: SPACING.lg,
         width: '48%',
         borderWidth: 0,
-        borderColor: 'transparent',
         ...SHADOWS.card,
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 2,
+        alignItems: 'center', // Center content in grid
+        justifyContent: 'center',
+        minHeight: 160, // Consistent height for Grid
     },
     cardList: {
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: SPACING.md,
-        borderRadius: RADIUS.md,
-        marginBottom: SPACING.sm,
+        justifyContent: 'flex-start',
+        padding: SPACING.sm,
+        minHeight: 'auto',
     },
-    topRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: SPACING.md,
-    },
-    topRowList: {
-        marginBottom: 0,
-        flex: 1,
+    innerContainer: {
         alignItems: 'center',
+        width: '100%',
+    },
+    innerContainerList: {
+        flexDirection: 'row',
     },
     iconContainer: {
-        width: SIZES.iconContainerMd,
-        height: SIZES.iconContainerMd,
-        borderRadius: RADIUS.sm,
+        marginBottom: SPACING.md,
+    },
+    iconContainerList: {
+        marginBottom: 0,
+        marginRight: SPACING.md,
+    },
+    iconPlaceholder: {
+        width: 56,
+        height: 56,
+        borderRadius: 20, // Soft large radius
         justifyContent: 'center',
         alignItems: 'center',
     },
-    moreButton: {
-        padding: SPACING.xs,
-    },
-    moreButtonList: {
-        marginLeft: 'auto',
-    },
     sectionImage: {
-        width: SIZES.iconContainerMd,
-        height: SIZES.iconContainerMd,
-        borderRadius: RADIUS.sm,
+        width: 56,
+        height: 56,
+        borderRadius: 20,
         resizeMode: 'cover',
     },
-    content: {
-        marginTop: SPACING.xs,
-    },
-    contentList: {
-        marginLeft: SPACING.md,
+    textContainer: {
+        alignItems: 'center',
         flex: 1,
-        marginRight: SPACING.sm,
+    },
+    textContainerList: {
+        alignItems: 'flex-start',
         justifyContent: 'center',
     },
+    centeredContent: {
+        alignItems: 'center',
+    },
     sectionName: {
-        fontSize: TYPOGRAPHY.size.xl,
-        fontWeight: TYPOGRAPHY.weight.semibold,
+        fontSize: TYPOGRAPHY.size.lg, // Larger
+        fontWeight: '700',
         color: COLORS.text,
-        marginBottom: SPACING.xs,
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    sectionNameList: {
+        textAlign: 'left',
+        marginBottom: 2,
+    },
+    badgeContainer: {
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: RADIUS.full,
     },
     itemCount: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.placeholder,
+        fontSize: 11,
+        color: COLORS.textSecondary,
+        fontWeight: '600',
+    },
+    moreButton: {
+        position: 'absolute',
+        top: -8,
+        right: -8,
+        padding: 8,
+    },
+    moreButtonList: {
+        position: 'relative',
+        top: 0,
+        right: 0,
+        marginLeft: 'auto',
     },
     cardSelected: {
         borderColor: COLORS.primary,
         borderWidth: 1.5,
-        backgroundColor: COLORS.primary + '05', // Subtle background like Notes
-        shadowColor: 'transparent',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
+        backgroundColor: COLORS.primary + '05',
     },
     selectionIndicator: {
         position: 'absolute',
         top: SPACING.sm,
         right: SPACING.sm,
-        width: 20, // Smaller size like Notes (20px)
-        height: 20,
-        borderRadius: 4, // 4px radius
+        width: 22,
+        height: 22,
+        borderRadius: 11,
         borderWidth: 1.5,
-        borderColor: COLORS.border,
-        backgroundColor: COLORS.surface,
+        borderColor: COLORS.primary,
+        backgroundColor: COLORS.primary,
         zIndex: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     selectionIndicatorActive: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
-        borderWidth: 0,
+        // Active styles
     }
 });

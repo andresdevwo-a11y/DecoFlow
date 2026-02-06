@@ -10,7 +10,7 @@ const CanvasCard = React.memo(({ canvas, onPress, onOptionsPress, viewMode = 'Gr
         <TouchableOpacity
             style={[styles.card, isList && styles.cardList]}
             onPress={onPress}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
         >
             {/* Image / Thumbnail Section */}
             <View style={[styles.imageContainer, isList && styles.imageContainerList]}>
@@ -18,19 +18,17 @@ const CanvasCard = React.memo(({ canvas, onPress, onOptionsPress, viewMode = 'Gr
                     <Image source={{ uri: canvas.thumbnail }} style={styles.image} />
                 ) : (
                     <View style={styles.placeholderImage}>
-                        <Feather name="layout" size={isList ? 24 : 32} color={COLORS.primary} />
+                        <Feather name="layout" size={isList ? 24 : 32} color={COLORS.primary + '60'} />
                     </View>
                 )}
 
                 {/* Options Button (Grid only) */}
                 {!isList && (
                     <TouchableOpacity
-                        style={styles.optionsButton}
+                        style={styles.floatingOptionsButton}
                         onPress={onOptionsPress}
                     >
-                        <View style={styles.optionsButtonBackground}>
-                            <Feather name="more-vertical" size={SIZES.iconSm} color={COLORS.text} />
-                        </View>
+                        <Feather name="more-horizontal" size={18} color={COLORS.text} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -41,9 +39,12 @@ const CanvasCard = React.memo(({ canvas, onPress, onOptionsPress, viewMode = 'Gr
                     <Text style={[styles.name, isList && styles.nameList]} numberOfLines={1}>
                         {canvas.name}
                     </Text>
-                    <Text style={styles.dateText}>
-                        {new Date(canvas.updatedAt).toLocaleDateString()}
-                    </Text>
+                    <View style={styles.dateBadge}>
+                        <Feather name="clock" size={10} color={COLORS.textMuted} style={{ marginRight: 4 }} />
+                        <Text style={styles.dateText}>
+                            {new Date(canvas.updatedAt).toLocaleDateString()}
+                        </Text>
+                    </View>
                 </View>
 
                 {/* Options Button (List only) */}
@@ -52,7 +53,7 @@ const CanvasCard = React.memo(({ canvas, onPress, onOptionsPress, viewMode = 'Gr
                         style={styles.optionsButtonList}
                         onPress={onOptionsPress}
                     >
-                        <Feather name="more-vertical" size={24} color={COLORS.textSecondary} />
+                        <Feather name="more-vertical" size={20} color={COLORS.textSecondary} />
                     </TouchableOpacity>
                 )}
             </View>
@@ -65,10 +66,14 @@ export default CanvasCard;
 const styles = StyleSheet.create({
     card: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
+        borderRadius: RADIUS.xl,
         marginBottom: SPACING.lg,
         width: '48%',
+        borderWidth: 0,
         ...SHADOWS.card,
+        elevation: 2,
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
     },
     cardList: {
         width: '100%',
@@ -77,24 +82,22 @@ const styles = StyleSheet.create({
         padding: SPACING.sm,
     },
     imageContainer: {
-        height: SIZES.cardImageHeight || 140, // Ensure fallback if SIZES.cardImageHeight is undefined
+        height: 140,
         width: '100%',
-        borderTopLeftRadius: RADIUS.lg,
-        borderTopRightRadius: RADIUS.lg,
+        borderTopLeftRadius: RADIUS.xl,
+        borderTopRightRadius: RADIUS.xl,
         overflow: 'hidden',
-        backgroundColor: COLORS.surfaceHighlight, // Slightly different from ProductCard background
+        backgroundColor: COLORS.background,
         position: 'relative',
     },
     imageContainerList: {
         width: 80,
         height: 80,
-        borderRadius: RADIUS.md,
+        borderRadius: RADIUS.lg,
         marginRight: SPACING.md,
         aspectRatio: 1,
-        borderTopLeftRadius: RADIUS.md,
-        borderTopRightRadius: RADIUS.md,
-        borderBottomLeftRadius: RADIUS.md,
-        borderBottomRightRadius: RADIUS.md,
+        borderBottomLeftRadius: RADIUS.lg,
+        borderBottomRightRadius: RADIUS.lg,
     },
     image: {
         width: '100%',
@@ -106,18 +109,22 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: COLORS.surfaceHighlight,
+        backgroundColor: '#F3F4F6',
     },
-    optionsButton: {
+    floatingOptionsButton: {
         position: 'absolute',
         top: SPACING.sm,
         right: SPACING.sm,
-        zIndex: 10,
-    },
-    optionsButtonBackground: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: RADIUS.md,
-        padding: SPACING.xs,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     content: {
         padding: SPACING.md,
@@ -134,17 +141,27 @@ const styles = StyleSheet.create({
     },
     name: {
         color: COLORS.text,
-        fontSize: TYPOGRAPHY.size.text,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        marginBottom: 4,
+        fontSize: TYPOGRAPHY.size.base,
+        fontWeight: '700',
+        marginBottom: 6,
     },
     nameList: {
-        fontSize: TYPOGRAPHY.size.xl,
-        marginBottom: 2,
+        fontSize: TYPOGRAPHY.size.lg,
+        marginBottom: 4,
+    },
+    dateBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.background,
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: RADIUS.sm,
     },
     dateText: {
-        fontSize: TYPOGRAPHY.size.xs,
-        color: COLORS.textSecondary,
+        fontSize: 10,
+        color: COLORS.textMuted,
+        fontWeight: '500',
     },
     optionsButtonList: {
         padding: SPACING.sm,

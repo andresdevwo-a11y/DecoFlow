@@ -1,44 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Modal, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, TextInput, Modal, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../constants/Theme';
-
-const COLORS_LIST = [
-    '#3B82F6', // Blue (Signature)
-    '#EF4444', // Red
-    '#F59E0B', // Amber
-    '#10B981', // Emerald
-    '#6366F1', // Indigo
-    '#8B5CF6', // Violet
-    '#EC4899', // Pink
-    '#6B7280', // Gray
-];
 
 export default function CreateSectionModal({ visible, onClose, onCreate }) {
     const [sectionName, setSectionName] = useState('');
-    const [selectedColor, setSelectedColor] = useState(COLORS.primary);
 
     const handleCreate = () => {
         if (!sectionName.trim()) return;
 
         onCreate({
-            name: sectionName,
-            color: selectedColor
+            name: sectionName.trim(),
+            color: COLORS.primary // Default color since selection is removed
         });
 
         setSectionName('');
-        setSelectedColor(COLORS.primary);
     };
 
     const handleClose = () => {
         setSectionName('');
-        setSelectedColor(COLORS.primary);
         onClose();
     }
 
     return (
         <Modal
-            animationType="slide"
+            animationType="fade"
             transparent={true}
             visible={visible}
             onRequestClose={handleClose}
@@ -50,42 +35,22 @@ export default function CreateSectionModal({ visible, onClose, onCreate }) {
                     style={styles.keyboardAvoidingView}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Nueva Sección</Text>
+                        <View style={styles.header}>
+                            <Text style={styles.modalTitle}>Nueva Sección</Text>
+                            <Text style={styles.modalSubtitle}>Organiza tus productos en categorías</Text>
+                        </View>
 
-                        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContainer}>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Nombre</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Ej. Inventario"
-                                    placeholderTextColor={COLORS.placeholder}
-                                    value={sectionName}
-                                    onChangeText={setSectionName}
-                                    autoFocus={true}
-                                />
-                            </View>
-
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Color</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorRow}>
-                                    {COLORS_LIST.map((color) => (
-                                        <TouchableOpacity
-                                            key={color}
-                                            style={[
-                                                styles.colorCircle,
-                                                { backgroundColor: color },
-                                                selectedColor === color && styles.selectedColorCircle
-                                            ]}
-                                            onPress={() => setSelectedColor(color)}
-                                        >
-                                            {selectedColor === color && (
-                                                <Feather name="check" size={16} color={COLORS.surface} />
-                                            )}
-                                        </TouchableOpacity>
-                                    ))}
-                                </ScrollView>
-                            </View>
-                        </ScrollView>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Nombre de la sección</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Ej. Inventario, Ventas..."
+                                placeholderTextColor={COLORS.placeholder}
+                                value={sectionName}
+                                onChangeText={setSectionName}
+                                autoFocus={true}
+                            />
+                        </View>
 
                         <View style={styles.buttonsContainer}>
                             <TouchableOpacity
@@ -117,95 +82,96 @@ export default function CreateSectionModal({ visible, onClose, onCreate }) {
 const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
-        backgroundColor: COLORS.overlay,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Softer overlay
         justifyContent: 'center',
-        padding: SPACING.xl,
+        alignItems: 'center',
+        padding: SPACING.lg,
+    },
+    keyboardAvoidingView: {
+        width: '100%',
+        alignItems: 'center',
     },
     modalContent: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
+        borderRadius: RADIUS.xl, // Increased radius for modern look
         padding: SPACING['2xl'],
-        maxHeight: '90%',
-        ...SHADOWS.modal,
+        width: '100%',
+        maxWidth: 400,
+        ...SHADOWS.modal, // Use soft large shadow
+        elevation: 10,
+    },
+    header: {
+        marginBottom: SPACING.xl,
+        alignItems: 'center',
     },
     modalTitle: {
-        fontSize: TYPOGRAPHY.size['3xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size['2xl'],
+        fontWeight: '700',
         color: COLORS.text,
-        marginBottom: SPACING['2xl'],
+        marginBottom: SPACING.xs,
+        textAlign: 'center',
+    },
+    modalSubtitle: {
+        fontSize: TYPOGRAPHY.size.sm,
+        color: COLORS.textSecondary,
         textAlign: 'center',
     },
     inputContainer: {
         marginBottom: SPACING.xl,
     },
     label: {
-        fontSize: TYPOGRAPHY.size.base,
-        fontWeight: TYPOGRAPHY.weight.medium,
+        fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: '600',
         color: COLORS.textSecondary,
         marginBottom: SPACING.sm,
+        marginLeft: SPACING.xs,
     },
     input: {
-        backgroundColor: COLORS.surface,
+        backgroundColor: COLORS.background,
         borderWidth: 1,
-        borderColor: COLORS.inputBorder,
-        borderRadius: RADIUS.sm,
-        padding: SPACING.md,
-        fontSize: TYPOGRAPHY.size.xl,
+        borderColor: COLORS.border,
+        borderRadius: RADIUS.lg,
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.md,
+        fontSize: TYPOGRAPHY.size.lg,
         color: COLORS.text,
-    },
-    colorRow: {
-        flexDirection: 'row',
-    },
-    colorCircle: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        marginRight: SPACING.md,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    selectedColorCircle: {
-        borderWidth: 2,
-        borderColor: COLORS.text,
     },
     buttonsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: SPACING.sm,
+        gap: SPACING.md,
     },
     button: {
         flex: 1,
         paddingVertical: SPACING.md,
-        borderRadius: RADIUS.sm,
+        borderRadius: RADIUS.lg, // Pills
         alignItems: 'center',
         justifyContent: 'center',
     },
     cancelButton: {
-        marginRight: SPACING.md,
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: COLORS.primary,
+        backgroundColor: COLORS.background,
+        // No border for cleaner look, just background
     },
     cancelButtonText: {
-        color: COLORS.primary,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        fontSize: TYPOGRAPHY.size.xl,
+        color: COLORS.textSecondary,
+        fontWeight: '600',
+        fontSize: TYPOGRAPHY.size.base,
     },
     createButton: {
         backgroundColor: COLORS.primary,
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     },
     disabledButton: {
-        backgroundColor: COLORS.primaryDisabled,
+        backgroundColor: COLORS.border,
+        shadowOpacity: 0,
+        elevation: 0,
     },
     createButtonText: {
-        color: COLORS.surface,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        fontSize: TYPOGRAPHY.size.xl,
-    },
-    keyboardAvoidingView: {
-        width: '100%',
-    },
-    scrollContainer: {
-        marginBottom: SPACING.md,
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: TYPOGRAPHY.size.base,
     },
 });
