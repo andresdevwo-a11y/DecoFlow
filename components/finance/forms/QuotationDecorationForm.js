@@ -47,7 +47,7 @@ const QuotationDecorationForm = ({ initialValues, onSubmit, onCancel, submitLabe
         address: '',
         documentId: ''
     });
-const [startDate, setStartDate] = useState(getLocalDateString());
+    const [startDate, setStartDate] = useState(getLocalDateString());
     const [endDate, setEndDate] = useState('');
 
     // Memoizar minDate para evitar re-renders innecesarios
@@ -73,10 +73,10 @@ const [startDate, setStartDate] = useState(getLocalDateString());
     });
 
     // Theme Colors
-    const THEME_COLOR = COLORS.primary; // Orange
-    const THEME_COLOR_LIGHT = COLORS.primaryLight || '#FFEDD5';
+    const THEME_COLOR = COLORS.decoration;
+    const THEME_COLOR_LIGHT = COLORS.decoration + '20';
 
-// Load initial values (Edit Mode)
+    // Load initial values (Edit Mode)
     useEffect(() => {
         if (initialValues) {
             // Batch all state updates to prevent race conditions
@@ -373,7 +373,7 @@ const [startDate, setStartDate] = useState(getLocalDateString());
                         <Text style={styles.sectionTitle}>3. Logística del Evento</Text>
                         <View style={styles.row}>
                             <View style={{ flex: 1, marginRight: SPACING.sm }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha evento"
                                     date={startDate}
                                     onDateChange={setStartDate}
@@ -381,7 +381,7 @@ const [startDate, setStartDate] = useState(getLocalDateString());
                             </View>
 
                             <View style={{ flex: 1 }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha Entrega (opcional)"
                                     date={endDate}
                                     placeholder="Sin definir"

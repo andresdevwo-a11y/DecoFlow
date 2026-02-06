@@ -44,7 +44,7 @@ const QuotationSaleForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'G
         documentId: ''
     });
     const [notes, setNotes] = useState('');
-const [date, setDate] = useState(getLocalDateString());
+    const [date, setDate] = useState(getLocalDateString());
     const [deliveryDate, setDeliveryDate] = useState('');
 
     // Memoizar minDate para evitar re-renders innecesarios
@@ -71,9 +71,9 @@ const [date, setDate] = useState(getLocalDateString());
     });
 
     // Theme Colors
-    const THEME_COLOR = '#22C55E'; // Green for Sale
+    const THEME_COLOR = COLORS.sale; // Green for Sale
 
-// Load initial values
+    // Load initial values
     useEffect(() => {
         if (initialValues) {
             // Batch all state updates to prevent race conditions
@@ -414,14 +414,14 @@ const [date, setDate] = useState(getLocalDateString());
 
                         <View style={styles.row}>
                             <View style={{ flex: 1, marginRight: SPACING.md }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha de Emisión"
                                     date={date}
                                     onDateChange={setDate}
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha Validez (opc.)"
                                     date={deliveryDate}
                                     onDateChange={setDeliveryDate}
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
         padding: SPACING.lg,
         marginBottom: SPACING.lg,
         borderWidth: 2,
-        borderColor: COLORS.primary,
+        borderColor: COLORS.sale,
     },
     totalLabel: {
         fontSize: TYPOGRAPHY.size.lg,
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     totalAmount: {
         fontSize: TYPOGRAPHY.size.xl,
         fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.primary,
+        color: COLORS.sale,
     },
     footer: {
         position: 'absolute',
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#22C55E',
+        backgroundColor: COLORS.sale,
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: SPACING.xl,

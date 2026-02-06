@@ -46,7 +46,7 @@ const SaleForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guardar Ve
         documentId: ''
     });
     const [notes, setNotes] = useState('');
-const [date, setDate] = useState(getLocalDateString());
+    const [date, setDate] = useState(getLocalDateString());
     const [deliveryDate, setDeliveryDate] = useState('');
 
     // Memoizar minDate para evitar re-renders innecesarios
@@ -78,9 +78,9 @@ const [date, setDate] = useState(getLocalDateString());
     });
 
     // Theme Colors
-    const THEME_COLOR = '#22C55E'; // Green for Sale
+    const THEME_COLOR = COLORS.sale; // Green for Sale
 
-// Load initial values
+    // Load initial values
     useEffect(() => {
         if (initialValues) {
             // Batch all state updates to prevent race conditions
@@ -444,14 +444,14 @@ const [date, setDate] = useState(getLocalDateString());
                         {/* Fecha y Descuento en Fila -> Ahora Fecha de Venta y Fecha de Entrega */}
                         <View style={styles.row}>
                             <View style={{ flex: 1, marginRight: SPACING.md }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha de Venta"
                                     date={date}
                                     onDateChange={setDate}
                                 />
                             </View>
                             <View style={{ flex: 1 }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha de Entrega"
                                     date={deliveryDate}
                                     onDateChange={setDeliveryDate}
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#22C55E',
+        backgroundColor: COLORS.sale,
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: SPACING.xl,

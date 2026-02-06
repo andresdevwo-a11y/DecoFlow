@@ -45,7 +45,7 @@ const RentalForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guardar 
         documentId: ''
     });
     const [notes, setNotes] = useState('');
-const [startDate, setStartDate] = useState(getLocalDateString());
+    const [startDate, setStartDate] = useState(getLocalDateString());
     const [endDate, setEndDate] = useState('');
 
     // Memoizar minDate para evitar re-renders innecesarios
@@ -75,15 +75,15 @@ const [startDate, setStartDate] = useState(getLocalDateString());
         originalProductId: null
     });
 
-    const THEME_COLOR = '#3B82F6'; // Blue for Rental
+    const THEME_COLOR = COLORS.rental; // Blue for Rental
 
-// Load initial values
+    // Load initial values
     useEffect(() => {
         if (initialValues) {
             // Batch all state updates to prevent race conditions
             const newRentalDescription = initialValues.productName || '';
             let newClientData;
-            
+
             if (initialValues.clientData) {
                 try {
                     newClientData = typeof initialValues.clientData === 'string'
@@ -396,7 +396,7 @@ const [startDate, setStartDate] = useState(getLocalDateString());
                         <Text style={styles.sectionTitle}>3. Temporalidad</Text>
                         <View style={styles.row}>
                             <View style={{ flex: 1, marginRight: SPACING.sm }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha inicio"
                                     date={startDate}
                                     onDateChange={setStartDate}
@@ -404,7 +404,7 @@ const [startDate, setStartDate] = useState(getLocalDateString());
                             </View>
 
                             <View style={{ flex: 1 }}>
-<CustomDatePicker
+                                <CustomDatePicker
                                     label="Fecha Entrega (opcional)"
                                     date={endDate}
                                     placeholder="Sin definir"
@@ -719,12 +719,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#3B82F620',
+        backgroundColor: COLORS.rental + '20',
         borderRadius: 12,
         padding: SPACING.lg,
         marginBottom: SPACING.lg,
         borderWidth: 2,
-        borderColor: '#3B82F6',
+        borderColor: COLORS.rental,
     },
     totalLabel: {
         fontSize: TYPOGRAPHY.size.lg,
@@ -733,13 +733,13 @@ const styles = StyleSheet.create({
     },
     statusBadge: {
         fontSize: TYPOGRAPHY.size.xs,
-        color: '#3B82F6',
+        color: COLORS.rental,
         marginTop: 4,
     },
     totalAmount: {
         fontSize: TYPOGRAPHY.size.xl,
         fontWeight: TYPOGRAPHY.weight.bold,
-        color: '#3B82F6',
+        color: COLORS.rental,
     },
     row: {
         flexDirection: 'row',
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#3B82F6',
+        backgroundColor: COLORS.rental,
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: SPACING.xl,

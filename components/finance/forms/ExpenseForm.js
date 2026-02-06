@@ -348,12 +348,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#EF444420',
+        backgroundColor: COLORS.expense + '20',
         borderRadius: 12,
         padding: SPACING.lg,
         marginBottom: SPACING.lg,
         borderWidth: 2,
-        borderColor: '#EF4444',
+        borderColor: COLORS.expense,
     },
     amountDisplayLabel: {
         fontSize: TYPOGRAPHY.size.lg,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     amountDisplayValue: {
         fontSize: TYPOGRAPHY.size.xl,
         fontWeight: TYPOGRAPHY.weight.bold,
-        color: '#EF4444',
+        color: COLORS.expense,
     },
     footer: {
         position: 'absolute',
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#EF4444',
+        backgroundColor: COLORS.expense,
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: SPACING.xl,
