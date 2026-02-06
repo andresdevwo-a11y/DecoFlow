@@ -80,7 +80,7 @@ const TransactionDetailScreen = ({ transaction, onBack, onDelete }) => {
     const getColors = () => {
         if (isSale) return { main: '#22C55E', bg: '#22C55E15' }; // Green
         if (isRental) return { main: '#3B82F6', bg: '#3B82F615' }; // Blue
-        if (isDecoration) return { main: COLORS.primary, bg: COLORS.primary + '15' }; // Primary (Blue)
+        if (isDecoration) return { main: '#F97316', bg: '#F9731615' }; // Orange
         return { main: '#EF4444', bg: '#EF444415' }; // Red
     };
 
