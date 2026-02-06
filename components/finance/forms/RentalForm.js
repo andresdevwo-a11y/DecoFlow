@@ -109,6 +109,12 @@ const RentalForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guardar 
             setStartDate(newStartDate);
             setEndDate(newEndDate);
 
+            // Cargar campos de abonos
+            if (initialValues.isInstallment) {
+                setIsInstallment(true);
+                setInstallmentAmount(String(initialValues.amountPaid || 0));
+            }
+
             // Handle items separately to avoid conflicts
             if (initialValues.items && Array.isArray(initialValues.items) && initialValues.items.length > 0) {
                 // Ensure each item has a unique id for React keys

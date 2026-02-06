@@ -97,6 +97,14 @@ const SaleForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guardar Ve
             setDate(newDate);
             setDeliveryDate(newDeliveryDate);
 
+            // Cargar campos de abonos
+            if (initialValues.isInstallment) {
+                setIsInstallment(true);
+                // Si hay amountPaid y totalPrice, el abono actual es amountPaid
+                // En modo edición, queremos mostrar lo que el usuario puede abonar nuevamente
+                setInstallmentAmount(String(initialValues.amountPaid || 0));
+            }
+
             // Handle items separately to avoid conflicts
             if (initialValues.items && Array.isArray(initialValues.items) && initialValues.items.length > 0) {
                 // Ensure each item has a unique id for React keys

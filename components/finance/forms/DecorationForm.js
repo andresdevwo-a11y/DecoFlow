@@ -106,6 +106,12 @@ const DecorationForm = ({ initialValues, onSubmit, onCancel, submitLabel = 'Guar
             setDecorationPrice(newDecorationPrice);
             setNotes(newNotes);
 
+            // Cargar campos de abonos
+            if (initialValues.isInstallment) {
+                setIsInstallment(true);
+                setInstallmentAmount(String(initialValues.amountPaid || 0));
+            }
+
             // Handle items separately to avoid conflicts
             if (initialValues.items && Array.isArray(initialValues.items)) {
                 setItems(initialValues.items);

@@ -529,6 +529,10 @@ export const FinanceProvider = ({ children }) => {
                 notes: updateData.notes !== undefined ? updateData.notes : currentTransaction.notes,
                 date: updateData.date || currentTransaction.date,
                 items: updateData.items !== undefined ? updateData.items : currentTransaction.items,
+                // Campos de abonos
+                isInstallment: updateData.isInstallment !== undefined ? updateData.isInstallment : currentTransaction.isInstallment,
+                totalPrice: updateData.totalPrice !== undefined ? updateData.totalPrice : currentTransaction.totalPrice,
+                amountPaid: updateData.amountPaid !== undefined ? updateData.amountPaid : currentTransaction.amountPaid,
                 updatedAt: now
             };
 
