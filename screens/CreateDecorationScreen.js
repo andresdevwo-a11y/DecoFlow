@@ -12,7 +12,7 @@ import { useFinance } from '../context/FinanceContext';
 import { useAlert } from '../context/AlertContext';
 import DecorationForm from '../components/finance/forms/DecorationForm';
 
-const CreateDecorationScreen = ({ onBack }) => {
+const CreateDecorationScreen = ({ onBack, onSuccess }) => {
     const insets = useSafeAreaInsets();
     const { addDecoration } = useFinance();
     const { showAlert } = useAlert();
@@ -21,8 +21,14 @@ const CreateDecorationScreen = ({ onBack }) => {
     const handleSubmit = async (formData) => {
         setIsSubmitting(true);
         try {
-            await addDecoration(formData);
-            showAlert("success", "Éxito", "Decoración registrada correctamente", onBack);
+            const newTransaction = await addDecoration(formData);
+            showAlert("success", "Éxito", "Decoración registrada correctamente", () => {
+                if (onSuccess) {
+                    onSuccess(newTransaction);
+                } else {
+                    onBack();
+                }
+            });
         } catch (error) {
             showAlert("error", "Error", "No se pudo registrar la decoración. Inténtalo de nuevo.");
         } finally {

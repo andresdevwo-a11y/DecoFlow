@@ -12,7 +12,7 @@ import { useFinance } from '../context/FinanceContext';
 import { useAlert } from '../context/AlertContext';
 import SaleForm from '../components/finance/forms/SaleForm';
 
-const CreateSaleScreen = ({ onBack }) => {
+const CreateSaleScreen = ({ onBack, onSuccess }) => {
     const insets = useSafeAreaInsets();
     const { addSale } = useFinance();
     const { showAlert } = useAlert();
@@ -21,8 +21,14 @@ const CreateSaleScreen = ({ onBack }) => {
     const handleSubmit = async (formData) => {
         setIsSubmitting(true);
         try {
-            await addSale(formData);
-            showAlert("success", "Éxito", "Venta registrada correctamente", onBack);
+            const newTransaction = await addSale(formData);
+            showAlert("success", "Éxito", "Venta registrada correctamente", () => {
+                if (onSuccess) {
+                    onSuccess(newTransaction);
+                } else {
+                    onBack();
+                }
+            });
         } catch (error) {
             showAlert("error", "Error", "No se pudo registrar la venta. Inténtalo de nuevo.");
         } finally {

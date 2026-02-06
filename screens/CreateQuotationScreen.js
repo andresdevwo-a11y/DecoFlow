@@ -17,7 +17,7 @@ import QuotationSaleForm from '../components/finance/forms/QuotationSaleForm';
 import QuotationRentalForm from '../components/finance/forms/QuotationRentalForm';
 import QuotationDecorationForm from '../components/finance/forms/QuotationDecorationForm';
 
-const CreateQuotationScreen = ({ onBack }) => {
+const CreateQuotationScreen = ({ onBack, onSuccess }) => {
     const insets = useSafeAreaInsets();
     const { addQuotation } = useFinance();
     const { showAlert } = useAlert();
@@ -27,13 +27,18 @@ const CreateQuotationScreen = ({ onBack }) => {
     const handleSubmit = async (formData) => {
         setIsSubmitting(true);
         try {
-            await addQuotation({
+            const newQuotation = await addQuotation({
                 ...formData,
                 type: transactionType
             });
             // Show toast and navigate immediately (Fire and forget)
-            showAlert("success", "Éxito", "Cotización registrada correctamente");
-            onBack();
+            showAlert("success", "Éxito", "Cotización registrada correctamente", () => {
+                if (onSuccess) {
+                    onSuccess(newQuotation);
+                } else {
+                    onBack();
+                }
+            });
         } catch (error) {
             console.error("Error saving quotation:", error);
             showAlert("error", "Error", "No se pudo registrar la cotización. Inténtalo de nuevo.");

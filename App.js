@@ -357,15 +357,52 @@ function AppContent() {
         />
       );
     } else if (activeTab === 'create_sale') {
-      return <CreateSaleScreen onBack={() => setActiveTab('finances')} />;
+      return (
+        <CreateSaleScreen
+          onBack={() => setActiveTab('finances')}
+          onSuccess={(transaction) => {
+            setSelectedTransaction(transaction);
+            setActiveTab('transaction_detail');
+          }}
+        />
+      );
     } else if (activeTab === 'create_rental') {
-      return <CreateRentalScreen onBack={() => setActiveTab('finances')} />;
+      return (
+        <CreateRentalScreen
+          onBack={() => setActiveTab('finances')}
+          onSuccess={(transaction) => {
+            setSelectedTransaction(transaction);
+            setActiveTab('transaction_detail');
+          }}
+        />
+      );
     } else if (activeTab === 'create_decoration') {
-      return <CreateDecorationScreen onBack={() => setActiveTab('finances')} />;
+      return (
+        <CreateDecorationScreen
+          onBack={() => setActiveTab('finances')}
+          onSuccess={(transaction) => {
+            setSelectedTransaction(transaction);
+            setActiveTab('transaction_detail');
+          }}
+        />
+      );
     } else if (activeTab === 'create_expense') {
-      return <CreateExpenseScreen onBack={() => setActiveTab('finances')} />;
+      return (
+        <CreateExpenseScreen
+          onBack={() => setActiveTab('finances')}
+          onSuccess={() => setActiveTab('finances')} // Explicitly go back to list for expenses for now
+        />
+      );
     } else if (activeTab === 'create_quotation') {
-      return <CreateQuotationScreen onBack={() => setActiveTab('finances')} />;
+      return (
+        <CreateQuotationScreen
+          onBack={() => setActiveTab('finances')}
+          onSuccess={(quotation) => {
+            setSelectedQuotation(quotation);
+            setActiveTab('quotation_detail');
+          }}
+        />
+      );
     } else if (activeTab === 'quotations_list') {
       return (
         <QuotationsListScreen

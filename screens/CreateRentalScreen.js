@@ -12,7 +12,7 @@ import { useFinance } from '../context/FinanceContext';
 import { useAlert } from '../context/AlertContext';
 import RentalForm from '../components/finance/forms/RentalForm';
 
-const CreateRentalScreen = ({ onBack }) => {
+const CreateRentalScreen = ({ onBack, onSuccess }) => {
     const insets = useSafeAreaInsets();
     const { addRental } = useFinance();
     const { showAlert } = useAlert();
@@ -21,8 +21,14 @@ const CreateRentalScreen = ({ onBack }) => {
     const handleSubmit = async (formData) => {
         setIsSubmitting(true);
         try {
-            await addRental(formData);
-            showAlert("success", "Éxito", "Alquiler registrado correctamente", onBack);
+            const newTransaction = await addRental(formData);
+            showAlert("success", "Éxito", "Alquiler registrado correctamente", () => {
+                if (onSuccess) {
+                    onSuccess(newTransaction);
+                } else {
+                    onBack();
+                }
+            });
         } catch (error) {
             showAlert("error", "Error", "No se pudo registrar el alquiler. Inténtalo de nuevo.");
         } finally {
