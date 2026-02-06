@@ -29,31 +29,45 @@ const NoteCard = React.memo(({ note, onPress, onLongPress, isSelected, selection
             style={[
                 styles.card,
                 isSelected && styles.cardSelected,
-                isSelected && {
-                    borderColor: COLORS.primary,
-                    backgroundColor: COLORS.primary + '10'
-                }
             ]}
             onPress={onPress}
             onLongPress={onLongPress}
             activeOpacity={0.7}
         >
             <View style={styles.cardHeader}>
-                <Text style={[
-                    styles.cardTitle,
-                    isSelected && { color: COLORS.primary, fontWeight: 'bold' }
-                ]} numberOfLines={1}>{note.title}</Text>
-                {selectionMode ? (
-                    <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                        {isSelected && <Feather name="check" size={14} color="#FFF" />}
+                {/* Decorative Icon */}
+                <View style={styles.cardIconContainer}>
+                    <Feather name="file-text" size={16} color={COLORS.primary} />
+                </View>
+
+                {/* Content Header */}
+                <View style={styles.headerContent}>
+                    <View style={styles.titleRow}>
+                        <Text style={[
+                            styles.cardTitle,
+                            isSelected && { color: COLORS.primary }
+                        ]} numberOfLines={1}>{note.title}</Text>
+
+                        {selectionMode ? (
+                            <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                                {isSelected && <Feather name="check" size={12} color="#FFF" />}
+                            </View>
+                        ) : (
+                            <View style={styles.dateBadge}>
+                                <Feather name="calendar" size={10} color={COLORS.textSecondary} />
+                                <Text style={styles.cardDate}>{formatDate(note.date)}</Text>
+                            </View>
+                        )}
                     </View>
-                ) : (
-                    <Text style={styles.cardDate}>{formatDate(note.date)}</Text>
-                )}
+                </View>
             </View>
-            <Text style={styles.cardPreview} numberOfLines={2}>
-                {note.content || "Sin contenido adicional"}
-            </Text>
+
+            {/* Note Preview */}
+            <View style={styles.cardPreviewContainer}>
+                <Text style={styles.cardPreview} numberOfLines={2}>
+                    {note.content || "Sin contenido adicional..."}
+                </Text>
+            </View>
         </TouchableOpacity>
     );
 });
@@ -155,7 +169,9 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Feather name="file-text" size={48} color={COLORS.textMuted} style={{ marginBottom: SPACING.md }} />
+            <View style={styles.emptyIconContainer}>
+                <Feather name="edit-3" size={32} color={COLORS.primary} />
+            </View>
             <Text style={styles.emptyText}>No hay notas</Text>
             <Text style={styles.emptySubtext}>Crea una nueva nota para empezar</Text>
         </View>
@@ -212,12 +228,14 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.md,
-        padding: SPACING.md,
+        borderRadius: RADIUS.lg,
+        padding: SPACING.lg,
         marginBottom: SPACING.md,
         borderWidth: 1,
         borderColor: COLORS.border,
         ...SHADOWS.card,
+        borderLeftWidth: 4,
+        borderLeftColor: COLORS.primary,
     },
     cardSelected: {
         shadowColor: 'transparent',
@@ -225,23 +243,62 @@ const styles = StyleSheet.create({
         shadowOpacity: 0,
         shadowRadius: 0,
         elevation: 0,
+        backgroundColor: COLORS.primary + '05',
+        borderColor: COLORS.primary,
+        borderWidth: 1,
+        borderLeftWidth: 4,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: SPACING.md,
+    },
+    cardIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: RADIUS.full,
+        backgroundColor: COLORS.primary + '15',
         alignItems: 'center',
-        marginBottom: SPACING.xs,
+        justifyContent: 'center',
+        marginRight: SPACING.sm,
+    },
+    headerContent: {
+        flex: 1,
+        gap: 4,
+    },
+    titleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
     cardTitle: {
-        fontSize: TYPOGRAPHY.size.lg,
+        fontSize: TYPOGRAPHY.size.base,
         fontWeight: TYPOGRAPHY.weight.bold,
         color: COLORS.text,
         flex: 1,
         marginRight: SPACING.sm,
     },
+    dateBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: RADIUS.sm,
+        backgroundColor: COLORS.background,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
     cardDate: {
-        fontSize: TYPOGRAPHY.size.xs,
-        color: COLORS.textMuted,
+        fontSize: 11,
+        color: COLORS.textSecondary,
+        marginLeft: 4,
+        fontWeight: TYPOGRAPHY.weight.medium,
+    },
+    cardPreviewContainer: {
+        backgroundColor: COLORS.background,
+        padding: SPACING.sm,
+        borderRadius: RADIUS.sm,
     },
     cardPreview: {
         fontSize: TYPOGRAPHY.size.sm,
@@ -251,17 +308,27 @@ const styles = StyleSheet.create({
     emptyContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 100,
+        marginTop: 80,
+    },
+    emptyIconContainer: {
+        width: 80,
+        height: 80,
+        borderRadius: RADIUS.full,
+        backgroundColor: COLORS.primary + '10',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: SPACING.md,
     },
     emptyText: {
-        fontSize: TYPOGRAPHY.size.xl,
+        fontSize: TYPOGRAPHY.size.lg,
         fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.textSecondary,
+        color: COLORS.text,
+        marginBottom: SPACING.xs,
     },
     emptySubtext: {
-        fontSize: TYPOGRAPHY.size.md,
+        fontSize: TYPOGRAPHY.size.sm,
         color: COLORS.textMuted,
-        marginTop: SPACING.xs,
+        textAlign: 'center',
     },
     checkbox: {
         width: 20,
