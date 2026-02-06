@@ -32,6 +32,11 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: SPACING.xl,
         right: SPACING.lg,
+        // Increase dimensions to match FinanceFAB layout context
+        height: 500,
+        width: 300,
+        alignItems: 'flex-end', // Align FAB to right
+        justifyContent: 'flex-end', // Align FAB to bottom
         zIndex: 100,
     },
     fabRow: {
