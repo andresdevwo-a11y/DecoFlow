@@ -239,10 +239,10 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                             </TouchableOpacity>
                         </View>
                         <TouchableOpacity
-                            style={styles.actionButtonList}
+                            style={styles.actionButtonOptions}
                             onPress={onOptionsPress}
                         >
-                            <Feather name="more-vertical" size={18} color={COLORS.placeholder} />
+                            <Feather name="more-vertical" size={20} color={COLORS.text} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -324,8 +324,14 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: RADIUS.lg,
+        // Explicitly set all corners to override Grid style inheritance
+        borderTopLeftRadius: RADIUS.lg,
+        borderTopRightRadius: RADIUS.lg,
+        borderBottomLeftRadius: RADIUS.lg,
+        borderBottomRightRadius: RADIUS.lg,
         marginRight: SPACING.md,
         aspectRatio: 1,
+        overflow: 'hidden',
     },
     image: {
         width: '100%',
@@ -447,17 +453,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: SPACING.sm, // Add explicit gap between column and options button
+        height: '100%', // Ensure it takes full height for centering
+        justifyContent: 'center',
     },
     actionColumn: {
         flexDirection: 'column',
         gap: 8, // Increase vertical gap effectively
         marginRight: 2, // Slight extra breathing room
+        justifyContent: 'center', // Center buttons vertically in column
+        alignItems: 'center', // Center buttons horizontally in column
     },
     actionButtonList: {
         padding: 6,
         backgroundColor: COLORS.background,
         borderRadius: RADIUS.full,
     },
+    actionButtonOptions: {
+        padding: 6,
+        backgroundColor: 'transparent', // No background
+        borderRadius: RADIUS.full,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 });
 
 export default ProductCard;
