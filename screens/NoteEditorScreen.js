@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +55,11 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         return `${dateStr}  |  ${charCount} caracteres`;
     };
 
+    const hasChanges = useMemo(() => {
+        if (!note) return true; // New note always has changes (or at least valid to save if title exists)
+        return title.trim() !== initialTitle || content !== initialContent;
+    }, [note, title, initialTitle, content, initialContent]);
+
     const showToast = (message, type = 'success') => {
         setToast({ visible: true, message, type });
     };
@@ -71,7 +76,6 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 
         // Check for changes if it's an existing note
         if (note) {
-            const hasChanges = title.trim() !== initialTitle || content !== initialContent;
             if (!hasChanges) {
                 showToast("No has realizado cambios", "info");
                 return;
@@ -184,9 +188,12 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             {/* Floating/Fixed Save Button */}
             <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
                 <TouchableOpacity
-                    style={[styles.saveButton, isSubmitting && styles.disabledButton]}
+                    style={[
+                        styles.saveButton,
+                        (isSubmitting || (note && !hasChanges)) && styles.disabledButton
+                    ]}
                     onPress={handleSave}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting} // We don't disable if !hasChanges, so we can show the toast
                     activeOpacity={0.9}
                 >
                     <Feather name="save" size={20} color="#FFF" style={{ marginRight: SPACING.sm }} />
