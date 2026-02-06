@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useLicense } from '../context/LicenseContext';
+import { useAlert } from '../context/AlertContext';
 import { StatusBar } from 'expo-status-bar';
-import ToastNotification from '../components/ui/ToastNotification';
 
 const COLORS = {
     primary: '#4CAF50',
@@ -16,20 +15,47 @@ const COLORS = {
 };
 
 export default function LicenseActivationScreen() {
+    // Redundant declaration removed
+    const { showToast } = useAlert();
+
+    // Safety check if useLicense didn't provide these (based on reading previous file, they weren't destructured in original file, but used in render?)
+    // Ah, wait. The original file had: const [code, setCode] = useState(''); const [submitting, setSubmitting] = useState(false);
+    // And const { activate } was NOT destructured but called as "activate(code)". Wait. 
+    // In original file: "const result = await activate(code);" implies activate was imported?
+    // Let me check imports again. "import { useLicense } from '../context/LicenseContext';"
+    // But inside component: "const { activate } = useLicense();" was MISSING in the view! 
+    // It was just "const result = await activate(code)". ERROR in previous code? 
+    // No, I might have missed it in the view.
+    // Line 58: "const result = await activate(code);"
+    // But where is activate defined? 
+    // Line 4: "import { useLicense } from '../context/LicenseContext';"
+    // Line 18: "export default function LicenseActivationScreen() {"
+    // No "const { activate } = useLicense();".
+    // This implies `activate` might be a global function or I missed a line. 
+    // Looking at file content again... Line 4 is import. Line 18 function start.
+    // Maybe it was imported from somewhere else? 
+
+    // Wait, looking at the previous specific view_code output for LicenseActivationScreen.js...
+    // Line 4: import { useLicense } from '../context/LicenseContext';
+    // Line 58: const result = await activate(code); -> This would throw ReferenceError if activate is not defined.
+    // UNLESS `activate` is imported? No...
+    // maybe `const { activate } = useLicense()` was omitted in the previous view or I missed it?
+    // I read lines 1-246. 
+    // Line 18: export default...
+    // Line 19: const [code, setCode] ...
+    // Line 20: const [submitting...
+    // Line 22: // Toast state...
+    // Line 55: const handleActivate...
+    // Line 58: const result = await activate(code);
+
+    // This suggests `activate` IS UNDEFINED in the current file unless I missed something?
+    // Or maybe it was imported? No.
+    // It is possible the previous code I saw was bugged or I missed a line.
+
+    // BUT, I should definitely fix it to use useLicense correctly.
+
     const [code, setCode] = useState('');
     const [submitting, setSubmitting] = useState(false);
-
-    // Toast state replacement for InfoModal
-    const [toast, setToast] = useState({
-        visible: false,
-        message: '',
-        type: 'error',
-        onHide: null
-    });
-
-    const showToast = (message, type = 'error', onHide = null) => {
-        setToast({ visible: true, message, type, onHide });
-    };
 
     const formatCode = (text) => {
         // Eliminar todo lo que no sea alfanumérico
@@ -52,25 +78,28 @@ export default function LicenseActivationScreen() {
         setCode(formatCode(text));
     };
 
+    // Retrieve activate from context
+    const { activate, confirmActivation, isEnteringNewCode, cancelNewLicenseEntry } = useLicense();
+
     const handleActivate = async () => {
         setSubmitting(true);
         try {
             const result = await activate(code);
             if (!result.success) {
-                showToast(result.message, 'error');
+                showToast('error', result.message);
             } else {
-                showToast('Tu licencia ha sido verificada correctamente. Bienvenido.', 'success', () => {
-                    confirmActivation();
-                });
+                // SUCCESS! 
+                // Show toast globally
+                showToast('success', 'Tu licencia ha sido verificada correctamente. Bienvenido.');
+                // Navigate immediately
+                confirmActivation();
             }
         } catch (error) {
-            showToast('Ocurrió un error inesperado. Intenta nuevamente.', 'error');
+            showToast('error', 'Ocurrió un error inesperado. Intenta nuevamente.');
         } finally {
             setSubmitting(false);
         }
     };
-
-
 
     return (
         <View style={styles.container}>
@@ -130,17 +159,6 @@ export default function LicenseActivationScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-
-            <ToastNotification
-                visible={toast.visible}
-                message={toast.message}
-                type={toast.type}
-                duration={3000}
-                onHide={() => {
-                    setToast(prev => ({ ...prev, visible: false }));
-                    if (toast.onHide) toast.onHide();
-                }}
-            />
         </View>
     );
 }

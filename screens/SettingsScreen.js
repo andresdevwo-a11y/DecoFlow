@@ -28,11 +28,12 @@ import ConfirmResetModal from '../components/ConfirmResetModal';
 import ChangeLicenseModal from '../components/ChangeLicenseModal';
 import InfoModal from '../components/InfoModal';
 import SelectionModal from '../components/SelectionModal';
-import ToastNotification from '../components/ui/ToastNotification';
+// import ToastNotification from '../components/ui/ToastNotification'; // Removed
 import { useData } from '../context/DataContext';
 import { useFinance } from '../context/FinanceContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useLicense } from '../context/LicenseContext';
+import { useAlert } from '../context/AlertContext'; // Added
 
 import { exportData } from '../services/ExportService';
 import { importData } from '../services/ImportService';
@@ -59,6 +60,9 @@ export default function SettingsScreen() {
         resetSettings
     } = useSettings();
 
+    // Access Global Alert
+    const { showToast: showGlobalToast } = useAlert();
+
     // Modals
     const [resetModalVisible, setResetModalVisible] = useState(false);
     const [changeLicenseModalVisible, setChangeLicenseModalVisible] = useState(false);
@@ -71,9 +75,12 @@ export default function SettingsScreen() {
         setBusinessForm(businessInfo);
     }, [businessInfo, editBusinessVisible]);
 
+    // Wrapper for Toast compatibility
+    const showToast = (message, type = 'success') => showGlobalToast(type, message);
+
     const handleSaveBusinessInfo = async () => {
         if (!businessForm.name || !businessForm.rut) {
-            showToast('Nombre y RUT son obligatorios');
+            showToast('Nombre y RUT son obligatorios', 'error'); // Fixed to use error type if needed, or default
             return;
         }
         await setBusinessInfo(businessForm);
@@ -84,10 +91,10 @@ export default function SettingsScreen() {
     // Custom Modals State
     const [infoModal, setInfoModal] = useState({ visible: false, title: '', message: '', type: 'info' });
     const [selectionModal, setSelectionModal] = useState({ visible: false, title: '', options: [] });
-    const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+    // const [toast, setToast] = useState({ visible: false, message: '', type: 'success' }); // Removed
 
     // Handlers
-    const showToast = (message) => setToast({ visible: true, message, type: 'success' });
+    // const showToast = (message) => setToast({ visible: true, message, type: 'success' }); // Removed
     const closeInfoModal = useCallback(() => setInfoModal(prev => ({ ...prev, visible: false })), []);
     const closeSelectionModal = useCallback(() => setSelectionModal(prev => ({ ...prev, visible: false })), []);
 
@@ -613,13 +620,6 @@ export default function SettingsScreen() {
                     </Text>
                 </View>
             </ScrollView>
-
-            <ToastNotification
-                visible={toast.visible}
-                message={toast.message}
-                type={toast.type}
-                onHide={() => setToast(prev => ({ ...prev, visible: false }))}
-            />
 
             {/* Modals */}
             <ChangeLicenseModal

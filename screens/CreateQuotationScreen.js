@@ -31,7 +31,9 @@ const CreateQuotationScreen = ({ onBack }) => {
                 ...formData,
                 type: transactionType
             });
-            showAlert("success", "Éxito", "Cotización registrada correctamente", onBack);
+            // Show toast and navigate immediately (Fire and forget)
+            showAlert("success", "Éxito", "Cotización registrada correctamente");
+            onBack();
         } catch (error) {
             console.error("Error saving quotation:", error);
             showAlert("error", "Error", "No se pudo registrar la cotización. Inténtalo de nuevo.");

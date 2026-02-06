@@ -14,7 +14,7 @@ import LayersPanel from '../components/workspace/panels/LayersPanel';
 import ContextualToolbar from '../components/workspace/toolbars/ContextualToolbar';
 import MultiSelectToolbar from '../components/workspace/toolbars/MultiSelectToolbar'; // NEW
 import FloatingControls from '../components/workspace/toolbars/FloatingControls';
-import ToastNotification from '../components/ui/ToastNotification';
+// import ToastNotification from '../components/ui/ToastNotification'; // Removed
 
 // Modals
 import ImageSourceModal from '../components/workspace/modals/ImageSourceModal';
@@ -26,6 +26,7 @@ import CreateCanvasModal from '../components/CreateCanvasModal'; // Used for Fir
 
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useSettings } from '../context/SettingsContext';
+import { useAlert } from '../context/AlertContext'; // Added
 
 export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisible prop
     const insets = useSafeAreaInsets();
@@ -54,6 +55,7 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     } = useWorkspace();
 
     const { isAutoSaveEnabled } = useSettings();
+    const { showToast: showGlobalToast } = useAlert(); // Access global alert
     const autoSaveTimeoutRef = useRef(null);
 
     // Local UI State (Panel visibility etc.)
@@ -76,8 +78,10 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     const [isNameModalVisible, setNameModalVisible] = useState(false);
 
     // Feedback State
-    const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
-    const showToast = (message, type = 'success') => setToast({ visible: true, message, type });
+    // Replaced local state with wrapper to global toast to maintain signature (message, type)
+    const showToast = (message, type = 'success') => {
+        showGlobalToast(type, message);
+    };
 
     const canvasRef = useRef();
 
@@ -472,7 +476,6 @@ export default function WorkspaceScreen({ onBack, isVisible }) { // Added isVisi
     return (
         <View style={styles.container}>
             {isVisible && <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />}
-            <ToastNotification visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(prev => ({ ...prev, visible: false }))} />
 
             <WorkspaceHeader
                 onBack={handleBackRequest}

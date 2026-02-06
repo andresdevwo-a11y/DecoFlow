@@ -486,9 +486,11 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <LicenseProvider>
-          <LicenseGate />
-        </LicenseProvider>
+        <AlertProvider>
+          <LicenseProvider>
+            <LicenseGate />
+          </LicenseProvider>
+        </AlertProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -526,11 +528,9 @@ function LicenseGate() {
           <FinanceProvider>
             <WorkspaceProvider>
               <LoadingProvider>
-                <AlertProvider>
-                  <NotesProvider>
-                    <AppContent />
-                  </NotesProvider>
-                </AlertProvider>
+                <NotesProvider>
+                  <AppContent />
+                </NotesProvider>
               </LoadingProvider>
             </WorkspaceProvider>
           </FinanceProvider>
