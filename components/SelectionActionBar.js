@@ -2,12 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY, SIZES } from '../constants/Theme';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 
 const SelectionActionBar = ({ selectedCount, onClear, onDelete, onMove }) => {
     if (selectedCount === 0) return null;
 
     return (
-        <View style={styles.container}>
+        <Animated.View
+            style={styles.container}
+            entering={FadeInDown.duration(300).springify()}
+            exiting={FadeOutDown.duration(200)}
+        >
             <View style={styles.leftSection}>
                 <TouchableOpacity onPress={onClear} style={styles.closeButton}>
                     <Feather name="x" size={24} color="#FFFFFF" />
@@ -20,7 +25,7 @@ const SelectionActionBar = ({ selectedCount, onClear, onDelete, onMove }) => {
                     <Feather name="trash-2" size={24} color="#FF6B6B" />
                 </TouchableOpacity>
             </View>
-        </View>
+        </Animated.View>
     );
 };
 
