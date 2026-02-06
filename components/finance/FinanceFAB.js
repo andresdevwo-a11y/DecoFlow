@@ -115,6 +115,36 @@ const FinanceFAB = ({
             outputRange: [1, activeSubMenu && hasSubMenu ? 1 : 0]
         });
 
+        // Scale animation to hide shadow when closed/hidden
+        const scale = Animated.multiply(
+            animation.interpolate({
+                inputRange: [0, 0.1, 1], // Quickly scale up
+                outputRange: [0, 1, 1]
+            }),
+            subMenuAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, activeSubMenu && hasSubMenu ? 1 : 0.01] // Scale to 0 if hidden by subMenu (0.01 to keep active one visible if needed, but here we want non-active to disappear)
+            })
+        );
+
+        // Specific scale logic:
+        // 1. Base scale comes from main opening animation (0 -> 1)
+        // 2. If subMenu is opening:
+        //    - If this item is the activeSubMenu host, it stays (scale 1)
+        //    - If this item is NOT the activeSubMenu host, it disappears (scale -> 0)
+
+        const mainScale = animation.interpolate({
+            inputRange: [0, 0.1, 1],
+            outputRange: [0, 1, 1]
+        });
+
+        const subMenuScale = subMenuAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, activeSubMenu && hasSubMenu ? 1 : 0]
+        });
+
+        const finalScale = Animated.multiply(mainScale, subMenuScale);
+
         // Determine visibility for pointer events
         const isVisible = !activeSubMenu || (activeSubMenu && hasSubMenu);
 
@@ -124,7 +154,8 @@ const FinanceFAB = ({
                     styles.menuItemContainer,
                     {
                         opacity: Animated.multiply(opacity, subMenuOpenOpacity),
-                        transform: [{ translateY }],
+                        opacity: Animated.multiply(opacity, subMenuOpenOpacity),
+                        transform: [{ translateY }, { scale: finalScale }],
                         zIndex: isOpen ? 1 : -1,
                     }
                 ]}
@@ -159,13 +190,19 @@ const FinanceFAB = ({
 
         const opacity = subMenuAnimation;
 
+        const scale = subMenuAnimation.interpolate({
+            inputRange: [0, 0.1, 1],
+            outputRange: [0, 1, 1]
+        });
+
         return (
             <Animated.View
                 style={[
                     styles.subMenuItemContainer,
                     {
                         opacity,
-                        transform: [{ translateY }],
+                        opacity,
+                        transform: [{ translateY }, { scale }],
                         bottom: 70 + 20, // Base position above main FAB + Ingresos offset
                     }
                 ]}
