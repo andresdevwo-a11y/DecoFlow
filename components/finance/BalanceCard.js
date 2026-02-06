@@ -46,7 +46,7 @@ const BalanceCard = ({ summary = {} }) => {
                 {/* Ingresos Column */}
                 <View style={styles.detailColumn}>
                     <View style={[styles.iconCircle, { backgroundColor: '#DCFCE7' }]}>
-                        <Feather name="arrow-down-left" size={20} color="#16A34A" />
+                        <Feather name="arrow-up-right" size={20} color="#16A34A" />
                     </View>
                     <View>
                         <Text style={styles.detailLabel}>Ingresos</Text>
@@ -61,7 +61,7 @@ const BalanceCard = ({ summary = {} }) => {
                 {/* Gastos Column */}
                 <View style={styles.detailColumn}>
                     <View style={[styles.iconCircle, { backgroundColor: '#FEE2E2' }]}>
-                        <Feather name="arrow-up-right" size={20} color="#DC2626" />
+                        <Feather name="arrow-down-left" size={20} color="#DC2626" />
                     </View>
                     <View>
                         <Text style={styles.detailLabel}>Gastos</Text>
