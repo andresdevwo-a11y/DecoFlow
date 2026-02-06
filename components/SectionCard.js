@@ -218,29 +218,31 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     cardSelected: {
-        backgroundColor: COLORS.primary + '12', // Slightly stronger background
+        backgroundColor: COLORS.primary + '05', // Match NotesScreen
         borderColor: COLORS.primary,
         borderWidth: 1.5,
-        shadowOpacity: 0, // Remove shadow when selected to avoid "dirty" edges
+        // Match NotesScreen shadow removal
+        shadowColor: 'transparent',
+        shadowOpacity: 0,
         elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
         top: SPACING.md,
         right: SPACING.md,
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+        width: 20, // Match NotesScreen size
+        height: 20, // Match NotesScreen size
+        borderRadius: 4, // Match NotesScreen (Square)
         borderWidth: 2,
-        borderColor: '#FFFFFF',
-        backgroundColor: 'rgba(0,0,0,0.1)', // Very subtle dark tint for contrast
+        borderColor: COLORS.textMuted, // Match NotesScreen unselected border
+        backgroundColor: 'rgba(255,255,255,0.9)', // High contrast background for over images
         zIndex: 20,
         justifyContent: 'center',
         alignItems: 'center',
     },
     selectionIndicatorActive: {
-        backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
-        opacity: 1, // Ensure distinct visibility
+        backgroundColor: COLORS.primary, // Match NotesScreen
+        borderColor: COLORS.primary, // Match NotesScreen
+        opacity: 1,
     }
 });
