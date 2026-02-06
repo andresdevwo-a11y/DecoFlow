@@ -78,14 +78,14 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.xl, // 24px
         marginBottom: SPACING.lg,
         width: '48%',
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        // Softer shadows
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
+        borderWidth: 1.5, // Match ProductCard
+        borderColor: 'transparent', // Match ProductCard (hidden by default)
+        // Shadows matching ProductCard
+        ...SHADOWS.card,
+        elevation: 2,
+        shadowOpacity: 0.06,
         shadowRadius: 10,
-        elevation: 2, // Reduced elevation
+
         minHeight: 180,
         overflow: 'hidden',
         padding: 0,
@@ -95,11 +95,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: SPACING.md,
-        minHeight: 88, // Slightly taller for better touch target
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        elevation: 0, // Flat or very subtle in list
-        shadowOpacity: 0,
+        minHeight: 88,
+        borderWidth: 1.5, // Match ProductCard
+        borderColor: 'transparent', // Match ProductCard
+        // Shadows matching ProductCard (enabled for List too)
+        ...SHADOWS.card,
+        elevation: 2,
+        shadowOpacity: 0.06,
+        shadowRadius: 10,
     },
     innerContainer: {
         width: '100%',
@@ -215,26 +218,29 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     cardSelected: {
+        backgroundColor: COLORS.primary + '12', // Slightly stronger background
         borderColor: COLORS.primary,
-        borderWidth: 2,
-        transform: [{ scale: 0.98 }], // Subtle press effect logic if needed, but here just border
+        borderWidth: 1.5,
+        shadowOpacity: 0, // Remove shadow when selected to avoid "dirty" edges
+        elevation: 0,
     },
     selectionIndicator: {
         position: 'absolute',
-        top: 10,
-        left: 10, // Left side often looks better for selection in cover cards
+        top: SPACING.md,
+        right: SPACING.md,
         width: 24,
         height: 24,
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: COLORS.white, // White border often readable on covers
-        backgroundColor: 'rgba(255,255,255,0.3)',
-        zIndex: 10,
+        borderColor: '#FFFFFF',
+        backgroundColor: 'rgba(0,0,0,0.1)', // Very subtle dark tint for contrast
+        zIndex: 20,
         justifyContent: 'center',
         alignItems: 'center',
     },
     selectionIndicatorActive: {
         backgroundColor: COLORS.primary,
         borderColor: COLORS.primary,
+        opacity: 1, // Ensure distinct visibility
     }
 });
