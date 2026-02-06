@@ -1,19 +1,15 @@
 
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Linking, ScrollView, ActivityIndicator } from 'react-native';
 import { useLicense } from '../context/LicenseContext';
 import { StatusBar } from 'expo-status-bar';
 import ToastNotification from '../components/ui/ToastNotification';
-
-const COLORS = {
-    error: '#E74C3C',
-    warning: '#F39C12',
-    background: '#F3F4F6',
-    text: '#2C3E50',
-    textSecondary: '#7F8C8D',
-};
+import { Feather } from '@expo/vector-icons';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS, SIZES } from '../constants/Theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LicenseBlockedScreen({ info }) {
+    const insets = useSafeAreaInsets();
     const { refreshLicense, removeLicense, startNewLicenseEntry, isLoading } = useLicense();
     const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
@@ -71,35 +67,35 @@ export default function LicenseBlockedScreen({ info }) {
                     title: 'Licencia Expirada',
                     message: `Tu licencia venció el ${new Date(info.expired_at).toLocaleDateString()}. Para continuar disfrutando del servicio, por favor renuévala.`,
                     color: COLORS.warning,
-                    icon: 'CLOCK'
+                    icon: 'clock'
                 };
             case 'LICENSE_BLOCKED':
                 return {
                     title: 'Acceso Bloqueado',
                     message: 'Tu licencia ha sido suspendida temporalmente por administración. Contacta a soporte para más detalles.',
                     color: COLORS.error,
-                    icon: 'LOCK'
+                    icon: 'lock'
                 };
             case 'DEVICE_MISMATCH':
                 return {
                     title: 'Dispositivo No Autorizado',
                     message: 'Esta licencia está siendo usada en otro dispositivo. Solo se permite un dispositivo activo por licencia.',
                     color: COLORS.error,
-                    icon: 'PHONE'
+                    icon: 'smartphone'
                 };
             case 'CACHE_EXPIRED':
                 return {
                     title: 'Verificación Requerida',
                     message: 'Has estado sin conexión demasiado tiempo. Conéctate a internet para verificar tu licencia.',
                     color: COLORS.warning,
-                    icon: 'WIFI'
+                    icon: 'wifi-off'
                 };
             default:
                 return {
                     title: 'Acceso Restringido',
                     message: info?.message || 'No se pudo validar la licencia.',
                     color: COLORS.error,
-                    icon: 'ALERT'
+                    icon: 'alert-triangle'
                 };
         }
     };
@@ -109,10 +105,15 @@ export default function LicenseBlockedScreen({ info }) {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView
+                contentContainerStyle={[
+                    styles.content,
+                    { paddingTop: insets.top + SPACING.xl, paddingBottom: insets.bottom + SPACING.xl }
+                ]}
+            >
 
-                <View style={[styles.iconContainer, { backgroundColor: details.color + '20' }]}>
-                    <Text style={[styles.iconText, { color: details.color }]}>!</Text>
+                <View style={[styles.iconContainer, { backgroundColor: details.color + '15' }]}>
+                    <Feather name={details.icon} size={48} color={details.color} />
                 </View>
 
                 <Text style={styles.title}>{details.title}</Text>
@@ -120,6 +121,7 @@ export default function LicenseBlockedScreen({ info }) {
 
                 {info?.offline_mode && (
                     <View style={styles.offlineBox}>
+                        <Feather name="wifi-off" size={16} color={COLORS.textSecondary} style={{ marginRight: 8 }} />
                         <Text style={styles.offlineText}>
                             Modo Offline: Quedan {info.offline_days_remaining} días
                         </Text>
@@ -131,10 +133,16 @@ export default function LicenseBlockedScreen({ info }) {
                         style={[styles.button, { backgroundColor: details.color }]}
                         onPress={handleVerifyLicense}
                         disabled={isLoading}
+                        activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>
-                            {isLoading ? 'Verificando...' : 'Verificar Estado'}
-                        </Text>
+                        {isLoading ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Feather name="refresh-cw" size={18} color="white" style={{ marginRight: 8 }} />
+                                <Text style={styles.buttonText}>Verificar Estado</Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -148,6 +156,7 @@ export default function LicenseBlockedScreen({ info }) {
                         style={styles.linkButton}
                         onPress={() => Linking.openURL('https://wa.me/573001234567')}
                     >
+                        <Feather name="message-circle" size={18} color={COLORS.primary} style={{ marginRight: 8 }} />
                         <Text style={styles.linkText}>Contactar Soporte</Text>
                     </TouchableOpacity>
                 </View>
@@ -172,7 +181,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 30,
+        paddingHorizontal: SPACING['2xl'],
     },
     iconContainer: {
         width: 100,
@@ -180,72 +189,83 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 24,
-    },
-    iconText: {
-        fontSize: 50,
-        fontWeight: '900',
+        marginBottom: SPACING['2xl'],
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: TYPOGRAPHY.size['3xl'],
+        fontWeight: TYPOGRAPHY.weight.bold,
         color: COLORS.text,
-        marginBottom: 16,
+        marginBottom: SPACING.md,
         textAlign: 'center',
+        letterSpacing: 0.5,
     },
     message: {
-        fontSize: 16,
-        color: COLORS.text,
+        fontSize: TYPOGRAPHY.size.base,
+        color: COLORS.textSecondary,
         textAlign: 'center',
-        marginBottom: 32,
+        marginBottom: SPACING['3xl'],
         lineHeight: 24,
+        paddingHorizontal: SPACING.md,
     },
     offlineBox: {
-        backgroundColor: '#F8F9FA',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 24,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.surface,
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.lg,
+        borderRadius: RADIUS.full,
+        marginBottom: SPACING['2xl'],
+        borderWidth: 1,
+        borderColor: COLORS.border,
     },
     offlineText: {
-        fontSize: 14,
+        fontSize: TYPOGRAPHY.size.sm,
         color: COLORS.textSecondary,
         fontWeight: '600',
     },
     actions: {
         width: '100%',
-        gap: 16,
+        gap: SPACING.lg,
     },
     button: {
         width: '100%',
-        padding: 16,
-        borderRadius: 12,
+        paddingVertical: 16,
+        borderRadius: RADIUS.full,
         alignItems: 'center',
+        justifyContent: 'center',
+        ...SHADOWS.md,
     },
     buttonText: {
         color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: TYPOGRAPHY.size.base,
+        fontWeight: '700',
+        letterSpacing: 0.5,
     },
     outlineButton: {
         width: '100%',
-        padding: 16,
-        borderRadius: 12,
+        paddingVertical: 16,
+        borderRadius: RADIUS.full,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
+        justifyContent: 'center',
+        borderWidth: 1.5,
+        borderColor: COLORS.textSecondary + '40',
+        backgroundColor: 'transparent',
     },
     outlineButtonText: {
         color: COLORS.textSecondary,
-        fontSize: 16,
+        fontSize: TYPOGRAPHY.size.base,
         fontWeight: '600',
     },
     linkButton: {
-        padding: 16,
+        flexDirection: 'row',
+        padding: SPACING.md,
         alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: SPACING.sm,
     },
     linkText: {
-        color: '#3498DB',
-        fontSize: 16,
-        textDecorationLine: 'underline',
+        color: COLORS.primary,
+        fontSize: TYPOGRAPHY.size.base,
+        fontWeight: '600',
     },
 });
