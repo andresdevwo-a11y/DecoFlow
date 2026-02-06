@@ -168,6 +168,13 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                 {!isList && !selectionMode && (
                     <View style={styles.floatingActions}>
                         <TouchableOpacity
+                            style={styles.floatingOptionsButton}
+                            onPress={() => setStatsModalVisible(true)}
+                        >
+                            <Feather name="bar-chart-2" size={16} color={COLORS.text} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
                             style={styles.floatingActionButton}
                             onPress={handleQuickAction}
                         >
@@ -219,6 +226,12 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
                     <View style={styles.actionsList}>
                         <TouchableOpacity
                             style={styles.actionButtonList}
+                            onPress={() => setStatsModalVisible(true)}
+                        >
+                            <Feather name="bar-chart-2" size={18} color={COLORS.textSecondary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.actionButtonList}
                             onPress={handleQuickAction}
                         >
                             <Feather name="shopping-bag" size={18} color={COLORS.primary} />
@@ -239,6 +252,12 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
             onClose={() => setQuickActionModalVisible(false)}
             onConfirm={handleQuickActionConfirm}
             transactionType={selectedTransactionType}
+            product={product}
+        />
+
+        <ProductStatsModal
+            visible={statsModalVisible}
+            onClose={() => setStatsModalVisible(false)}
             product={product}
         />
     </>
