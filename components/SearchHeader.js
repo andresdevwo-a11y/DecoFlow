@@ -12,7 +12,7 @@ const SearchHeader = React.memo(({ title, placeholder, searchText, onSearchChang
 
     return (
         <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
+            {title ? <Text style={styles.title}>{title}</Text> : null}
             {showSearch && (
                 <View style={[
                     styles.searchContainer,

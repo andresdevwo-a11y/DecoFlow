@@ -1,19 +1,40 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING, SIZES } from '../constants/Theme';
+import { COLORS, TYPOGRAPHY, SPACING, SIZES, SHADOWS } from '../constants/Theme';
 
-const Header = ({ title = "DecoFlow Studio", onBack }) => {
+const Header = ({ title, onBack }) => {
+    // Default title if none provided
+    const displayTitle = title || "DecoFlow Studio";
+
+    // Fixed width for side elements to ensure perfect centering
+    const SIDE_WIDTH = 60;
+
     return (
         <View style={styles.container}>
             <View style={styles.contentContainer}>
-                {onBack && (
-                    <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                        <Feather name="arrow-left" size={SIZES.iconLg} color={COLORS.primary} />
-                    </TouchableOpacity>
-                )}
-                <Text style={styles.logoText}>{title}</Text>
-                {onBack && <View style={styles.rightSpacer} />}
+                {/* Left Section (Back Button or Spacer) */}
+                <View style={[styles.sideContainer, { alignItems: 'flex-start' }]}>
+                    {onBack && (
+                        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                            <View style={styles.backButtonCircle}>
+                                <Feather name="arrow-left" size={20} color={COLORS.text} />
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Center Section (Title) */}
+                <View style={styles.titleContainer}>
+                    <Text style={styles.titleText} numberOfLines={1}>
+                        {displayTitle}
+                    </Text>
+                </View>
+
+                {/* Right Section (Spacer - Must be same width as Left) */}
+                <View style={[styles.sideContainer, { alignItems: 'flex-end' }]}>
+                    {/* Add right-side actions here if needed later */}
+                </View>
             </View>
         </View>
     );
@@ -22,33 +43,46 @@ const Header = ({ title = "DecoFlow Studio", onBack }) => {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
         width: '100%',
+        ...SHADOWS.navBar,
+        zIndex: 100,
     },
     contentContainer: {
         height: SIZES.headerHeight,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         paddingHorizontal: SPACING.lg,
     },
+    sideContainer: {
+        width: 50, // Fixed width for perfect balance
+        justifyContent: 'center',
+    },
+    titleContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: SPACING.xs,
+    },
     backButton: {
-        position: 'absolute',
-        left: SPACING.lg,
-        bottom: (SIZES.headerHeight - SIZES.iconLg) / 2,
-        zIndex: 10,
+        justifyContent: 'center',
     },
-    logoText: {
+    backButtonCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: COLORS.background, // Subtle contrast
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    titleText: {
         color: COLORS.text,
-        fontSize: TYPOGRAPHY.size['3xl'],
+        fontSize: 17,
         fontWeight: '700',
-        letterSpacing: TYPOGRAPHY.letterSpacing.wide,
+        letterSpacing: 0.3,
+        textAlign: 'center',
     },
-    rightSpacer: {
-        width: SIZES.iconLg,
-    }
 });
 
 export default Header;

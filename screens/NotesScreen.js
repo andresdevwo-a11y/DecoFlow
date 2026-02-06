@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES, SHADOWS } from '../constants/Theme';
 import SearchHeader from '../components/SearchHeader';
+import Header from '../components/Header';
 
 import FloatingActionButton from '../components/FloatingActionButton';
 import SelectionActionBar from '../components/SelectionActionBar';
@@ -177,14 +178,17 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
         </View>
     );
 
+
+
     return (
         <View style={styles.container}>
+            <Header title="Notas" />
             <FlatList
                 contentContainerStyle={[
                     styles.listContent,
                     {
                         paddingBottom: 100,
-                        paddingTop: insets.top + SPACING.lg
+                        paddingTop: SPACING.md // Reduced top padding since Header is now there
                     }
                 ]}
                 data={filteredNotes}
@@ -192,7 +196,7 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
                 keyExtractor={item => item.id}
                 ListHeaderComponent={
                     <SearchHeader
-                        title="Mis Notas"
+                        // Title removed to avoid duplication
                         placeholder="Buscar notas..."
                         searchText={searchText}
                         onSearchChange={setSearchText}
