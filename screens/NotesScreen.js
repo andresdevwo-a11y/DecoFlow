@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES, SHADOWS } from '../constants/Theme';
 import SearchHeader from '../components/SearchHeader';
 import Header from '../components/Header';
+import EmptyState from '../components/EmptyState';
 
 import FloatingActionButton from '../components/FloatingActionButton';
 import SelectionActionBar from '../components/SelectionActionBar';
@@ -169,13 +170,14 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
     };
 
     const renderEmpty = () => (
-        <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconContainer}>
-                <Feather name="edit-3" size={32} color={COLORS.primary} />
-            </View>
-            <Text style={styles.emptyText}>No hay notas</Text>
-            <Text style={styles.emptySubtext}>Crea una nueva nota para empezar</Text>
-        </View>
+        <EmptyState
+            icon="edit-3"
+            title="No hay notas"
+            description="Crea una nueva nota para empezar"
+            // Notes screen used marginTop 80 previously, but let's try the default flex centering first.
+            // If it needs specific positioning, we can pass style.
+            style={{ marginTop: 80, flex: 0 }} // Override flex:1 if we want it to sit higher up like before
+        />
     );
 
 
@@ -309,31 +311,7 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         lineHeight: 20,
     },
-    emptyContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 80,
-    },
-    emptyIconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: RADIUS.full,
-        backgroundColor: COLORS.primary + '10',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: SPACING.md,
-    },
-    emptyText: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-        marginBottom: SPACING.xs,
-    },
-    emptySubtext: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
-        textAlign: 'center',
-    },
+
     checkbox: {
         width: 20,
         height: 20,

@@ -10,6 +10,7 @@ import SearchHeader from '../components/SearchHeader';
 import ProductCard from '../components/ProductCard';
 import ProductOptionsModal from '../components/ProductOptionsModal';
 import ProductDetailsModal from '../components/ProductDetailsModal';
+import EmptyState from '../components/EmptyState';
 
 import FloatingActionButton from '../components/FloatingActionButton'; // Import FAB
 import SelectionActionBar from '../components/SelectionActionBar';
@@ -198,17 +199,11 @@ export default function SectionContentsScreen({ section, products = [], onBack, 
     }, [handleOptionsPress, productViewMode, isSelectionMode, selectedProductIds, toggleSelection, toggleSelectionMode]);
 
     const renderEmptyState = useCallback(() => (
-        <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-                <Feather name={searchText ? "search" : "folder"} size={SIZES.iconEmpty} color={COLORS.primary} />
-            </View>
-            <Text style={styles.emptyTitle}>
-                {searchText ? "No se encontraron productos" : "Esta sección está vacía"}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-                {searchText ? "Intenta con otro nombre" : "No hay archivos aquí todavía"}
-            </Text>
-        </View>
+        <EmptyState
+            icon={searchText ? "search" : "folder"}
+            title={searchText ? "No se encontraron productos" : "Esta sección está vacía"}
+            description={searchText ? "Intenta con otro nombre" : "No hay archivos aquí todavía"}
+        />
     ), [searchText]);
 
     return (
@@ -294,37 +289,6 @@ const styles = StyleSheet.create({
     listContent: {
         padding: SPACING.xl,
         paddingBottom: 120,
-    },
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: SPACING.xl,
-    },
-    emptyIconContainer: {
-        width: SIZES.iconContainerEmpty,
-        height: SIZES.iconContainerEmpty,
-        borderRadius: SIZES.iconContainerEmpty / 2,
-        backgroundColor: COLORS.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        borderWidth: 1,
-        borderColor: COLORS.primaryBorder,
-    },
-    emptyTitle: {
-        fontSize: TYPOGRAPHY.size['3xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-        marginBottom: SPACING.sm + 2,
-        textAlign: 'center',
-    },
-    emptySubtitle: {
-        fontSize: TYPOGRAPHY.size.xl,
-        color: COLORS.textSecondary,
-        textAlign: 'center',
-        maxWidth: 280,
-        lineHeight: TYPOGRAPHY.lineHeight.normal,
     },
     row: {
         justifyContent: 'space-between',

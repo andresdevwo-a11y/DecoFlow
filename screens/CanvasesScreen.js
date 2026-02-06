@@ -10,6 +10,7 @@ import CanvasCard from '../components/CanvasCard';
 import CanvasOptionsModal from '../components/CanvasOptionsModal';
 import RenameCanvasModal from '../components/RenameCanvasModal';
 import SearchHeader from '../components/SearchHeader';
+import EmptyState from '../components/EmptyState';
 
 // Local view mode state if not in global settings, but let's re-use global for consistency?
 // Or just local since it wasn't specified. Let's use local for now or props if passed.
@@ -118,17 +119,11 @@ export default function CanvasesScreen({ onOpenCanvas, onCreateCanvas }) {
     ), [handleOptionsPress, canvasViewMode, onOpenCanvas]);
 
     const renderEmptyState = useCallback(() => (
-        <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-                <Feather name={searchText ? "search" : "layout"} size={SIZES.iconEmpty} color={COLORS.primary} />
-            </View>
-            <Text style={styles.emptyTitle}>
-                {searchText ? "No se encontraron diseños" : "No hay diseños guardados"}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-                {searchText ? "Intenta con otro nombre" : "Crea uno nuevo en la Mesa de Trabajo y guárdalo."}
-            </Text>
-        </View>
+        <EmptyState
+            icon={searchText ? "search" : "layout"}
+            title={searchText ? "No se encontraron diseños" : "No hay diseños guardados"}
+            description={searchText ? "Intenta con otro nombre" : "Crea uno nuevo en la Mesa de Trabajo y guárdalo."}
+        />
     ), [searchText]);
 
     return (
@@ -198,37 +193,8 @@ const styles = StyleSheet.create({
     columnWrapper: {
         justifyContent: 'space-between',
     },
-    emptyState: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: SPACING.xl,
-        minHeight: 400,
-    },
-    emptyIconContainer: {
-        width: SIZES.iconContainerEmpty,
-        height: SIZES.iconContainerEmpty,
-        borderRadius: SIZES.iconContainerEmpty / 2,
-        backgroundColor: COLORS.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        borderWidth: 1,
-        borderColor: COLORS.primaryBorder,
-    },
-    emptyTitle: {
-        fontSize: TYPOGRAPHY.size['3xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-        marginBottom: SPACING.sm + 2,
-        textAlign: 'center',
-    },
-    emptySubtitle: {
-        fontSize: TYPOGRAPHY.size.xl,
-        color: COLORS.textSecondary,
-        textAlign: 'center',
-        maxWidth: 280,
-        lineHeight: TYPOGRAPHY.lineHeight.normal,
+    columnWrapper: {
+        justifyContent: 'space-between',
     },
 });
 

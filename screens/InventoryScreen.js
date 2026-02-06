@@ -8,6 +8,7 @@ import EditSectionModal from '../components/EditSectionModal';
 import SearchHeader from '../components/SearchHeader';
 import SelectionActionBar from '../components/SelectionActionBar';
 import FloatingActionButton from '../components/FloatingActionButton'; // Import FAB
+import EmptyState from '../components/EmptyState';
 import { useSettings } from '../context/SettingsContext';
 import { useAlert } from '../context/AlertContext';
 
@@ -156,28 +157,20 @@ export default function InventoryScreen({ sections = [], onDeleteSection, onDupl
     const renderEmptyState = useCallback(() => {
         if (searchText.length > 0 && filteredSections.length === 0) {
             return (
-                <View style={styles.emptyState}>
-                    <View style={styles.emptyIconContainer}>
-                        <Feather name="search" size={SIZES.iconEmpty} color={COLORS.primary} />
-                    </View>
-                    <Text style={styles.emptyTitle}>No se encontraron resultados</Text>
-                    <Text style={styles.emptySubtitle}>
-                        Intenta con otro nombre
-                    </Text>
-                </View>
+                <EmptyState
+                    icon="search"
+                    title="No se encontraron resultados"
+                    description="Intenta con otro nombre"
+                />
             );
         }
 
         return (
-            <View style={styles.emptyState}>
-                <View style={styles.emptyIconContainer}>
-                    <Feather name="folder" size={SIZES.iconEmpty} color={COLORS.primary} />
-                </View>
-                <Text style={styles.emptyTitle}>No hay secciones</Text>
-                <Text style={styles.emptySubtitle}>
-                    Crea una nueva sección para organizar tus productos
-                </Text>
-            </View>
+            <EmptyState
+                icon="folder"
+                title="No hay secciones"
+                description="Crea una nueva sección para organizar tus productos"
+            />
         );
     }, [searchText, filteredSections.length]);
 
@@ -297,36 +290,7 @@ const styles = StyleSheet.create({
     columnWrapper: {
         justifyContent: 'space-between',
     },
-    emptyState: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: SPACING.xl,
-        minHeight: 400,
-    },
-    emptyIconContainer: {
-        width: SIZES.iconContainerEmpty,
-        height: SIZES.iconContainerEmpty,
-        borderRadius: SIZES.iconContainerEmpty / 2,
-        backgroundColor: COLORS.primaryLight,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-        borderWidth: 1,
-        borderColor: COLORS.primaryBorder,
-    },
-    emptyTitle: {
-        fontSize: TYPOGRAPHY.size['3xl'],
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-        marginBottom: SPACING.sm + 2,
-        textAlign: 'center',
-    },
-    emptySubtitle: {
-        fontSize: TYPOGRAPHY.size.xl,
-        color: COLORS.textSecondary,
-        textAlign: 'center',
-        maxWidth: 280,
-        lineHeight: TYPOGRAPHY.lineHeight.normal,
+    columnWrapper: {
+        justifyContent: 'space-between',
     },
 });
