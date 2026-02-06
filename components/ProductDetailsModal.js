@@ -316,7 +316,7 @@ export default function ProductDetailsModal({ visible, onClose, product, onUpdat
                                 onPress={handleShare}
                                 disabled={isSharing}
                             >
-                                {isSharing ? <ActivityIndicator color="#FFF" size="small" /> : <Feather name="share" size={20} color="#FFF" style={{ marginRight: 8 }} />}
+                                {isSharing ? <ActivityIndicator color="#FFF" size="small" style={{ marginRight: 8 }} /> : <Feather name="share" size={20} color="#FFF" style={{ marginRight: 8 }} />}
                                 <Text style={styles.actionButtonText}>Compartir PDF</Text>
                             </TouchableOpacity>
                         </View>
