@@ -174,9 +174,6 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
             icon="edit-3"
             title="No hay notas"
             description="Crea una nueva nota para empezar"
-            // Notes screen used marginTop 80 previously, but let's try the default flex centering first.
-            // If it needs specific positioning, we can pass style.
-            style={{ marginTop: 80, flex: 0 }} // Override flex:1 if we want it to sit higher up like before
         />
     );
 
@@ -190,8 +187,9 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
                     styles.listContent,
                     {
                         paddingBottom: 100,
-                        paddingTop: SPACING.md // Reduced top padding since Header is now there
-                    }
+                        paddingTop: SPACING.md,
+                    },
+                    filteredNotes.length === 0 && { flexGrow: 1 }
                 ]}
                 data={filteredNotes}
                 renderItem={renderItem}
@@ -206,7 +204,7 @@ export default function NotesScreen({ onCreateNote, onNotePress }) {
                         />
                     ) : null
                 }
-                ListEmptyComponent={!isLoading && renderEmpty}
+                ListEmptyComponent={renderEmpty}
                 showsVerticalScrollIndicator={false}
             />
 
