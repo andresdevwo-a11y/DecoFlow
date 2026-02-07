@@ -133,10 +133,24 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 </TouchableOpacity>
 
                 <View style={styles.headerActions}>
-                    {/* Botones de acción adicionales placeholder (share, etc) */}
+                    {/* Botón Guardar */}
+                    <TouchableOpacity
+                        onPress={handleSave}
+                        disabled={isSubmitting}
+                        style={[
+                            styles.headerSaveButton,
+                            (isSubmitting || (note && !hasChanges)) && styles.headerButtonDisabled
+                        ]}
+                    >
+                        <Feather
+                            name="check"
+                            size={24}
+                            color={COLORS.primary}
+                        />
+                    </TouchableOpacity>
 
                     {note && onDelete && (
-                        <TouchableOpacity onPress={handleDelete} style={styles.iconButton}>
+                        <TouchableOpacity onPress={handleDelete} style={[styles.iconButton, { marginLeft: SPACING.xs }]}>
                             <Feather name="trash-2" size={20} color={COLORS.error} />
                         </TouchableOpacity>
                     )}
@@ -191,24 +205,6 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Floating/Fixed Save Button */}
-            <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
-                <TouchableOpacity
-                    style={[
-                        styles.saveButton,
-                        (isSubmitting || (note && !hasChanges)) && styles.disabledButton
-                    ]}
-                    onPress={handleSave}
-                    disabled={isSubmitting} // We don't disable if !hasChanges, so we can show the toast
-                    activeOpacity={0.9}
-                >
-                    <Feather name="save" size={20} color="#FFF" style={{ marginRight: SPACING.sm }} />
-                    <Text style={styles.saveButtonText}>
-                        {isSubmitting ? 'Guardando...' : (note ? 'Guardar cambios' : 'Guardar')}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
             <ToastNotification
                 visible={toast.visible}
                 message={toast.message}
@@ -235,6 +231,17 @@ const styles = StyleSheet.create({
     headerActions: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    headerSaveButton: {
+        width: 40,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: RADIUS.full,
+        // Eliminado fondo y sombras para diseño minimalista
+    },
+    headerButtonDisabled: {
+        opacity: 0.5,
     },
     iconButton: {
         width: 40,
@@ -265,36 +272,5 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         lineHeight: 24, // Mejor legibilidad
         minHeight: 200,
-    },
-    footer: {
-        paddingHorizontal: SPACING.xl,
-        paddingTop: SPACING.md,
-        // Fondo transparente o gradiente si se quiere flotante, aquí simple
-        backgroundColor: 'transparent',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
-    saveButton: {
-        backgroundColor: COLORS.primary,
-        borderRadius: RADIUS.full, // Botón pastilla
-        paddingVertical: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    disabledButton: {
-        opacity: 0.7,
-    },
-    saveButtonText: {
-        color: '#FFF',
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.bold,
     },
 });
