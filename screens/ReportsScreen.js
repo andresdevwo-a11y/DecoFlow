@@ -400,13 +400,7 @@ const ReportsScreen = ({ onBack }) => {
             )}
 
             {viewingReport && (
-                <View style={[styles.detailHeader, { paddingTop: insets.top }]}>
-                    <TouchableOpacity onPress={() => setViewingReport(null)} style={styles.backButton}>
-                        <Feather name="arrow-left" size={24} color={COLORS.text} />
-                    </TouchableOpacity>
-                    <Text style={styles.detailHeaderTitle}>Detalle del Reporte</Text>
-                    <View style={{ width: 40 }} />
-                </View>
+                <Header title="Detalle del Reporte" onBack={() => setViewingReport(null)} />
             )}
 
             {/* Tabs (only if not viewing detailed report) */}
