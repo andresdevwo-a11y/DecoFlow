@@ -1,62 +1,73 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, BackHandler, Animated, Share, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../constants/Theme';
+import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../constants/Theme';
 import { useAlert } from '../context/AlertContext';
 import ToastNotification from '../components/ui/ToastNotification';
 
 export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     const insets = useSafeAreaInsets();
     const { showDelete, showAlert } = useAlert();
+    const scrollY = useRef(new Animated.Value(0)).current;
 
     // State
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [date, setDate] = useState(new Date().toISOString()); // Guardamos ISO completo
+    const [date, setDate] = useState(new Date().toISOString());
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Menu State
+    const [menuVisible, setMenuVisible] = useState(false);
 
     // Track initial state for dirty checking
     const [initialTitle, setInitialTitle] = useState('');
     const [initialContent, setInitialContent] = useState('');
 
+    // Focus refs
+    const contentInputRef = useRef(null);
+    const titleInputRef = useRef(null);
+
     // Toast State
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
-    // Init state if editing
+    // Init state
     useEffect(() => {
         if (note) {
             setTitle(note.title);
             setContent(note.content || '');
             setDate(note.date || note.createdAt || new Date().toISOString());
-
-            // Set initial values
             setInitialTitle(note.title);
             setInitialContent(note.content || '');
+        } else {
+            // New note: Auto-focus content after a short delay to allow transition
+            setTimeout(() => {
+                contentInputRef.current?.focus();
+            }, 500);
         }
     }, [note]);
 
-    // Format date and time for metadata
-    const getMetadataString = () => {
-        const d = new Date(date);
+    // Handle Hardware Back Button (Android)
+    useEffect(() => {
+        const backAction = () => {
+            if (menuVisible) {
+                setMenuVisible(false);
+                return true;
+            }
+            handleBackBehavior();
+            return true; // Prevent default behavior
+        };
 
-        // Date part: "4 de febrero de 2026, 3:04 p. m." matches NotesScreen format
-        const dateStr = d.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
 
-        const charCount = content ? content.length : 0;
-
-        return `${dateStr}  |  ${charCount} caracteres`;
-    };
+        return () => backHandler.remove();
+    }, [title, content, initialTitle, initialContent, menuVisible]);
 
     const hasChanges = useMemo(() => {
-        if (!note) return true; // New note always has changes (or at least valid to save if title exists)
+        if (!note) return title.trim().length > 0 || content.trim().length > 0;
         return title.trim() !== initialTitle || content !== initialContent;
     }, [note, title, initialTitle, content, initialContent]);
 
@@ -68,51 +79,51 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         setToast(prev => ({ ...prev, visible: false }));
     };
 
-    const handleSave = async () => {
-        if (!title.trim()) {
-            showToast("Por favor ingresa un título para la nota.", "error");
+    // Logic for saving/discarding on back
+    const handleBackBehavior = async () => {
+        Keyboard.dismiss();
+
+        // If no changes, just go back
+        if (!hasChanges) {
+            onBack();
             return;
         }
 
-        // Check for changes if it's an existing note
-        if (note) {
-            if (!hasChanges) {
-                showToast("No has realizado cambios", "info");
-                return;
-            }
+        // If no title and no content, just go back (discard empty)
+        if (!title.trim() && !content.trim()) {
+            onBack();
+            return;
         }
 
+        // Auto-save logic
         setIsSubmitting(true);
         const now = new Date().toISOString();
-        // Update local state to reflect change immediately if we stay on screen
-        setDate(now);
 
         try {
-            await onSave({
+            // Prepare data
+            const noteData = {
                 id: note?.id,
-                title: title.trim(),
+                title: title.trim() || 'Sin título',
                 content: content,
-                date: now // Update date to now
-            });
+                date: now
+            };
 
-            // Update initial state to current state after successful save
-            setInitialTitle(title.trim());
-            setInitialContent(content);
+            await onSave(noteData);
+            onBack();
 
-            const successMessage = note ? "Cambios guardados correctamente" : "Nota creada correctamente";
-            showToast(successMessage);
         } catch (error) {
             console.error(error);
-            showToast("No se pudo guardar la nota.", "error");
-        } finally {
+            showAlert("error", "Error", "No se pudo guardar la nota automáticamente.");
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = () => {
+        setMenuVisible(false);
+        Keyboard.dismiss();
         showDelete({
             title: "Eliminar Nota",
-            message: "¿Estás seguro de eliminar esta nota? Esta acción no se puede deshacer.",
+            message: "¿Estás seguro de eliminar esta nota?",
             onConfirm: async () => {
                 try {
                     await onDelete(note.id);
@@ -124,52 +135,104 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         });
     };
 
+    const handleShare = async () => {
+        setMenuVisible(false);
+        try {
+            const message = `${title}\n\n${content}`;
+            await Share.share({
+                message: message,
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // Header Animation (Opacity based on scroll)
+    const headerTitleOpacity = scrollY.interpolate({
+        inputRange: [0, 50],
+        outputRange: [0, 1],
+        extrapolate: 'clamp'
+    });
+
+    const getMetadataString = () => {
+        const d = new Date(date);
+        const dateStr = d.toLocaleDateString('es-ES', {
+            day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit'
+        });
+        const charCount = content ? content.length : 0;
+        return `${dateStr}  |  ${charCount} caracteres`;
+    };
+
     return (
         <View style={styles.container}>
             {/* Minimalist Header */}
             <View style={[styles.header, { paddingTop: insets.top + SPACING.sm }]}>
-                <TouchableOpacity onPress={onBack} style={styles.iconButton}>
-                    <Feather name="arrow-left" size={24} color={COLORS.text} />
+                <TouchableOpacity onPress={handleBackBehavior} style={styles.iconButton}>
+                    <Feather name="chevron-left" size={32} color={COLORS.text} />
                 </TouchableOpacity>
 
-                <View style={styles.headerActions}>
-                    {/* Botón Guardar */}
-                    <TouchableOpacity
-                        onPress={handleSave}
-                        disabled={isSubmitting}
-                        style={[
-                            styles.headerSaveButton,
-                            (isSubmitting || (note && !hasChanges)) && styles.headerButtonDisabled
-                        ]}
-                    >
-                        <Feather
-                            name="check"
-                            size={24}
-                            color={COLORS.primary}
-                        />
-                    </TouchableOpacity>
+                {/* Animated Header Title (Shows when scrolled) */}
+                <Animated.View style={{ opacity: headerTitleOpacity, flex: 1, alignItems: 'center' }}>
+                    <Text style={styles.headerTitle} numberOfLines={1}>
+                        {title || "Nota"}
+                    </Text>
+                </Animated.View>
 
-                    {note && onDelete && (
-                        <TouchableOpacity onPress={handleDelete} style={[styles.iconButton, { marginLeft: SPACING.xs }]}>
-                            <Feather name="trash-2" size={20} color={COLORS.error} />
-                        </TouchableOpacity>
-                    )}
+                <View style={styles.headerActions}>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        onPress={() => setMenuVisible(true)}
+                    >
+                        <Feather name="more-vertical" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Menu Modal */}
+            <Modal
+                visible={menuVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setMenuVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.menuContainer, { top: insets.top + 50 }]}>
+                            <TouchableOpacity style={styles.menuItem} onPress={handleShare}>
+                                <Feather name="share" size={20} color={COLORS.text} style={styles.menuIcon} />
+                                <Text style={styles.menuText}>Compartir</Text>
+                            </TouchableOpacity>
+
+                            {note && (
+                                <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+                                    <Feather name="trash-2" size={20} color={COLORS.error} style={styles.menuIcon} />
+                                    <Text style={[styles.menuText, { color: COLORS.error }]}>Eliminar</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             >
                 <ScrollView
                     contentContainerStyle={styles.content}
-                    showsVerticalScrollIndicator={false}
-                    bounces={false}
-                    overScrollMode="never"
+                    showsVerticalScrollIndicator={true}
+                    scrollEventThrottle={16}
+                    onScroll={Animated.event(
+                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                        { useNativeDriver: false }
+                    )}
                     keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="interactive"
                 >
                     {/* Title Input */}
                     <TextInput
+                        ref={titleInputRef}
                         style={styles.titleInputClean}
                         placeholder="Título"
                         placeholderTextColor={COLORS.placeholder}
@@ -188,19 +251,19 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 
                     {/* Content Input */}
                     <TextInput
+                        ref={contentInputRef}
                         style={styles.contentInputClean}
-                        placeholder="Empiece a escribir"
+                        placeholder="Escribe aquí..."
                         placeholderTextColor={COLORS.placeholder}
                         value={content}
                         onChangeText={setContent}
                         multiline
                         textAlignVertical="top"
                         selectionColor={COLORS.primary}
-                        scrollEnabled={false} // Dejamos que el ScrollView maneje el scroll
+                        scrollEnabled={false}
                     />
 
-                    {/* Espaciado extra al final para scroll cómodo */}
-                    <View style={{ height: 150 }} />
+                    <View style={{ height: 300 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
 
@@ -217,7 +280,7 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background, // Idealmente sería un color sólido oscuro o claro según tema
+        backgroundColor: COLORS.background,
     },
     header: {
         flexDirection: 'row',
@@ -225,51 +288,75 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.md,
         paddingBottom: SPACING.sm,
-        // Sin borde ni fondo marcado para look limpio
+        backgroundColor: COLORS.background,
+        zIndex: 10,
+    },
+    headerTitle: {
+        fontSize: TYPOGRAPHY.size.lg,
+        fontWeight: 'bold',
+        color: COLORS.text,
     },
     headerActions: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    headerSaveButton: {
-        width: 40,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: RADIUS.full,
-        // Eliminado fondo y sombras para diseño minimalista
-    },
-    headerButtonDisabled: {
-        opacity: 0.5,
-    },
     iconButton: {
-        width: 40,
-        height: 40,
+        width: 44,
+        height: 44,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: RADIUS.full,
     },
     content: {
-        paddingHorizontal: SPACING.lg,
-        paddingTop: SPACING.sm,
+        paddingHorizontal: SPACING.xl,
+        paddingTop: SPACING.xs,
     },
     titleInputClean: {
-        fontSize: 28, // Tamaño grande para título
+        fontSize: 32,
         fontWeight: 'bold',
         color: COLORS.text,
         paddingVertical: SPACING.sm,
         marginBottom: SPACING.xs,
     },
     metadataText: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textSecondary,
-        marginBottom: SPACING.xl,
-        opacity: 0.8,
+        fontSize: TYPOGRAPHY.size.xs,
+        color: COLORS.textMuted,
+        marginBottom: SPACING.lg,
     },
     contentInputClean: {
-        fontSize: TYPOGRAPHY.size.md,
+        fontSize: TYPOGRAPHY.size.md + 2,
         color: COLORS.text,
-        lineHeight: 24, // Mejor legibilidad
+        lineHeight: 28,
         minHeight: 200,
+        paddingBottom: SPACING.xl,
+    },
+    // Menu Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.1)', // Subtle dim
+    },
+    menuContainer: {
+        position: 'absolute',
+        right: SPACING.md,
+        // Top is dynamic
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.md,
+        paddingVertical: SPACING.xs,
+        minWidth: 180,
+        ...SHADOWS.md, // Use shadow from theme
+        elevation: 5,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.lg,
+    },
+    menuIcon: {
+        marginRight: SPACING.md,
+    },
+    menuText: {
+        fontSize: TYPOGRAPHY.size.base,
+        color: COLORS.text,
     },
 });
