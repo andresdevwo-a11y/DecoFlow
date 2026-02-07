@@ -167,7 +167,6 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                     bounces={false}
                     overScrollMode="never"
                     keyboardShouldPersistTaps="handled"
-                    keyboardDismissMode="on-drag"
                 >
                     {/* Title Input */}
                     <TextInput
