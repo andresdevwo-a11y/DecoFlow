@@ -1,0 +1,30 @@
+cambios por hacer:
+
+1. en la seccion de inventario:
+   - lo que pasa es que al presionar sobre una seccion que tiene productos
+     al entrar a dicha seccion se puestra rapidamente el empty state cuando
+     una seccion esta vacia y despues se muestran los items (productos) que 
+     tiene dicha seccion.
+   - lo que pasa es que al realizar una venta rapida de un producto ya sea 
+     por una venta rapida o realizando una venta desde la seccion de finanzas
+     en el product stats modal no se muestra correctamente las estadisticas de
+     dicho producto como la cantidad que se ha vendido de dicho producto (ya que
+     al realizar una venta rapida de dicho producto pide la cantidad de dicho producto
+     en tonces yo elegi 2 de cantidad y el el product stats modal muestra en la cantidad 1)
+     y cuando elijo 1 producto para venderlo desde la seccion de finanzas en el product stats
+     modal no se muestra informacion relacionada con dicha venta, esto tambien aplica para los alquileres
+     y tambien cuando selecciono un periodo para ver las estadisticas de dicho producto no se muestran las 
+     estadisticas de dicho producto.
+   - tambien cuando se realiza una venta rapida (venta) esta se muestra correctamente en la seccion de finanzas y se
+     le pueden realizar todo lo que se le realiza a una transaccion comun y corriente, pero hay un problema y es que
+     al generar un reporte con el tiempo en el cual dicha venta rapida se realizo no se muestra en el reporte, pero los alquileres
+     se muestran correctamente al generar un reporte.
+
+ 2. en la seccion de notas:
+   - lo que pasa en que al crear una nota y empezar a llenar los campos de dicha nota hay algunos problemas faciles de resolver y es que lo que 
+     pasa es que al ingresar el titulo de dicha nota el usuario puede ingresar la cantidad de caracteres que el usuario quiera para dicho titulo
+     y tambien lo que pasa es que el titulo que el usuario escribe si es muy lago se va derecho, pero quiero que conforme no quepa en la pantalla
+     se vaya llendo hacia abajo para que el usuario lo pueda ver correctamente y con respecto al contenido de la nota es que si el usuario ingresa un texto muy largo
+     la pantalla se glitchea y cuando sobrepasa el texto la pantalla no me deja hacer scroll hacia arriba para ver el titulo y los demas elementos que estan arriba y
+     tambien cuando intento hacer scroll y cuando llego al extremo del scroll la se extremece y no quiero que eso pase mas. 
+

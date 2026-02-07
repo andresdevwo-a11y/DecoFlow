@@ -607,7 +607,7 @@ export const getTransactionsForReport = async (startDate, endDate) => {
         SELECT t.*, r.startDate as rentalStartDate, r.endDate as rentalEndDate, r.status as rentalStatus
         FROM transactions t
         LEFT JOIN rentals r ON t.id = r.transactionId
-        WHERE t.date >= ? AND t.date <= ?
+        WHERE substr(t.date, 1, 10) >= ? AND substr(t.date, 1, 10) <= ?
             ORDER BY t.date DESC
                 `, [startDate, endDate]);
 
@@ -765,7 +765,7 @@ export const getExpenses = async () => {
 export const getExpensesByDateRange = async (startDate, endDate) => {
     const database = getDb();
     return await database.getAllAsync(
-        'SELECT * FROM expenses WHERE date >= ? AND date <= ? ORDER BY date DESC',
+        'SELECT * FROM expenses WHERE substr(date, 1, 10) >= ? AND substr(date, 1, 10) <= ? ORDER BY date DESC',
         [startDate, endDate]
     );
 };
@@ -1188,46 +1188,89 @@ export const getFinanceSummary = async (startDate = null, endDate = null) => {
 export const getProductStats = async (productId, startDate = null, endDate = null) => {
     const database = getDb();
 
-    let salesQuery = 'SELECT COALESCE(SUM(totalAmount), 0) as total, COUNT(*) as count FROM transactions WHERE type = ? AND productId = ?';
-    let rentalsQuery = 'SELECT COALESCE(SUM(totalAmount), 0) as total, COUNT(*) as count FROM transactions WHERE type = ? AND productId = ?';
-    let params = [productId];
+    // Consulta base para obtener las transacciones relevantes
+    // Buscamos transacciones donde el producto sea el principal O esté contenido en los items
+    let query = `
+        SELECT * FROM transactions 
+        WHERE (productId = ? OR items LIKE ?)
+    `;
 
+    // El patrón de búsqueda en items es %productId% para cubrir casos simples
+    const searchPattern = `%${productId}%`;
+    let params = [productId, searchPattern];
+
+    // Aplicar filtro de fechas si existen
     if (startDate && endDate) {
-        const dateFilter = ' AND date >= ? AND date <= ?';
-        salesQuery += dateFilter;
-        rentalsQuery += dateFilter;
-        params = [productId, startDate, endDate];
-    } else {
-        // Create params array for queries without date
-        params = [productId];
+        // Usamos substr para comparar solo la parte YYYY-MM-DD, manejando tanto 'YYYY-MM-DD' como ISO strings
+        query += ` AND substr(date, 1, 10) >= ? AND substr(date, 1, 10) <= ?`;
+        params.push(startDate, endDate);
     }
 
-    // Get Sales Stats
-    const salesResult = await database.getAllAsync(
-        salesQuery,
-        ['sale', ...params]
-    );
+    const transactions = await database.getAllAsync(query, params);
 
-    // Get Rental Stats
-    const rentalsResult = await database.getAllAsync(
-        rentalsQuery,
-        ['rental', ...params]
-    );
+    // Inicializar contadores
+    let salesCount = 0;
+    let salesTotal = 0;
+    let rentalsCount = 0;
+    let rentalsTotal = 0;
 
-    const salesTotal = salesResult[0].total;
-    const rentalsTotal = rentalsResult[0].total;
-    const totalRevenue = salesTotal + rentalsTotal;
+    // Procesar resultados en JS para precisión máxima
+    transactions.forEach(t => {
+        let quantityInTransaction = 0;
+        let amountInTransaction = 0;
+
+        // Caso 1: Venta directa del producto (productId coinciden)
+        if (t.productId === productId) {
+            quantityInTransaction += (t.quantity || 1);
+            amountInTransaction += (t.totalAmount || 0);
+        }
+        // Caso 2: Producto dentro de una lista de items (Venta compleja)
+        else if (t.items) {
+            try {
+                const items = JSON.parse(t.items);
+                if (Array.isArray(items)) {
+                    items.forEach(item => {
+                        // Verificar si el item corresponde al producto buscado
+                        // A veces los items guardan el ID como 'id' o 'productId'
+                        if (item.productId === productId || item.id === productId) {
+                            const qty = item.quantity || 1;
+                            const price = item.unitPrice || item.price || 0;
+
+                            quantityInTransaction += qty;
+                            // Si es venta compleja, sumamos el precio * cantidad de este item específico
+                            // Si la transacción solo tiene este item, el totalAmount debería coincidir, 
+                            // pero si hay varios, calculamos la parte proporcional.
+                            amountInTransaction += (price * qty);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error parsing items JSON in getProductStats:", e);
+            }
+        }
+
+        // Agregar a los totales según el tipo de transacción
+        if (quantityInTransaction > 0) {
+            if (t.type === 'sale') {
+                salesCount += quantityInTransaction;
+                salesTotal += amountInTransaction;
+            } else if (t.type === 'rental') {
+                rentalsCount += quantityInTransaction;
+                rentalsTotal += amountInTransaction;
+            }
+        }
+    });
 
     return {
         sales: {
-            count: salesResult[0].count,
+            count: salesCount,
             total: salesTotal
         },
         rentals: {
-            count: rentalsResult[0].count,
+            count: rentalsCount,
             total: rentalsTotal
         },
-        totalRevenue: totalRevenue
+        totalRevenue: salesTotal + rentalsTotal
     };
 };
 

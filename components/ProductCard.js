@@ -64,7 +64,7 @@ const ProductCard = React.memo(({ product, onPress, onOptionsPress, onQuickActio
             quantity: quantity,
             unitPrice: unitPrice,
             totalAmount: isInstallment ? (installmentAmount || 0) : total,
-            date: now.toISOString(),
+            date: now.toISOString().split('T')[0],
             items: [productItem],
             startDate: now.toISOString().split('T')[0],
             status: 'active',
