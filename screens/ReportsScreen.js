@@ -396,7 +396,7 @@ const ReportsScreen = ({ onBack }) => {
         <View style={styles.container}>
             {/* Header */}
             {!viewingReport && (
-                <Header title="Reportes" />
+                <Header title="Reportes" onBack={onBack} />
             )}
 
             {viewingReport && (
@@ -696,6 +696,7 @@ const ReportsScreen = ({ onBack }) => {
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
+            <View style={{ height: insets.bottom, backgroundColor: '#FFF' }} />
         </View>
     );
 };
