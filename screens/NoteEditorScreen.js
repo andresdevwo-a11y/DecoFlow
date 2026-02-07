@@ -144,12 +144,16 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             </View>
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={{ flex: 1 }}
             >
                 <ScrollView
                     contentContainerStyle={styles.content}
                     showsVerticalScrollIndicator={false}
+                    bounces={false}
+                    overScrollMode="never"
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="on-drag"
                 >
                     {/* Title Input */}
                     <TextInput
@@ -160,6 +164,8 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                         onChangeText={setTitle}
                         maxLength={100}
                         selectionColor={COLORS.primary}
+                        multiline={true}
+                        scrollEnabled={false}
                     />
 
                     {/* Metadata Line */}
