@@ -34,6 +34,7 @@ import { useFinance } from '../context/FinanceContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useLicense } from '../context/LicenseContext';
 import { useAlert } from '../context/AlertContext'; // Added
+import { useNotes } from '../context/NotesContext';
 
 import { exportData } from '../services/ExportService';
 import { importData } from '../services/ImportService';
@@ -225,6 +226,7 @@ export default function SettingsScreen() {
 
     const { refresh: refreshData, clearDataState } = useData();
     const { clearFinanceState } = useFinance();
+    const { clearNotes } = useNotes();
 
     // But useWorkspace IS a hook.
     const { resetWorkspace } = useWorkspace();
@@ -273,6 +275,7 @@ export default function SettingsScreen() {
             // 2. Only if DB deletion succeeds, clear the UI/Context state
             await clearDataState();
             await clearFinanceState();
+            clearNotes();
 
             // 3. Reset Settings and Workspace
             await resetSettings();

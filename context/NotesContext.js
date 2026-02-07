@@ -66,6 +66,10 @@ export const NotesProvider = ({ children }) => {
         }
     }, []);
 
+    const clearNotes = useCallback(() => {
+        setNotes([]);
+    }, []);
+
     return (
         <NotesContext.Provider value={{
             notes,
@@ -73,7 +77,8 @@ export const NotesProvider = ({ children }) => {
             loadNotes,
             addNote,
             updateNote,
-            deleteNote
+            deleteNote,
+            clearNotes
         }}>
             {children}
         </NotesContext.Provider>
