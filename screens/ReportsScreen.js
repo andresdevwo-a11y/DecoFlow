@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import {
     View,
@@ -21,6 +22,7 @@ import { useAlert } from '../context/AlertContext';
 import CustomDatePicker from '../components/finance/CustomDatePicker';
 import ExpandableIncomeSection from '../components/ExpandableIncomeSection';
 import { exportReportToPDF, exportReportToExcel } from '../services/reportExportService';
+import Header from '../components/Header';
 
 const ReportsScreen = ({ onBack }) => {
     const insets = useSafeAreaInsets();
@@ -246,17 +248,26 @@ const ReportsScreen = ({ onBack }) => {
 
     const renderReportContent = (data, isSaved = false) => (
         <View style={styles.reportContainer}>
-            <View style={styles.reportHeader}>
-                <Text style={styles.reportTitle}>{isSaved ? data.name : 'Resultado del Reporte'}</Text>
-                <Text style={styles.reportPeriod}>{formatPeriodLabel(data)}</Text>
-                {isSaved && (
-                    <Text style={styles.savedDate}>Creado el: {new Date(data.createdAt).toLocaleDateString()}</Text>
-                )}
+            <View style={styles.reportHeaderCard}>
+                <View style={styles.reportHeaderTop}>
+                    <Text style={styles.reportTitle} numberOfLines={1}>
+                        {isSaved ? data.name : 'Resultado'}
+                    </Text>
+                    {isSaved && (
+                        <View style={styles.savedDateBadge}>
+                            <Feather name="calendar" size={12} color={COLORS.textSecondary} />
+                            <Text style={styles.savedDateText}>
+                                {new Date(data.createdAt).toLocaleDateString()}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+                <Text style={styles.reportPeriodText}>{formatPeriodLabel(data)}</Text>
             </View>
 
             {/* Income Section */}
-            <View style={styles.reportSection}>
-                <Text style={styles.reportSectionTitle}>Ingresos</Text>
+            <View style={styles.sectionCard}>
+                <Text style={styles.cardSectionTitle}>INGRESOS</Text>
                 {data.summary?.sales && (
                     <ExpandableIncomeSection
                         icon="trending-up"
@@ -290,10 +301,10 @@ const ReportsScreen = ({ onBack }) => {
                         formatCurrency={formatCurrency}
                     />
                 )}
-                <View style={styles.reportDivider} />
-                <View style={styles.reportRow}>
-                    <Text style={styles.reportSubtotalLabel}>Total Ingresos</Text>
-                    <Text style={styles.reportSubtotalValue}>
+                <View style={styles.divider} />
+                <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Total Ingresos</Text>
+                    <Text style={styles.summaryValuePositive}>
                         {formatCurrency(data.summary?.totalIncome)}
                     </Text>
                 </View>
@@ -301,33 +312,38 @@ const ReportsScreen = ({ onBack }) => {
 
             {/* Expenses Section */}
             {data.expensesByCategory && (
-                <View style={styles.reportSection}>
-                    <Text style={styles.reportSectionTitle}>Gastos por Categoría</Text>
+                <View style={styles.sectionCard}>
+                    <Text style={styles.cardSectionTitle}>GASTOS</Text>
                     {data.expensesByCategory.length > 0 ? (
                         data.expensesByCategory.map((item) => (
-                            <View key={item.category} style={styles.reportRow}>
-                                <View style={styles.reportRowLeft}>
-                                    <Feather
-                                        name={EXPENSE_CATEGORIES[item.category]?.icon || 'minus'}
-                                        size={16}
-                                        color="#EF4444"
-                                    />
-                                    <Text style={styles.reportRowLabel}>
+                            <View key={item.category} style={styles.expenseRow}>
+                                <View style={styles.expenseInfo}>
+                                    <View style={styles.categoryIcon}>
+                                        <Feather
+                                            name={EXPENSE_CATEGORIES[item.category]?.icon || 'minus'}
+                                            size={14}
+                                            color="#EF4444"
+                                        />
+                                    </View>
+                                    <Text style={styles.expenseLabel}>
                                         {EXPENSE_CATEGORIES[item.category]?.label || item.category}
                                     </Text>
                                 </View>
-                                <Text style={[styles.reportRowValue, { color: '#EF4444' }]}>
+                                <Text style={styles.expenseCategoryValue}>
                                     -{formatCurrency(item.total)}
                                 </Text>
                             </View>
                         ))
                     ) : (
-                        <Text style={styles.noDataText}>Sin gastos en este período</Text>
+                        <View style={styles.emptyExpenses}>
+                            <Feather name="check-circle" size={24} color={COLORS.success} opacity={0.5} />
+                            <Text style={styles.emptyExpensesText}>Sin gastos registrados</Text>
+                        </View>
                     )}
-                    <View style={styles.reportDivider} />
-                    <View style={styles.reportRow}>
-                        <Text style={styles.reportSubtotalLabel}>Total Gastos</Text>
-                        <Text style={[styles.reportSubtotalValue, { color: '#EF4444' }]}>
+                    <View style={styles.divider} />
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Total Gastos</Text>
+                        <Text style={styles.summaryValueNegative}>
                             -{formatCurrency(data.summary?.expenses?.total)}
                         </Text>
                     </View>
@@ -335,31 +351,41 @@ const ReportsScreen = ({ onBack }) => {
             )}
 
             {/* Balance */}
-            <View style={styles.balanceSection}>
-                <Text style={styles.balanceLabel}>BALANCE NETO</Text>
-                <Text style={[
-                    styles.balanceValue,
-                    data.summary?.balance >= 0 ? styles.positiveBalance : styles.negativeBalance
+            <View style={styles.balanceCard}>
+                <View style={[
+                    styles.balanceIconContainer,
+                    data.summary?.balance >= 0 ? styles.balanceIconPositive : styles.balanceIconNegative
                 ]}>
-                    {formatCurrency(data.summary?.balance)}
-                </Text>
+                    <Feather
+                        name={data.summary?.balance >= 0 ? "trending-up" : "trending-down"}
+                        size={24}
+                        color={data.summary?.balance >= 0 ? "#22C55E" : "#EF4444"}
+                    />
+                </View>
+                <View style={styles.balanceInfo}>
+                    <Text style={styles.balanceLabel}>BALANCE NETO</Text>
+                    <Text style={[
+                        styles.balanceValue,
+                        data.summary?.balance >= 0 ? styles.positiveText : styles.negativeText
+                    ]}>
+                        {formatCurrency(data.summary?.balance)}
+                    </Text>
+                </View>
             </View>
 
             {/* Actions (Only when creating) */}
             {!isSaved && (
                 <View style={styles.actionButtons}>
                     <TouchableOpacity style={styles.saveButton} onPress={confirmSave}>
-                        <Feather name="save" size={18} color={COLORS.primary} />
-                        <Text style={styles.saveButtonText}>Guardar</Text>
+                        <Feather name="save" size={20} color={COLORS.primary} />
+                        <Text style={styles.saveButtonText}>Guardar Reporte</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[styles.exportButton, { flex: 1 }]}
+                        style={styles.exportButton}
                         onPress={() => showExportOptions(data)}
                     >
-                        <Feather name="download" size={18} color="#FFF" />
-                        <Text style={[styles.exportButtonText, { color: '#FFF' }]}>
-                            Exportar
-                        </Text>
+                        <Feather name="download" size={20} color="#FFF" />
+                        <Text style={styles.exportButtonText}>Exportar</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -369,41 +395,52 @@ const ReportsScreen = ({ onBack }) => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + SPACING.sm }]}>
-                <TouchableOpacity onPress={viewingReport ? () => setViewingReport(null) : onBack} style={styles.backButton}>
-                    <Feather name="arrow-left" size={24} color={COLORS.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>
-                    {viewingReport ? 'Detalle Reporte' : 'Reportes'}
-                </Text>
-                <View style={{ width: 40 }} />
-            </View>
+            {!viewingReport && (
+                <Header title="Reportes" />
+            )}
+
+            {viewingReport && (
+                <View style={[styles.detailHeader, { paddingTop: insets.top }]}>
+                    <TouchableOpacity onPress={() => setViewingReport(null)} style={styles.backButton}>
+                        <Feather name="arrow-left" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.detailHeaderTitle}>Detalle del Reporte</Text>
+                    <View style={{ width: 40 }} />
+                </View>
+            )}
 
             {/* Tabs (only if not viewing detailed report) */}
             {!viewingReport && (
-                <View style={styles.tabContainer}>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'create' && styles.tabActive]}
-                        onPress={() => setActiveTab('create')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'create' && styles.tabTextActive]}>
-                            Crear reporte
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'saved' && styles.tabActive]}
-                        onPress={() => setActiveTab('saved')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'saved' && styles.tabTextActive]}>
-                            Reportes guardados
-                        </Text>
-                    </TouchableOpacity>
+                <View style={styles.tabsWrapper}>
+                    <View style={styles.segmentedControl}>
+                        <TouchableOpacity
+                            style={[styles.segment, activeTab === 'create' && styles.segmentActive]}
+                            onPress={() => setActiveTab('create')}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={[styles.segmentText, activeTab === 'create' && styles.segmentTextActive]}>
+                                Generar
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.segment, activeTab === 'saved' && styles.segmentActive]}
+                            onPress={() => setActiveTab('saved')}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={[styles.segmentText, activeTab === 'saved' && styles.segmentTextActive]}>
+                                Guardados
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             )}
 
             <ScrollView
                 style={styles.scrollView}
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[
+                    styles.content,
+                    { paddingBottom: viewingReport ? 100 : 40 }
+                ]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* VIEW DETAIL */}
@@ -415,33 +452,31 @@ const ReportsScreen = ({ onBack }) => {
                         {activeTab === 'create' && (
                             <>
                                 {/* Period Selection */}
-                                <View style={styles.section}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm }}>
-                                        <Text style={styles.sectionTitle}>Período Rápido</Text>
+                                <View style={styles.inputGroup}>
+                                    <View style={styles.sectionHeader}>
+                                        <Text style={styles.sectionTitle}>Período</Text>
                                         {selectedPeriod === 'custom' && (
-                                            <View style={styles.customBadge}>
-                                                <Text style={styles.customBadgeText}>Rango personalizado activo</Text>
+                                            <View style={styles.badge}>
+                                                <Text style={styles.badgeText}>Personalizado</Text>
                                             </View>
                                         )}
                                     </View>
-                                    <View style={[
-                                        styles.periodButtons,
-                                        selectedPeriod === 'custom' && styles.periodButtonsDisabled
-                                    ]}>
+
+                                    <View style={styles.periodGrid}>
                                         {periodButtons.map(({ key, label }) => (
                                             <TouchableOpacity
                                                 key={key}
                                                 style={[
-                                                    styles.periodButton,
-                                                    selectedPeriod === key && styles.periodButtonSelected,
-                                                    // Visual feedback for disabled state
-                                                    selectedPeriod === 'custom' && styles.periodButtonDimmed
+                                                    styles.periodCard,
+                                                    selectedPeriod === key && styles.periodCardSelected,
+                                                    selectedPeriod === 'custom' && styles.periodCardDimmed
                                                 ]}
                                                 onPress={() => setSelectedPeriod(key)}
+                                                activeOpacity={0.7}
                                             >
                                                 <Text style={[
-                                                    styles.periodButtonText,
-                                                    selectedPeriod === key && styles.periodButtonTextSelected
+                                                    styles.periodCardText,
+                                                    selectedPeriod === key && styles.periodCardTextSelected
                                                 ]}>
                                                     {label}
                                                 </Text>
@@ -451,12 +486,12 @@ const ReportsScreen = ({ onBack }) => {
                                 </View>
 
                                 {/* Custom Date Range */}
-                                <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Rango Personalizado</Text>
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Rango de Fechas</Text>
                                     <View style={styles.dateRow}>
                                         <View style={{ flex: 1 }}>
                                             <CustomDatePicker
-                                                placeholder="Desde"
+                                                placeholder="Inicio"
                                                 date={startDate}
                                                 onDateChange={(newDate) => {
                                                     setStartDate(newDate);
@@ -467,7 +502,7 @@ const ReportsScreen = ({ onBack }) => {
                                         <Feather name="arrow-right" size={16} color={COLORS.textMuted} style={{ marginHorizontal: SPACING.xs }} />
                                         <View style={{ flex: 1 }}>
                                             <CustomDatePicker
-                                                placeholder="Hasta"
+                                                placeholder="Fin"
                                                 date={endDate}
                                                 minDate={startDate ? new Date(startDate) : undefined}
                                                 onDateChange={(newDate) => {
@@ -480,39 +515,39 @@ const ReportsScreen = ({ onBack }) => {
                                 </View>
 
                                 {/* Filters */}
-                                <View style={styles.section}>
-                                    <Text style={styles.sectionTitle}>Incluir en Reporte</Text>
+                                <View style={styles.inputGroup}>
+                                    <Text style={styles.inputLabel}>Incluir</Text>
                                     <ScrollView
                                         horizontal
                                         showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={styles.filters}
+                                        contentContainerStyle={styles.filterContainer}
                                     >
                                         <TouchableOpacity
                                             style={[styles.filterChip, includeFilters.sales && styles.filterChipActive]}
                                             onPress={() => setIncludeFilters(prev => ({ ...prev, sales: !prev.sales }))}
                                         >
-                                            <Feather name={includeFilters.sales ? "check-square" : "square"} size={18} color={includeFilters.sales ? '#22C55E' : COLORS.textMuted} />
+                                            <Feather name={includeFilters.sales ? "check" : "circle"} size={14} color={includeFilters.sales ? '#22C55E' : COLORS.textMuted} />
                                             <Text style={[styles.filterText, includeFilters.sales && { color: '#22C55E' }]}>Ventas</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={[styles.filterChip, includeFilters.rentals && styles.filterChipActive]}
                                             onPress={() => setIncludeFilters(prev => ({ ...prev, rentals: !prev.rentals }))}
                                         >
-                                            <Feather name={includeFilters.rentals ? "check-square" : "square"} size={18} color={includeFilters.rentals ? '#3B82F6' : COLORS.textMuted} />
+                                            <Feather name={includeFilters.rentals ? "check" : "circle"} size={14} color={includeFilters.rentals ? '#3B82F6' : COLORS.textMuted} />
                                             <Text style={[styles.filterText, includeFilters.rentals && { color: '#3B82F6' }]}>Alquileres</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={[styles.filterChip, includeFilters.decorations && styles.filterChipActive]}
                                             onPress={() => setIncludeFilters(prev => ({ ...prev, decorations: !prev.decorations }))}
                                         >
-                                            <Feather name={includeFilters.decorations ? "check-square" : "square"} size={18} color={includeFilters.decorations ? '#F97316' : COLORS.textMuted} />
-                                            <Text style={[styles.filterText, includeFilters.decorations && { color: '#F97316' }]}>Decoraciones</Text>
+                                            <Feather name={includeFilters.decorations ? "check" : "circle"} size={14} color={includeFilters.decorations ? '#F97316' : COLORS.textMuted} />
+                                            <Text style={[styles.filterText, includeFilters.decorations && { color: '#F97316' }]}>Deco</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={[styles.filterChip, includeFilters.expenses && styles.filterChipActive]}
                                             onPress={() => setIncludeFilters(prev => ({ ...prev, expenses: !prev.expenses }))}
                                         >
-                                            <Feather name={includeFilters.expenses ? "check-square" : "square"} size={18} color={includeFilters.expenses ? '#EF4444' : COLORS.textMuted} />
+                                            <Feather name={includeFilters.expenses ? "check" : "circle"} size={14} color={includeFilters.expenses ? '#EF4444' : COLORS.textMuted} />
                                             <Text style={[styles.filterText, includeFilters.expenses && { color: '#EF4444' }]}>Gastos</Text>
                                         </TouchableOpacity>
                                     </ScrollView>
@@ -520,22 +555,27 @@ const ReportsScreen = ({ onBack }) => {
 
                                 {/* Generate Button */}
                                 <TouchableOpacity
-                                    style={styles.generateButton}
+                                    style={styles.mainButton}
                                     onPress={generateReport}
                                     disabled={isLoading}
+                                    activeOpacity={0.8}
                                 >
                                     {isLoading ? (
                                         <ActivityIndicator color="#FFF" />
                                     ) : (
                                         <>
+                                            <Text style={styles.mainButtonText}>Generar Reporte</Text>
                                             <Feather name="bar-chart-2" size={20} color="#FFF" />
-                                            <Text style={styles.generateButtonText}>Generar Reporte</Text>
                                         </>
                                     )}
                                 </TouchableOpacity>
 
                                 {/* Generated Report Result */}
-                                {report && renderReportContent(report, false)}
+                                {report && (
+                                    <View style={styles.resultContainer}>
+                                        {renderReportContent(report, false)}
+                                    </View>
+                                )}
                             </>
                         )}
 
@@ -544,9 +584,11 @@ const ReportsScreen = ({ onBack }) => {
                             <View style={styles.savedList}>
                                 {savedReports.length === 0 ? (
                                     <View style={styles.emptyState}>
-                                        <Feather name="archive" size={48} color={COLORS.textMuted} />
-                                        <Text style={styles.emptyStateText}>No tienes reportes guardados</Text>
-                                        <Text style={styles.emptyStateSubtext}>Genera un reporte y guárdalo para verlo aquí.</Text>
+                                        <View style={styles.emptyIconBg}>
+                                            <Feather name="archive" size={32} color={COLORS.primary} />
+                                        </View>
+                                        <Text style={styles.emptyStateText}>Sin reportes guardados</Text>
+                                        <Text style={styles.emptyStateSubtext}>Los reportes que guardes aparecerán aquí</Text>
                                     </View>
                                 ) : (
                                     savedReports.map((saved) => (
@@ -554,37 +596,25 @@ const ReportsScreen = ({ onBack }) => {
                                             key={saved.id}
                                             style={styles.savedCard}
                                             onPress={() => setViewingReport(saved)}
+                                            activeOpacity={0.7}
                                         >
-                                            <View style={styles.savedCardHeader}>
-                                                <View>
-                                                    <Text style={styles.savedCardTitle}>{saved.name}</Text>
+                                            <View style={styles.savedCardLeft}>
+                                                <View style={styles.savedCardIcon}>
+                                                    <Feather name="file-text" size={20} color={COLORS.primary} />
+                                                </View>
+                                                <View style={styles.savedCardInfo}>
+                                                    <Text style={styles.savedCardTitle} numberOfLines={1}>{saved.name}</Text>
                                                     <Text style={styles.savedCardDate}>{formatPeriodLabel(saved)}</Text>
                                                 </View>
-                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                                                    <TouchableOpacity
-                                                        onPress={(e) => {
-                                                            // Stop propagation isn't always reliable in RN without direct event handling, 
-                                                            // but putting it in a separate view helping spacing.
-                                                            // We'll trust the layout. 
-                                                            // Note: OnPress in RN doesn't bubble like Web DOM in all cases.
-                                                            // To be safe, we rely on this touchable capturing the press.
-                                                            handleDeleteReport(saved);
-                                                        }}
-                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                                    >
-                                                        <Feather name="trash-2" size={20} color="#EF4444" />
-                                                    </TouchableOpacity>
-                                                    <Feather name="chevron-right" size={20} color={COLORS.textMuted} />
-                                                </View>
                                             </View>
-                                            <View style={styles.savedCardFooter}>
-                                                <Text style={styles.savedCardBalanceLabel}>Balance:</Text>
+                                            <View style={styles.savedCardRight}>
                                                 <Text style={[
-                                                    styles.savedCardBalanceValue,
-                                                    saved.summary.balance >= 0 ? styles.positiveBalance : styles.negativeBalance
+                                                    styles.savedBalance,
+                                                    saved.summary.balance >= 0 ? styles.positiveText : styles.negativeText
                                                 ]}>
                                                     {formatCurrency(saved.summary.balance)}
                                                 </Text>
+                                                <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
                                             </View>
                                         </TouchableOpacity>
                                     ))
@@ -593,37 +623,30 @@ const ReportsScreen = ({ onBack }) => {
                         )}
                     </>
                 )}
-
-                <View style={{ height: insets.bottom + SPACING.xl + (viewingReport ? SIZES.navBarHeight : 0) }} />
             </ScrollView>
 
             {/* Fixed Bottom Action Bar for Saved Reports */}
             {viewingReport && (
-                <View style={[
-                    styles.detailFooter,
-                    {
-                        height: SIZES.navBarHeight + insets.bottom,
-                        paddingBottom: insets.bottom,
-                    }
-                ]}>
-                    <TouchableOpacity style={styles.detailActionButton} onPress={() => showExportOptions(viewingReport)}>
-                        <Feather name="download" size={20} color={COLORS.primary} style={styles.detailActionIcon} />
-                        <Text style={styles.detailActionLabel}>Exportar</Text>
+                <View style={[styles.actionBar, { paddingBottom: Math.max(insets.bottom, SPACING.md) }]}>
+                    <TouchableOpacity style={styles.actionItem} onPress={() => showExportOptions(viewingReport)}>
+                        <View style={styles.actionIconBg}>
+                            <Feather name="download" size={20} color={COLORS.primary} />
+                        </View>
+                        <Text style={styles.actionLabel}>Exportar</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.detailActionButton} onPress={() => handleExportPDF(viewingReport)}>
-                        <Feather name="share-2" size={20} color={COLORS.primary} style={styles.detailActionIcon} />
-                        <Text style={styles.detailActionLabel}>Compartir</Text>
+                    <TouchableOpacity style={styles.actionItem} onPress={() => openRenameModal(viewingReport)}>
+                        <View style={styles.actionIconBg}>
+                            <Feather name="edit-2" size={20} color={COLORS.primary} />
+                        </View>
+                        <Text style={styles.actionLabel}>Renombrar</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.detailActionButton} onPress={() => openRenameModal(viewingReport)}>
-                        <Feather name="edit-3" size={20} color={COLORS.primary} style={styles.detailActionIcon} />
-                        <Text style={styles.detailActionLabel}>Editar nombre</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.detailActionButton} onPress={() => handleDeleteReport(viewingReport)}>
-                        <Feather name="trash-2" size={20} color="#EF4444" style={styles.detailActionIcon} />
-                        <Text style={[styles.detailActionLabel, styles.detailActionLabelDestructive]}>Eliminar</Text>
+                    <TouchableOpacity style={styles.actionItem} onPress={() => handleDeleteReport(viewingReport)}>
+                        <View style={[styles.actionIconBg, { backgroundColor: '#FEE2E2' }]}>
+                            <Feather name="trash-2" size={20} color="#EF4444" />
+                        </View>
+                        <Text style={[styles.actionLabel, { color: '#EF4444' }]}>Eliminar</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -644,8 +667,14 @@ const ReportsScreen = ({ onBack }) => {
                     </TouchableWithoutFeedback>
 
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Renombrar Reporte</Text>
-                        <Text style={styles.modalSubtitle}>Ingresa el nuevo nombre para este reporte</Text>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Renombrar Reporte</Text>
+                            <TouchableOpacity onPress={() => setRenameModalVisible(false)}>
+                                <Feather name="x" size={24} color={COLORS.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.modalSubtitle}>Ingresa un nuevo nombre para identificar este reporte.</Text>
 
                         <TextInput
                             style={styles.modalInput}
@@ -654,22 +683,16 @@ const ReportsScreen = ({ onBack }) => {
                             placeholder="Nombre del reporte"
                             placeholderTextColor={COLORS.textMuted}
                             autoFocus
+                            returnKeyType="done"
+                            onSubmitEditing={handleRenameSubmit}
                         />
 
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.modalButtonCancel]}
-                                onPress={() => setRenameModalVisible(false)}
-                            >
-                                <Text style={styles.modalButtonTextCancel}>Cancelar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.modalButtonConfirm]}
-                                onPress={handleRenameSubmit}
-                            >
-                                <Text style={styles.modalButtonTextConfirm}>Guardar</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            style={styles.modalButtonConfirm}
+                            onPress={handleRenameSubmit}
+                        >
+                            <Text style={styles.modalButtonTextConfirm}>Guardar Cambios</Text>
+                        </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
@@ -684,7 +707,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: COLORS.background,
     },
-    header: {
+    detailHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -693,377 +716,510 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surface,
         borderBottomWidth: 1,
         borderBottomColor: COLORS.border,
+        ...SHADOWS.sm,
+        zIndex: 10,
+    },
+    detailHeaderTitle: {
+        fontSize: TYPOGRAPHY.size.lg,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.text,
     },
     backButton: {
         width: 40,
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: RADIUS.full,
     },
-    headerTitle: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-    },
-    // TABS
-    tabContainer: {
-        flexDirection: 'row',
-        backgroundColor: COLORS.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
-    },
-    tab: {
-        flex: 1,
-        paddingVertical: 14,
-        alignItems: 'center',
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    tabActive: {
-        borderBottomColor: COLORS.primary,
-    },
-    tabText: {
-        fontSize: TYPOGRAPHY.size.md,
-        color: COLORS.textMuted,
-        fontWeight: TYPOGRAPHY.weight.medium,
-    },
-    tabTextActive: {
-        color: COLORS.primary,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    content: {
-        padding: SPACING.lg,
-    },
-    section: {
-        marginBottom: SPACING.lg,
-    },
-    sectionTitle: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.text,
-        marginBottom: SPACING.sm,
-    },
-    periodButtons: {
-        flexDirection: 'row',
-        gap: SPACING.sm,
-    },
-    periodButton: {
-        flex: 1,
+
+    // TABS - SEGMENTED CONTROL
+    tabsWrapper: {
+        paddingHorizontal: SPACING.lg,
         paddingVertical: SPACING.md,
-        paddingHorizontal: SPACING.sm,
-        borderRadius: 10,
+        backgroundColor: COLORS.background,
+    },
+    segmentedControl: {
+        flexDirection: 'row',
         backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.full,
+        padding: 4,
+        ...SHADOWS.sm,
+    },
+    segment: {
+        flex: 1,
+        paddingVertical: 10,
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: COLORS.border,
+        justifyContent: 'center',
+        borderRadius: RADIUS.full,
     },
-    periodButtonSelected: {
+    segmentActive: {
         backgroundColor: COLORS.primary,
-        borderColor: COLORS.primary,
+        ...SHADOWS.sm,
     },
-    periodButtonText: {
+    segmentText: {
         fontSize: TYPOGRAPHY.size.sm,
         fontWeight: TYPOGRAPHY.weight.medium,
         color: COLORS.textSecondary,
     },
-    periodButtonTextSelected: {
+    segmentTextActive: {
         color: '#FFF',
+        fontWeight: TYPOGRAPHY.weight.bold,
     },
-    // New styles for custom period improvements
-    periodButtonsDisabled: {
-        opacity: 0.8,
+
+    scrollView: {
+        flex: 1,
     },
-    periodButtonDimmed: {
-        backgroundColor: COLORS.background,
-        borderColor: COLORS.border,
-        opacity: 0.6
+    content: {
+        paddingHorizontal: SPACING.lg,
+        paddingTop: SPACING.sm,
     },
-    customBadge: {
-        backgroundColor: COLORS.primaryLight || '#DBEAFE', // Fallback if primaryLight not defined
-        paddingHorizontal: SPACING.sm,
+
+    // FORM STYLES
+    inputGroup: {
+        marginBottom: SPACING.xl,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: SPACING.md,
+    },
+    sectionTitle: {
+        fontSize: TYPOGRAPHY.size.md,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.text,
+    },
+    badge: {
+        backgroundColor: COLORS.primary + '20',
+        paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 12,
+        borderRadius: RADIUS.sm,
     },
-    customBadgeText: {
-        fontSize: TYPOGRAPHY.size.xs,
+    badgeText: {
+        fontSize: 10,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.primary,
+    },
+    inputLabel: {
+        fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: TYPOGRAPHY.weight.medium,
+        color: COLORS.textSecondary,
+        marginBottom: SPACING.sm,
+    },
+
+    // PERIOD GRID
+    periodGrid: {
+        flexDirection: 'row',
+        gap: SPACING.sm,
+    },
+    periodCard: {
+        flex: 1,
+        paddingVertical: SPACING.md,
+        borderRadius: RADIUS.md,
+        backgroundColor: COLORS.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        ...SHADOWS.sm,
+    },
+    periodCardSelected: {
+        borderColor: COLORS.primary,
+        backgroundColor: COLORS.primary + '10',
+    },
+    periodCardDimmed: {
+        opacity: 0.5,
+        backgroundColor: COLORS.background,
+    },
+    periodCardText: {
+        fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: TYPOGRAPHY.weight.medium,
+        color: COLORS.textSecondary,
+    },
+    periodCardTextSelected: {
         color: COLORS.primary,
         fontWeight: TYPOGRAPHY.weight.bold,
     },
+
+    // DATE ROW
     dateRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: SPACING.sm,
     },
-    filters: {
+
+    // FILTERS
+    filterContainer: {
         flexDirection: 'row',
         gap: SPACING.sm,
+        paddingBottom: 4,
     },
     filterChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: SPACING.sm,
         paddingHorizontal: SPACING.md,
-        borderRadius: 20,
+        paddingVertical: SPACING.sm,
+        borderRadius: RADIUS.full,
         backgroundColor: COLORS.surface,
         borderWidth: 1,
         borderColor: COLORS.border,
-        gap: SPACING.xs,
+        gap: 6,
     },
     filterChipActive: {
+        borderColor: COLORS.border, // Or specific color if needed, but cleaner with just icon color
         backgroundColor: COLORS.surface,
+        ...SHADOWS.sm,
     },
     filterText: {
         fontSize: TYPOGRAPHY.size.sm,
+        fontWeight: TYPOGRAPHY.weight.medium,
         color: COLORS.textSecondary,
     },
-    generateButton: {
+
+    // MAIN BUTTON
+    mainButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: COLORS.primary,
-        borderRadius: 12,
-        padding: SPACING.lg,
-        marginBottom: SPACING.xl,
+        paddingVertical: SPACING.lg,
+        borderRadius: RADIUS.xl,
         gap: SPACING.sm,
-        ...SHADOWS.medium,
+        ...SHADOWS.md,
+        marginTop: SPACING.sm,
     },
-    generateButtonText: {
+    mainButtonText: {
         fontSize: TYPOGRAPHY.size.md,
         fontWeight: TYPOGRAPHY.weight.bold,
         color: '#FFF',
     },
+
+    // RESULT STYLES
+    resultContainer: {
+        marginTop: SPACING.xl,
+        marginBottom: SPACING.xl,
+    },
     reportContainer: {
-        backgroundColor: COLORS.surface,
-        borderRadius: 16,
-        padding: SPACING.lg,
-        ...SHADOWS.medium,
+        gap: SPACING.lg,
     },
-    reportHeader: {
-        marginBottom: SPACING.lg,
+    reportHeaderCard: {
+        marginBottom: SPACING.xs,
     },
-    reportTitle: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-    },
-    reportPeriod: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
-        marginTop: SPACING.xs,
-    },
-    savedDate: {
-        fontSize: TYPOGRAPHY.size.xs,
-        color: COLORS.textMuted,
-        marginTop: 4
-    },
-    reportSection: {
-        marginBottom: SPACING.lg,
-    },
-    reportSectionTitle: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.textSecondary,
-        marginBottom: SPACING.md,
-    },
-    reportRow: {
+    reportHeaderTop: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: SPACING.sm,
+        marginBottom: 4,
     },
-    reportRowLeft: {
+    reportTitle: {
+        fontSize: TYPOGRAPHY.size.xl,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.text,
+        flex: 1,
+    },
+    reportPeriodText: {
+        fontSize: TYPOGRAPHY.size.sm,
+        color: COLORS.textMuted,
+    },
+    savedDateBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: RADIUS.sm,
+        gap: 4,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    savedDateText: {
+        fontSize: 10,
+        color: COLORS.textSecondary,
+        fontWeight: TYPOGRAPHY.weight.medium,
+    },
+
+    // SECTION CARDS (Income/Expenses)
+    sectionCard: {
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.lg,
+        padding: SPACING.lg,
+        ...SHADOWS.card,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    cardSectionTitle: {
+        fontSize: 11,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.textMuted,
+        marginBottom: SPACING.md,
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: COLORS.border,
+        marginVertical: SPACING.md,
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    summaryLabel: {
+        fontSize: TYPOGRAPHY.size.base,
+        fontWeight: TYPOGRAPHY.weight.medium,
+        color: COLORS.text,
+    },
+    summaryValuePositive: {
+        fontSize: TYPOGRAPHY.size.lg,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.text, // Cleaner look than green everywhere
+    },
+    summaryValueNegative: {
+        fontSize: TYPOGRAPHY.size.lg,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: '#EF4444',
+    },
+
+    // EXPENSE ROWS
+    expenseRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
+    },
+    expenseInfo: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: SPACING.sm,
     },
-    reportRowLabel: {
-        fontSize: TYPOGRAPHY.size.md,
-        color: COLORS.text,
-    },
-    reportRowValue: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-    },
-    reportDivider: {
-        height: 1,
-        backgroundColor: COLORS.border,
-        marginVertical: SPACING.sm,
-    },
-    reportSubtotalLabel: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.text,
-    },
-    reportSubtotalValue: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-    },
-    noDataText: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
-        fontStyle: 'italic',
-        textAlign: 'center',
-        paddingVertical: SPACING.md,
-    },
-    balanceSection: {
-        backgroundColor: COLORS.background,
-        borderRadius: 12,
-        padding: SPACING.lg,
+    categoryIcon: {
+        width: 28,
+        height: 28,
+        borderRadius: RADIUS.full,
+        backgroundColor: '#FEE2E2',
         alignItems: 'center',
-        marginBottom: SPACING.lg,
+        justifyContent: 'center',
     },
-    balanceLabel: {
+    expenseLabel: {
+        fontSize: TYPOGRAPHY.size.sm,
+        color: COLORS.text,
+    },
+    expenseCategoryValue: {
         fontSize: TYPOGRAPHY.size.sm,
         fontWeight: TYPOGRAPHY.weight.medium,
-        color: COLORS.textSecondary,
-        letterSpacing: 1,
-        marginBottom: SPACING.xs,
-    },
-    balanceValue: {
-        fontSize: TYPOGRAPHY.size.xxl,
-        fontWeight: TYPOGRAPHY.weight.bold,
-    },
-    positiveBalance: {
-        color: '#22C55E',
-    },
-    negativeBalance: {
         color: '#EF4444',
     },
-    // New Action Buttons
+    emptyExpenses: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: SPACING.md,
+        gap: SPACING.sm,
+        opacity: 0.7,
+    },
+    emptyExpensesText: {
+        color: COLORS.textMuted,
+        fontSize: TYPOGRAPHY.size.sm,
+    },
+
+    // BALANCE CARD
+    balanceCard: {
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.xl,
+        padding: SPACING.lg,
+        ...SHADOWS.card,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.md,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    balanceIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: RADIUS.full,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    balanceIconPositive: {
+        backgroundColor: '#DCFCE7', // Light green
+    },
+    balanceIconNegative: {
+        backgroundColor: '#FEE2E2', // Light red
+    },
+    balanceInfo: {
+        flex: 1,
+    },
+    balanceLabel: {
+        fontSize: 11,
+        color: COLORS.textMuted,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        textTransform: 'uppercase',
+        marginBottom: 2,
+    },
+    balanceValue: {
+        fontSize: TYPOGRAPHY.size['2xl'],
+        fontWeight: TYPOGRAPHY.weight.bold,
+    },
+    positiveText: {
+        color: '#15803D', // darker green
+    },
+    negativeText: {
+        color: '#B91C1C', // darker red
+    },
+
+    // ACTION BUTTONS (Create flow)
     actionButtons: {
         flexDirection: 'row',
         gap: SPACING.md,
-        marginTop: SPACING.sm
+        marginTop: SPACING.sm,
     },
     saveButton: {
+        flex: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.surface,
+        borderWidth: 1,
+        borderColor: COLORS.primary,
+        paddingVertical: SPACING.md,
+        borderRadius: RADIUS.lg,
+        gap: SPACING.sm,
+    },
+    saveButtonText: {
+        color: COLORS.primary,
+        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size.sm,
+    },
+    exportButton: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: COLORS.text,
         paddingVertical: SPACING.md,
-        borderRadius: 10,
-        backgroundColor: COLORS.background,
-        borderWidth: 1,
-        borderColor: COLORS.primary,
-        gap: SPACING.sm
-    },
-    saveButtonText: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.medium,
-        color: COLORS.primary
-    },
-    exportButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: SPACING.md,
-        paddingHorizontal: SPACING.sm,
-        borderRadius: 10,
-        backgroundColor: COLORS.primary, // Changed to fill for visibility or keep outline if preferred
+        borderRadius: RADIUS.lg,
         gap: SPACING.sm,
     },
     exportButtonText: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.medium,
         color: '#FFF',
+        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size.sm,
     },
-    // Saved List Styles
+
+    // SAVED LIST
     savedList: {
         gap: SPACING.md,
+        paddingBottom: 100,
     },
     savedCard: {
         backgroundColor: COLORS.surface,
-        borderRadius: 12,
+        borderRadius: RADIUS.lg,
         padding: SPACING.md,
-        ...SHADOWS.small,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        ...SHADOWS.sm,
         borderWidth: 1,
         borderColor: COLORS.border,
     },
-    savedCardHeader: {
+    savedCardLeft: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: SPACING.md,
+        gap: SPACING.md,
+        flex: 1,
+    },
+    savedCardIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: RADIUS.md,
+        backgroundColor: COLORS.primary + '10',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    savedCardInfo: {
+        flex: 1,
     },
     savedCardTitle: {
-        fontSize: TYPOGRAPHY.size.md,
+        fontSize: TYPOGRAPHY.size.base,
         fontWeight: TYPOGRAPHY.weight.bold,
         color: COLORS.text,
+        marginBottom: 2,
     },
     savedCardDate: {
-        fontSize: TYPOGRAPHY.size.sm,
+        fontSize: TYPOGRAPHY.size.xs,
         color: COLORS.textMuted,
     },
-    savedCardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: SPACING.sm,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.border,
+    savedCardRight: {
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        gap: 4,
     },
-    savedCardBalanceLabel: {
+    savedBalance: {
         fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textSecondary,
-    },
-    savedCardBalanceValue: {
-        fontSize: TYPOGRAPHY.size.md,
         fontWeight: TYPOGRAPHY.weight.bold,
     },
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: SPACING.xl,
-        marginTop: SPACING.xl
+        paddingVertical: SPACING['3xl'],
+        opacity: 0.8,
+    },
+    emptyIconBg: {
+        width: 64,
+        height: 64,
+        borderRadius: RADIUS.full,
+        backgroundColor: COLORS.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: SPACING.md,
+        ...SHADOWS.sm,
     },
     emptyStateText: {
         fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.semibold,
-        color: COLORS.textSecondary,
-        marginTop: SPACING.md
+        fontWeight: TYPOGRAPHY.weight.bold,
+        color: COLORS.text,
+        marginBottom: 4,
     },
     emptyStateSubtext: {
         fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
-        textAlign: 'center',
-        marginTop: SPACING.xs
+        color: COLORS.textSecondary,
     },
-    // Footer Action Bar
-    detailFooter: {
+
+    // ACTION BAR (Bottom)
+    actionBar: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
         backgroundColor: COLORS.surface,
         borderTopWidth: 1,
         borderTopColor: COLORS.border,
-        ...SHADOWS.navBar,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: SPACING.md,
+        ...SHADOWS.sheet, // Using sheet shadow for upward shadow
     },
-    detailActionButton: {
-        flex: 1,
+    actionItem: {
+        alignItems: 'center',
+        gap: 4,
+    },
+    actionIconBg: {
+        width: 40,
+        height: 40,
+        borderRadius: RADIUS.full,
+        backgroundColor: COLORS.background,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 12,
     },
-    detailActionIcon: {
-        marginBottom: 4,
-    },
-    detailActionLabel: {
-        fontSize: TYPOGRAPHY.size.xs,
-        color: COLORS.text,
+    actionLabel: {
+        fontSize: 10,
         fontWeight: TYPOGRAPHY.weight.medium,
+        color: COLORS.textSecondary,
     },
-    detailActionLabelDestructive: {
-        color: '#EF4444',
-    },
-    // Modal Styles
+
+    // MODAL
     modalOverlay: {
         flex: 1,
         justifyContent: 'center',
@@ -1071,67 +1227,56 @@ const styles = StyleSheet.create({
         zIndex: 1000,
     },
     modalBackdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalContent: {
         width: '85%',
         backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
+        borderRadius: RADIUS.xl,
         padding: SPACING.xl,
-        ...SHADOWS.modal,
-        zIndex: 1001,
+        ...SHADOWS.md,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
     },
     modalTitle: {
-        fontSize: TYPOGRAPHY.size.xl,
+        fontSize: TYPOGRAPHY.size.lg,
         fontWeight: TYPOGRAPHY.weight.bold,
         color: COLORS.text,
-        marginBottom: SPACING.xs,
-        textAlign: 'center',
     },
     modalSubtitle: {
         fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
+        color: COLORS.textSecondary,
         marginBottom: SPACING.lg,
-        textAlign: 'center',
     },
     modalInput: {
         backgroundColor: COLORS.background,
-        borderRadius: RADIUS.md,
-        padding: SPACING.md,
+        borderRadius: RADIUS.lg,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.md,
         fontSize: TYPOGRAPHY.size.md,
         color: COLORS.text,
         borderWidth: 1,
-        borderColor: COLORS.inputBorder,
-        marginBottom: SPACING.xl,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        gap: SPACING.md,
-    },
-    modalButton: {
-        flex: 1,
-        paddingVertical: SPACING.md,
-        borderRadius: RADIUS.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    modalButtonCancel: {
-        backgroundColor: COLORS.background,
-        borderWidth: 1,
         borderColor: COLORS.border,
+        marginBottom: SPACING.lg,
     },
     modalButtonConfirm: {
         backgroundColor: COLORS.primary,
-    },
-    modalButtonTextCancel: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.medium,
-        color: COLORS.textSecondary,
+        paddingVertical: SPACING.md,
+        borderRadius: RADIUS.lg,
+        alignItems: 'center',
     },
     modalButtonTextConfirm: {
-        fontSize: TYPOGRAPHY.size.md,
-        fontWeight: TYPOGRAPHY.weight.bold,
         color: '#FFF',
-    }
+        fontWeight: TYPOGRAPHY.weight.bold,
+        fontSize: TYPOGRAPHY.size.md,
+    },
 });

@@ -4,10 +4,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/Theme';
 
-const CustomDatePicker = ({ label, date, onDateChange, minDate, maxDate, placeholder = 'Seleccionar fecha' }) => {
+const CustomDatePicker = ({ label, date, onDateChange, minDate, maxDate, placeholder = 'Seleccionar fecha', containerStyle }) => {
     const [show, setShow] = useState(false);
 
-// Si date es null/undefined/'', usamos hoy como base para el picker, pero mantemos el valor visual como vacío
+    // Si date es null/undefined/'', usamos hoy como base para el picker, pero mantemos el valor visual como vacío
     // Ajuste de zona horaria local para strings YYYY-MM-DD
     const parseDateForPicker = (d) => {
         if (d instanceof Date) return d;
@@ -33,7 +33,7 @@ const CustomDatePicker = ({ label, date, onDateChange, minDate, maxDate, placeho
             return;
         }
 
-if (selectedDate) {
+        if (selectedDate) {
             // Convertir a formato ISO string consistente (YYYY-MM-DD) usando hora local
             const year = selectedDate.getFullYear();
             const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
@@ -43,7 +43,7 @@ if (selectedDate) {
         }
     };
 
-const formatDate = (date) => {
+    const formatDate = (date) => {
         if (!date || date === '') return '';
         const d = typeof date === 'string' ? parseDateForPicker(date) : date;
         return d.toLocaleDateString('es-CO', {
@@ -55,7 +55,7 @@ const formatDate = (date) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, containerStyle]}>
             {label && <Text style={styles.label}>{label}</Text>}
 
             <TouchableOpacity
@@ -63,7 +63,7 @@ const formatDate = (date) => {
                 onPress={() => setShow(true)}
                 activeOpacity={0.7}
             >
-                <Feather name="calendar" size={20} color={hasDate ? COLORS.textMuted : COLORS.textMuted} />
+                <Feather name="calendar" size={20} color={COLORS.textMuted} />
                 <Text style={hasDate ? styles.dateText : styles.placeholderText}>
                     {hasDate ? formatDate(date) : placeholder}
                 </Text>
@@ -108,6 +108,7 @@ const formatDate = (date) => {
                         onChange={onChange}
                         minimumDate={minDate}
                         maximumDate={maxDate}
+                        locale="es-ES"
                     />
                 )
             )}
