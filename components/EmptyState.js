@@ -1,11 +1,22 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../constants/Theme';
 
 const EmptyState = ({ icon = "inbox", title, description, style }) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        // Fade in animation on mount
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+        }).start();
+    }, []);
+
     return (
-        <View style={[styles.container, style]}>
+        <Animated.View style={[styles.container, style, { opacity: fadeAnim }]}>
             <View style={styles.iconContainer}>
                 <Feather name={icon} size={32} color={COLORS.primary} />
             </View>
@@ -13,7 +24,7 @@ const EmptyState = ({ icon = "inbox", title, description, style }) => {
             {description && (
                 <Text style={styles.description}>{description}</Text>
             )}
-        </View>
+        </Animated.View>
     );
 };
 

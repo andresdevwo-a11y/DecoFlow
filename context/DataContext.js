@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import * as Database from '../services/Database';
 import * as ImageService from '../services/ImageService';
 
@@ -9,6 +9,7 @@ export const DataProvider = ({ children }) => {
     const [activeSection, setActiveSection] = useState(null);
     const [products, setProducts] = useState([]); // Products for the active section
     const [isLoading, setIsLoading] = useState(true);
+    const [isProductsLoading, setIsProductsLoading] = useState(false); // NEW: Track products loading
     const [initializationError, setInitializationError] = useState(null);
 
     // Initialize DB and load sections on startup
@@ -78,10 +79,16 @@ export const DataProvider = ({ children }) => {
     useEffect(() => {
         const loadProducts = async () => {
             if (activeSection) {
-                const loadedProducts = await Database.getProductsBySectionId(activeSection.id);
-                setProducts(loadedProducts);
+                setIsProductsLoading(true); // Start loading
+                try {
+                    const loadedProducts = await Database.getProductsBySectionId(activeSection.id);
+                    setProducts(loadedProducts);
+                } finally {
+                    setIsProductsLoading(false); // Done loading
+                }
             } else {
                 setProducts([]);
+                setIsProductsLoading(false);
             }
         };
         loadProducts();
@@ -549,6 +556,7 @@ export const DataProvider = ({ children }) => {
             setActiveSection, // We expose this so UI can navigate
             products,
             isLoading,
+            isProductsLoading, // NEW: Expose products loading state
             addSection,
             updateSection,
             deleteSection,

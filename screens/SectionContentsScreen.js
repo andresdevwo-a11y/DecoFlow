@@ -1,9 +1,10 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SIZES } from '../constants/Theme';
 import { useSettings } from '../context/SettingsContext';
 import { useAlert } from '../context/AlertContext';
+import { useData } from '../context/DataContext';
 import Header from '../components/Header';
 import SearchHeader from '../components/SearchHeader';
 
@@ -18,6 +19,7 @@ import SelectionActionBar from '../components/SelectionActionBar';
 export default function SectionContentsScreen({ section, products = [], onBack, onEditProduct, onDuplicateProduct, onDeleteProduct, onCreateProduct, onUpdateProduct }) {
     const { productViewMode, productSortBy, confirmProductDelete } = useSettings();
     const { showAlert, showDelete } = useAlert();
+    const { isProductsLoading } = useData(); // Get loading state
 
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isOptionsVisible, setOptionsVisible] = useState(false);
@@ -198,13 +200,24 @@ export default function SectionContentsScreen({ section, products = [], onBack, 
         );
     }, [handleOptionsPress, productViewMode, isSelectionMode, selectedProductIds, toggleSelection, toggleSelectionMode]);
 
-    const renderEmptyState = useCallback(() => (
-        <EmptyState
-            icon={searchText ? "search" : "folder"}
-            title={searchText ? "No se encontraron productos" : "Esta sección está vacía"}
-            description={searchText ? "Intenta con otro nombre" : "No hay archivos aquí todavía"}
-        />
-    ), [searchText]);
+    const renderEmptyState = useCallback(() => {
+        // Don't show empty state while loading - prevents flash
+        if (isProductsLoading) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                </View>
+            );
+        }
+
+        return (
+            <EmptyState
+                icon={searchText ? "search" : "folder"}
+                title={searchText ? "No se encontraron productos" : "Esta sección está vacía"}
+                description={searchText ? "Intenta con otro nombre" : "No hay archivos aquí todavía"}
+            />
+        );
+    }, [searchText, isProductsLoading]);
 
     return (
         <View style={styles.container}>
@@ -226,9 +239,9 @@ export default function SectionContentsScreen({ section, products = [], onBack, 
                     initialNumToRender={8}
                     maxToRenderPerBatch={8}
                     windowSize={5}
-                    extraData={{ isSelectionMode, selectedProductIds }}
+                    extraData={{ isSelectionMode, selectedProductIds, isProductsLoading }}
                     ListHeaderComponent={
-                        products.length > 0 ? (
+                        !isProductsLoading && products.length > 0 ? (
                             <SearchHeader
                                 title="Productos"
                                 placeholder="Buscar producto..."
@@ -292,5 +305,11 @@ const styles = StyleSheet.create({
     },
     row: {
         justifyContent: 'space-between',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: SPACING.xxl,
     },
 });
