@@ -1,0 +1,316 @@
+================================================================================
+PLAN DE IMPLEMENTACIÓN DE DISEÑO MINIMALISTA - DecoFlow
+================================================================================
+
+OBJETIVO PRINCIPAL
+Optimizar y unificar el diseño visual de la app DecoFlow adoptando un enfoque 
+minimalista y profesional, creando descanso visual para el usuario. El refactor 
+debe ser progresivo, no simultáneo en todas las pantallas.
+
+================================================================================
+FASE 0: ANÁLISIS Y DIAGNÓSTICO (Duración: 2 días)
+================================================================================
+
+0.1 - AUDITORÍA DE DISEÑO ACTUAL
+- [ ] Analizar consistencia de colores en todas las pantallas
+- [ ] Analizar consistencia de espaciado (padding, margins, gaps)
+- [ ] Analizar consistencia de tipografía (tamaños, pesos)
+- [ ] Analizar consistencia de bordes y sombras
+- [ ] Analizar componentes duplicados (headers, botones, cards)
+- [ ] Documentar inconsistencias encontradas
+- [ ] Crear matriz de componentes reutilizables vs componentes únicos
+
+0.2 - PLANIFICACIÓN DEL SISTEMA DE DISEÑO
+- [ ] Revisar Theme.js actual
+- [ ] Definir paleta de colores completa (colores base + variaciones)
+- [ ] Definir escala de espaciado unificada
+- [ ] Definir escala de tipografía unificada
+- [ ] Definir escala de bordes y sombras
+- [ ] Documentar decisiones de diseño
+
+0.3 - IDENTIFICACIÓN DE PANTALLAS PRIORITARIAS
+- [ ] Clasificar pantallas por complejidad (baja, media, alta)
+- [ ] Clasificar pantallas por cantidad de componentes reutilizables
+- [ ] Seleccionar 2-3 pantallas de baja complejidad para comenzar
+- [ ] Crear roadmap de refactor
+
+SALIDA ESPERADA: Documento de auditoría + Roadmap de implementación
+
+================================================================================
+FASE 1: SISTEMA DE DISEÑO BASE (Duración: 3-4 días)
+================================================================================
+
+1.1 - ACTUALIZAR THEME.JS
+- [ ] Expandir COLORS con variaciones completas (50-900)
+- [ ] Unificar TYPOGRAPHY con presets: title, heading, body, label, caption
+- [ ] Unificar SPACING con escala 4px: xs, sm, md, lg, xl, 2xl, 3xl
+- [ ] Agregar SIZES: borderRadius, buttonHeight, inputHeight, iconSizes
+- [ ] Agregar SHADOWS: sm, md, lg
+- [ ] Reemplazar referencias a SPACING.sm, SPACING.md con nuevas claves
+
+ARCHIVO A MODIFICAR: constants/Theme.js
+
+VALIDACIÓN: No debe haber errores de importación en ninguna pantalla
+
+================================================================================
+FASE 2: COMPONENTES BASE REUTILIZABLES (Duración: 4-5 días)
+================================================================================
+
+2.1 - CREAR COMPONENTE TEXT UNIFICADO
+ARCHIVO: components/common/Text.js
+- [ ] Implementar variantes: title, heading, body, label, caption
+- [ ] Implementar colores semánticos: primary, secondary, muted, error, success
+- [ ] Reemplazar todos los <Text> inline con este componente en una pantalla de prueba
+VALIDACIÓN: ComponentShowcase.js debe mostrar todas las variantes sin errores
+
+2.2 - CREAR COMPONENTE CARD UNIFICADO
+ARCHIVO: components/common/Card.js
+- [ ] Implementar variantes: default, elevated, subtle
+- [ ] Implementar padding estándar
+- [ ] Implementar soporte para onPress (TouchableOpacity)
+VALIDACIÓN: Prueba en InventoryScreen con SectionCard
+
+2.3 - CREAR COMPONENTE BUTTON UNIFICADO
+ARCHIVO: components/common/Button.js
+- [ ] Implementar variantes: primary, secondary, tertiary, danger
+- [ ] Implementar tamaños: sm, md, lg
+- [ ] Implementar loading state
+- [ ] Implementar disabled state
+VALIDACIÓN: Prueba en FinancesScreen con botones de acciones
+
+2.4 - CREAR COMPONENTE INPUT UNIFICADO
+ARCHIVO: components/common/Input.js
+- [ ] Implementar validación visual (error state)
+- [ ] Implementar placeholder estándar
+- [ ] Implementar disabled state
+- [ ] Implementar multiline support
+VALIDACIÓN: Prueba en CreateSaleScreen con formulario
+
+2.5 - CREAR COMPONENTE SCREENHEADER
+ARCHIVO: components/common/ScreenHeader.js
+- [ ] Implementar título
+- [ ] Implementar botón back automático
+- [ ] Implementar soporte para right action
+- [ ] Reemplazar headers duplicados en pantallas de formulario
+VALIDACIÓN: CreateSaleScreen, CreateExpenseScreen, CreateDecorationScreen 
+            deben usar ScreenHeader
+
+================================================================================
+FASE 3: COMPONENTES SECUNDARIOS (Duración: 3-4 días)
+================================================================================
+
+3.1 - CREAR COMPONENTE LISTITEM
+ARCHIVO: components/common/ListItem.js
+- [ ] Implementar icon left, title, subtitle, amount/action right
+- [ ] Implementar onPress
+- [ ] Usar Card como base
+VALIDACIÓN: Prueba en InventoryScreen reemplazando SectionCard
+
+3.2 - CREAR COMPONENTE FORMFIELD
+ARCHIVO: components/forms/FormField.js
+- [ ] Implementar label, error, required state
+- [ ] Integrar Input unificado
+- [ ] Usar SPACING consistente
+VALIDACIÓN: Prueba en CreateSaleScreen con múltiples campos
+
+3.3 - CREAR COMPONENTE EMPTYSTATE MEJORADO
+ARCHIVO: components/common/EmptyState.js (mejora)
+- [ ] Revisar EmptyState existente
+- [ ] Estandarizar con tipografía nueva
+- [ ] Estandarizar spacing
+- [ ] Estandarizar colors
+VALIDACIÓN: Prueba en InventoryScreen y NotesScreen
+
+3.4 - CREAR COMPONENTE BADGE/CHIP
+ARCHIVO: components/common/Badge.js
+- [ ] Implementar variantes: default, success, error, warning
+- [ ] Implementar tamaños: sm, md
+- [ ] Usar en TransactionCard
+VALIDACIÓN: Prueba en FinancesScreen con estado de transacciones
+
+================================================================================
+FASE 4: REFACTOR POR PANTALLAS (PRIORITARIO) (Duración: 6-8 días)
+================================================================================
+
+4.1 - PANTALLAS DE FORMULARIO (BAJA COMPLEJIDAD)
+
+CREATESALESCREEN
+- [ ] Reemplazar header manual con ScreenHeader
+- [ ] Reemplazar inputs con FormField + Input unificado
+- [ ] Reemplazar botones con Button unificado
+- [ ] Unificar spacing y padding
+COMMIT: "refactor: CreateSaleScreen with unified design system"
+
+CREATEEXPENSESCREEN
+- [ ] Aplicar mismo patrón que CreateSaleScreen
+COMMIT: "refactor: CreateExpenseScreen with unified design system"
+
+CREATEDECORATIONSCREEN
+- [ ] Aplicar mismo patrón que CreateSaleScreen
+COMMIT: "refactor: CreateDecorationScreen with unified design system"
+
+CREATEQUOTATIONSCREEN
+- [ ] Reemplazar header manual con ScreenHeader
+- [ ] Reemplazar type selector con componente unificado (Chips/Buttons)
+- [ ] Reemplazar inputs con FormField
+COMMIT: "refactor: CreateQuotationScreen with unified design system"
+
+---
+
+4.2 - PANTALLAS DE LISTADO (MEDIA COMPLEJIDAD)
+
+INVENTORYSCREEN
+- [ ] Reemplazar SectionCard con ListItem unificado
+- [ ] Unificar espaciado entre items
+- [ ] Reemplazar EmptyState con componente unificado
+- [ ] Reemplazar botones con Button unificado
+COMMIT: "refactor: InventoryScreen with unified design system"
+
+NOTESSCREEN
+- [ ] Reemplazar NoteCard con ListItem unificado
+- [ ] Unificar espaciado
+- [ ] Reemplazar EmptyState
+COMMIT: "refactor: NotesScreen with unified design system"
+
+CANVASESSCREEN
+- [ ] Reemplazar CanvasCard con ListItem unificado
+- [ ] Unificar espaciado
+- [ ] Reemplazar EmptyState
+COMMIT: "refactor: CanvasesScreen with unified design system"
+
+---
+
+4.3 - PANTALLAS COMPLEJAS (ALTA COMPLEJIDAD)
+
+FINANCESSCREEN
+- [ ] Estandarizar BalanceCard con Card unificada
+- [ ] Estandarizar TransactionCard con ListItem unificado
+- [ ] Unificar QuickNavigationGrid con Button unificados
+- [ ] Unificar espaciado global
+- [ ] Reemplazar headers secundarios con tipografía unificada
+COMMIT: "refactor: FinancesScreen with unified design system"
+
+REPORTSSCREEN
+- [ ] Estandarizar cards de reporte
+- [ ] Estandarizar botones de tabs
+- [ ] Unificar espaciado
+- [ ] Estandarizar tipografía de secciones
+COMMIT: "refactor: ReportsScreen with unified design system"
+
+SETTINGSSCREEN
+- [ ] Estandarizar SettingSection con Card
+- [ ] Estandarizar SettingNavItem con ListItem
+- [ ] Estandarizar SettingToggle
+- [ ] Unificar espaciado
+COMMIT: "refactor: SettingsScreen with unified design system"
+
+================================================================================
+FASE 5: COMPONENTES ESPECIALIZADOS (OPCIONAL) (Duración: 2-3 días)
+================================================================================
+
+5.1 - COMPONENTES DE FINANZAS
+- [ ] Estandarizar BalanceCard
+- [ ] Estandarizar TransactionCard
+- [ ] Crear TransactionBadge para tipo de transacción
+- [ ] Unificar colores por tipo (sale, rental, expense, decoration)
+
+5.2 - COMPONENTES DE MODALES
+- [ ] Estandarizar Modal base
+- [ ] Estandarizar BottomSheet base
+- [ ] Unificar padding y spacing en modales
+- [ ] Estandarizar botones en modales
+
+5.3 - COMPONENTES DE NAVEGACIÓN
+- [ ] Estandarizar BottomNavBar
+- [ ] Unificar iconos y labels
+- [ ] Ajustar height y spacing
+
+================================================================================
+FASE 6: VALIDACIÓN Y TESTING (Duración: 2-3 días)
+================================================================================
+
+6.1 - VISUAL TESTING
+- [ ] Revisar todas las pantallas refactoricadas en múltiples dispositivos
+- [ ] Verificar consistencia de colores
+- [ ] Verificar consistencia de espaciado
+- [ ] Verificar consistencia de tipografía
+- [ ] Verificar bordes y sombras
+
+6.2 - FUNCTIONALITY TESTING
+- [ ] Verificar que los botones funcionen correctamente
+- [ ] Verificar que los inputs acepten input correctamente
+- [ ] Verificar que las transiciones sean suaves
+- [ ] Verificar que no haya console errors
+
+6.3 - PERFORMANCE TESTING
+- [ ] Verificar que el app no tenga retrasos
+- [ ] Medir render time de pantallas complejas
+- [ ] Verificar memoria usage
+
+6.4 - DOCUMENTACIÓN
+- [ ] Crear DESIGN_SYSTEM.md con guía de uso
+- [ ] Documentar todos los componentes
+- [ ] Documentar colores y usos
+- [ ] Documentar espaciado
+- [ ] Crear ComponentShowcase.js con todas las variantes
+
+================================================================================
+FASE 7: OPTIMIZACIONES FINALES (Duración: 1-2 días)
+================================================================================
+
+7.1 - MICRO-ANIMACIONES
+- [ ] Agregar transiciones suaves a botones (200ms)
+- [ ] Agregar transiciones a cambios de color
+- [ ] Agregar feedback táctil a interacciones
+
+7.2 - ACCESIBILIDAD
+- [ ] Verificar contraste de colores (WCAG AA)
+- [ ] Verificar tamaños de tap targets (mínimo 44px)
+- [ ] Verificar labels en inputs
+
+7.3 - MODO OSCURO (FUTURO)
+- [ ] Crear COLORS_DARK en Theme.js
+- [ ] Preparar estructura para soporte de dark mode
+- [ ] No implementar aún, solo preparar base
+
+================================================================================
+RESUMEN DE SALIDAS POR FASE
+================================================================================
+
+FASE | DURACIÓN  | ARCHIVOS CREADOS | ARCHIVOS MODIFICADOS | PANTALLAS REFACTORICADAS
+-----|-----------|------------------|----------------------|-------------------------
+0    | 2 días    | AUDIT.md         | constants/Theme.js   | -
+1    | 3-4 días  | -                | constants/Theme.js   | -
+2    | 4-5 días  | 5 componentes    | -                     | -
+3    | 3-4 días  | 4 componentes    | -                     | -
+4.1  | 2 días    | -                | 4 pantallas          | 4 pantallas
+4.2  | 2 días    | -                | 3 pantallas          | 3 pantallas
+4.3  | 2-3 días  | -                | 3 pantallas          | 3 pantallas
+5    | 2-3 días  | 6 componentes    | -                     | -
+6    | 2-3 días  | DESIGN_SYSTEM.md | ComponentShowcase.js  | Todas validadas
+7    | 1-2 días  | -                | Todos los archivos   | Pulido final
+
+================================================================================
+ESTIMACIÓN TOTAL
+================================================================================
+
+Tiempo estimado: 8-9 semanas (aproximadamente 60-70 horas de desarrollo)
+Parallelizable: Algunas fases pueden solaparse
+Puntos de control: Fin de cada fase (commit + validación)
+
+================================================================================
+CRITERIOS DE ÉXITO
+================================================================================
+
+✅ Todos los componentes usan colores de COLORS
+✅ Todos los componentes usan spacing de SPACING
+✅ Todos los componentes usan tipografía de TYPOGRAPHY
+✅ No hay estilos inline en pantallas (solo en componentes)
+✅ No hay código duplicado de headers
+✅ Consistencia visual en 100% de las pantallas
+✅ App renderea sin errores de console
+✅ DESIGN_SYSTEM.md documentado y completo
+
+================================================================================
+FIN DEL PLAN
+================================================================================
