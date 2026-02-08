@@ -221,23 +221,29 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
             </Modal>
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1, backgroundColor: COLORS.background }}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             >
-                <ScrollView
+                <Animated.ScrollView
                     contentContainerStyle={[
                         styles.content,
                         { paddingTop: headerHeight > 0 ? headerHeight + SPACING.xs : insets.top + 60 }
                     ]}
-                    showsVerticalScrollIndicator={true}
-                    scrollEventThrottle={16}
+                    showsVerticalScrollIndicator={false}
+                    scrollEventThrottle={32}
                     onScroll={Animated.event(
                         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                        { useNativeDriver: false }
+                        { useNativeDriver: true }
                     )}
                     keyboardShouldPersistTaps="handled"
                     keyboardDismissMode="interactive"
+                    overScrollMode="never"
+                    bounces={true}
+                    alwaysBounceVertical={false}
+                    removeClippedSubviews={false}
+                    nestedScrollEnabled={true}
+                    contentInsetAdjustmentBehavior="automatic"
                 >
                     {/* Title Input */}
                     <TextInput
@@ -251,6 +257,7 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                         selectionColor={COLORS.primary}
                         multiline={true}
                         scrollEnabled={false}
+                        blurOnSubmit={false}
                     />
 
                     {/* Metadata Line */}
@@ -270,10 +277,12 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
                         textAlignVertical="top"
                         selectionColor={COLORS.primary}
                         scrollEnabled={false}
+                        blurOnSubmit={false}
                     />
 
-                    <View style={{ height: 300 }} />
-                </ScrollView>
+                    {/* Dynamic bottom spacing for keyboard */}
+                    <View style={styles.bottomSpacer} />
+                </Animated.ScrollView>
             </KeyboardAvoidingView>
 
             <ToastNotification
@@ -342,6 +351,9 @@ const styles = StyleSheet.create({
         lineHeight: 28,
         minHeight: 200,
         paddingBottom: SPACING.xl,
+    },
+    bottomSpacer: {
+        height: 250,
     },
     // Menu Styles
     modalOverlay: {
