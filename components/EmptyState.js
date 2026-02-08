@@ -1,30 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Image } from 'react-native';
+import Theme from '../constants/Theme';
+import Text from './common/Text';
+import Button from './common/Button';
 import { Feather } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../constants/Theme';
 
-const EmptyState = ({ icon = "inbox", title, description, style }) => {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        // Fade in animation on mount
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-        }).start();
-    }, []);
-
+const EmptyState = ({
+    title,
+    description,
+    icon,
+    image,
+    actionLabel,
+    onAction,
+    style
+}) => {
     return (
-        <Animated.View style={[styles.container, style, { opacity: fadeAnim }]}>
+        <View style={[styles.container, style]}>
             <View style={styles.iconContainer}>
-                <Feather name={icon} size={32} color={COLORS.primary} />
+                {image ? (
+                    <Image source={image} style={styles.image} resizeMode="contain" />
+                ) : (
+                    <Feather
+                        name={icon || 'inbox'}
+                        size={48}
+                        color={Theme.COLORS.primary}
+                    />
+                )}
             </View>
-            <Text style={styles.title}>{title}</Text>
+
+            <Text preset="h3" centered style={styles.title}>
+                {title || 'No Data'}
+            </Text>
+
             {description && (
-                <Text style={styles.description}>{description}</Text>
+                <Text preset="bodyMedium" color="textSecondary" centered style={styles.description}>
+                    {description}
+                </Text>
             )}
-        </Animated.View>
+
+            {actionLabel && onAction && (
+                <Button
+                    text={actionLabel}
+                    onPress={onAction}
+                    variant="primary"
+                    style={styles.button}
+                />
+            )}
+        </View>
     );
 };
 
@@ -32,32 +54,33 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: SPACING.xl,
+        padding: Theme.SPACING.xl,
         flex: 1,
-        minHeight: 300, // Ensure it takes some vertical space
+        minHeight: 300,
     },
     iconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: RADIUS.full,
-        backgroundColor: COLORS.primary + '10', // Consistent with NotesScreen
-        alignItems: 'center',
+        marginBottom: Theme.SPACING.lg,
+        width: 100,
+        height: 100,
         justifyContent: 'center',
-        marginBottom: SPACING.md,
+        alignItems: 'center',
+        backgroundColor: Theme.COLORS.primary50,
+        borderRadius: Theme.RADIUS.full,
+    },
+    image: {
+        width: '80%',
+        height: '80%',
     },
     title: {
-        fontSize: TYPOGRAPHY.size.lg,
-        fontWeight: TYPOGRAPHY.weight.bold,
-        color: COLORS.text,
-        marginBottom: SPACING.xs,
-        textAlign: 'center',
+        marginBottom: Theme.SPACING.sm,
     },
     description: {
-        fontSize: TYPOGRAPHY.size.sm,
-        color: COLORS.textMuted,
-        textAlign: 'center',
-        maxWidth: 250,
+        marginBottom: Theme.SPACING.xl,
+        maxWidth: 280,
     },
+    button: {
+        minWidth: 160,
+    }
 });
 
 export default EmptyState;

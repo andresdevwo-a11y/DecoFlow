@@ -38,7 +38,7 @@ export const COLORS = {
     warning: '#F59E0B',    // Amber
     error: '#EF4444',      // Red
     info: '#3B82F6',       // Blue
-    
+
     // Feature Specific
     sale: '#10B981',       // Green
     rental: '#3B82F6',     // Blue
@@ -49,17 +49,17 @@ export const COLORS = {
     background: '#F8FAFC', // Very light slate (cleaner than pure gray)
     surface: '#FFFFFF',
     surfaceSubtle: '#F1F5F9',
-    
+
     // Text
     text: '#0F172A',            // High contrast
     textSecondary: '#64748B',   // Medium contrast
     textTertiary: '#94A3B8',    // Low contrast
     textInverse: '#FFFFFF',
-    
+
     // Borders
     border: '#E2E8F0',
     borderSubtle: '#F1F5F9',
-    
+
     // Overlay
     overlay: 'rgba(0, 0, 0, 0.4)',
 };
@@ -70,25 +70,53 @@ export const COLORS = {
 export const TYPOGRAPHY = {
     // Fonts
     fontFamily: {
-        regular: 'System', // Use system font for now, ideally 'Inter' or similar
+        regular: 'System',
         medium: 'System-Medium',
-        bold: 'System-Bold', 
+        bold: 'System-Bold',
     },
 
-    // Semantic Presets
+    // Semantic Presets (New System)
     presets: {
         h1: { fontSize: 32, fontWeight: '700', lineHeight: 40, letterSpacing: -0.5 },
         h2: { fontSize: 24, fontWeight: '700', lineHeight: 32, letterSpacing: -0.5 },
         h3: { fontSize: 20, fontWeight: '600', lineHeight: 28 },
         h4: { fontSize: 18, fontWeight: '600', lineHeight: 26 },
-        
+
         bodyLarge: { fontSize: 16, fontWeight: '400', lineHeight: 24 },
         bodyMedium: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
         bodySmall: { fontSize: 13, fontWeight: '400', lineHeight: 18 },
-        
+
         label: { fontSize: 12, fontWeight: '600', lineHeight: 16, textTransform: 'uppercase', letterSpacing: 0.5 },
         caption: { fontSize: 12, fontWeight: '400', lineHeight: 16 },
-    }
+    },
+
+    // Legacy Support (Keep these until all screens are refactored)
+    size: {
+        xs: 10,
+        sm: 12,
+        md: 13,
+        base: 14,
+        lg: 15,
+        xl: 16,
+        '2xl': 18,
+        '3xl': 20,
+        '4xl': 24,
+        '5xl': 28,
+    },
+    weight: {
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: 'bold',
+    },
+    letterSpacing: {
+        wide: 1.0,
+    },
+    lineHeight: {
+        tight: 18,
+        normal: 22,
+        relaxed: 24,
+    },
 };
 
 // =============================================================================
@@ -127,13 +155,13 @@ export const SIZES = {
     buttonHeightSm: 36,
     inputHeight: 48,
     checkbox: 20,
-    
+
     // Icons
     iconSm: 16,
     iconMd: 20,
     iconLg: 24,
     iconXl: 32,
-    
+
     // Layout
     headerHeight: 60,
     tabBarHeight: 64,

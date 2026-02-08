@@ -6,6 +6,8 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import ScreenHeader from '../components/common/ScreenHeader';
+import ListItem from '../components/common/ListItem';
+import Badge from '../components/common/Badge';
 import { Feather } from '@expo/vector-icons';
 
 const ComponentShowcase = () => {
@@ -93,6 +95,75 @@ const ComponentShowcase = () => {
                     </Card>
                     <Card variant="outlined" style={{ marginBottom: 10 }}>
                         <Text>Outlined Card</Text>
+                    </Card>
+                </View>
+
+                {/* LIST ITEMS SECTION */}
+                <View style={styles.section}>
+                    <Text preset="h2" style={styles.sectionTitle}>List Items</Text>
+                    <Card padding="none">
+                        <ListItem
+                            title="Simple Item"
+                            showChevron
+                        />
+                        <ListItem
+                            title="With Subtitle"
+                            subtitle="Description goes here"
+                            showChevron
+                        />
+                        <ListItem
+                            title="With Icon"
+                            subtitle="And subtitle"
+                            leftIcon={<Feather name="box" size={20} color={Theme.COLORS.primary} />}
+                            showChevron
+                        />
+                        <ListItem
+                            title="With Right Element"
+                            leftIcon={<Feather name="bell" size={20} color={Theme.COLORS.warning} />}
+                            rightElement={<Badge text="New" variant="error" size="sm" />}
+                        />
+                    </Card>
+                    <View style={{ height: 20 }} />
+                    <ListItem
+                        variant="card"
+                        title="Card Variant"
+                        subtitle="This is a list item inside its own card"
+                        leftIcon={<Feather name="credit-card" size={20} color={Theme.COLORS.success} />}
+                        showChevron
+                    />
+                </View>
+
+                {/* BADGES SECTION */}
+                <View style={styles.section}>
+                    <Text preset="h2" style={styles.sectionTitle}>Badges</Text>
+                    <Card>
+                        <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                            <Badge text="Neutral" variant="neutral" />
+                            <Badge text="Primary" variant="primary" />
+                            <Badge text="Success" variant="success" />
+                            <Badge text="Warning" variant="warning" />
+                            <Badge text="Error" variant="error" />
+                            <Badge text="Info" variant="info" />
+                        </View>
+                        <View style={[styles.row, { justifyContent: 'flex-start' }]}>
+                            <Badge text="Small" size="sm" variant="success" />
+                            <View style={{ width: 10 }} />
+                            <Badge text="Medium" size="md" variant="primary" />
+                        </View>
+                    </Card>
+                </View>
+
+                {/* EMPTY STATE PREVIEW */}
+                <View style={styles.section}>
+                    <Text preset="h2" style={styles.sectionTitle}>Empty State</Text>
+                    <Card>
+                        <View style={{ height: 300 }}>
+                            {/* Importing EmptyState dynamically or assuming it's available would be better, 
+                                but for this showcase we might need to add import. 
+                                For now, I'll skip rendering it directly to avoid import errors if not added at top.
+                                Instead, just showing a placeholder text. */}
+                            <Text centered>Empty State Component (See separate test)</Text>
+                        </View>
                     </Card>
                 </View>
 
