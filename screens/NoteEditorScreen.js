@@ -47,6 +47,9 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
         }
     }, [note]);
 
+    // State for header height (to adjust scroll padding)
+    const [headerHeight, setHeaderHeight] = useState(0);
+
     // Handle Hardware Back Button (Android)
     useEffect(() => {
         const backAction = () => {
@@ -166,7 +169,10 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
     return (
         <View style={styles.container}>
             {/* Minimalist Header */}
-            <View style={[styles.header, { paddingTop: insets.top + SPACING.sm }]}>
+            <View
+                style={[styles.header, { paddingTop: insets.top + SPACING.sm }]}
+                onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+            >
                 <TouchableOpacity onPress={handleBackBehavior} style={styles.iconButton}>
                     <Feather name="chevron-left" size={32} color={COLORS.text} />
                 </TouchableOpacity>
@@ -216,11 +222,14 @@ export default function NoteEditorScreen({ note, onBack, onSave, onDelete }) {
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={{ flex: 1 }}
+                style={{ flex: 1, backgroundColor: COLORS.background }}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             >
                 <ScrollView
-                    contentContainerStyle={styles.content}
+                    contentContainerStyle={[
+                        styles.content,
+                        { paddingTop: headerHeight > 0 ? headerHeight + SPACING.xs : insets.top + 60 }
+                    ]}
                     showsVerticalScrollIndicator={true}
                     scrollEventThrottle={16}
                     onScroll={Animated.event(
@@ -283,13 +292,17 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
     header: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.md,
         paddingBottom: SPACING.sm,
-        backgroundColor: COLORS.background,
         zIndex: 10,
+        backgroundColor: COLORS.background,
     },
     headerTitle: {
         fontSize: TYPOGRAPHY.size.lg,
